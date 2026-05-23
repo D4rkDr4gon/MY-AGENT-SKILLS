@@ -72,7 +72,7 @@ dotfiles/
 │   ├── config.ini                     # 98% width, 28px, rounded 10px
 │   ├── colors.ini                     # Dinamico por tema
 │   ├── launch.sh                      # Kill + launch por monitor
-│   └── modules/ (battery, bluetooth, brillo, date, logo, pulseaudio, wlan, xworkspaces)
+    │   └── modules/ (battery, bluetooth, brillo, date, logo, pulseaudio, vpn, wlan, xworkspaces)
 │
 ├── kitty/                             # Terminal
 │   ├── kitty.conf                     # Hack Nerd Font 10pt, 80% opacity
@@ -144,7 +144,8 @@ dotfiles/
 │   └── kali-red/
 │
 ├── scripts/
-│   └── theme-switch.sh                # Cambia polybar/kitty/zsh/qtile/fastfetch
+│   ├── theme-switch.sh                # Cambia polybar/kitty/zsh/qtile/fastfetch
+│   └── vpn-replace.sh                 # Reemplazar config de Wireguard VPN
 │
 ├── automat/
 │   ├── display-monitors.sh            # xrandr laptop + HDMI
