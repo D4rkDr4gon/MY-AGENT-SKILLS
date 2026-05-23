@@ -93,6 +93,8 @@ dotfiles/
 │   ├── config.rasi                    # drun/run/window, fzf sort
 │   ├── theme.rasi                     # Norte, 480px, 24px radius, semi-transparente
 │   ├── favoritos.txt                  # Sublime, Burp, Wireshark, Bitwarden
+│   ├── theme-drun.rasi                # Grid Android 5x4 para app launcher
+│   ├── theme-action.rasi              # Grid 4x1 para action menu
 │   └── scripts/
 │       ├── launcher.sh                # Apps + Google search via "g <query>"
 │       ├── emoji.sh                   # 800+ emojis, copia al clipboard
