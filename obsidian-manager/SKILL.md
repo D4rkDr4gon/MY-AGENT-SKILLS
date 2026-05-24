@@ -10,8 +10,8 @@ description: Use when the user asks about managing their Obsidian vault, taking 
 **Vault**: Personal-Vault
 **Path**: `/files/Personal-Vault`
 **CLI**: `obsidian vault=Personal-Vault <command>`
-**Remote**: `https://github.com/D4rkDr4gon/Personal-Vault.git`
-**Git user**: D4rkDr4gon (`luccianocamp@outlook.com`)
+**Remote**: `https://github.com/<usuario>/<vault>.git`
+**Git user**: `<usuario>`
 
 ### Estructura de carpetas
 
@@ -23,7 +23,7 @@ description: Use when the user asks about managing their Obsidian vault, taking 
 │   ├── DOCUMENTS/             # Documentos personales
 │   │   ├── LABORAL/
 │   │   ├── MIS-FINANZAS/
-│   │   │   └── RECIBOS-DE-SUELDO-PLUGZONE/
+│   │   │   └── RECIBOS-DE-SUELDO/
 │   │   └── OTROS/
 │   │       └── Certificaciones/
 │   ├── General/               # Notas generales
@@ -50,11 +50,11 @@ description: Use when the user asks about managing their Obsidian vault, taking 
 │   ├── CALENDAR/
 │   ├── Other/
 │   └── PENDIENTES FACULTAD.md
-├── WORK/                      # Trabajo
-│   ├── 00-ARCOR/
-│   ├── 01-LA CAJA/
-│   ├── 02-PAE/
-│   ├── 03-PZ/
+├── WORK/                      # Trabajo (clientes anonimizados)
+│   ├── 00-CLIENTE-A/
+│   ├── 01-CLIENTE-B/
+│   ├── 02-CLIENTE-C/
+│   ├── 03-CLIENTE-D/
 │   ├── 2026/
 │   └── PENDIENTES TRABAJO.md
 └── PENDIENTES FACULTAD.md
@@ -364,7 +364,7 @@ obsidian vault=Personal-Vault create name="INCIDENTE-1234" \
 
 - El CLI requiere que Obsidian este **abierto** para la mayoria de los comandos
 - `file=<name>` resuelve por nombre (como wikilinks), no por ruta exacta
-- Usar `path=<path>` para rutas exactas: `path="WORK/03-PZ/nota.md"`
+- Usar `path=<path>` para rutas exactas: `path="WORK/00-CLIENTE-A/nota.md"`
 - Los valores con espacios van entre comillas: `name="Mi nota"`
 - Las variables de template se resuelven automaticamente con `resolve`
 - Si no se especifica `file` o `path`, los comandos operan sobre el **archivo activo**
