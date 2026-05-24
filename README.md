@@ -7,6 +7,7 @@ Skills personales para Agentes de IA (opencode). Cada skill es una carpeta con s
 | Skill | Descripcion |
 |-------|-------------|
 | [dotfiles-manager](./dotfiles-manager/SKILL.md) | Gestion de dotfiles: documentacion, creacion de temas, contexto completo del repositorio `~/dotfiles` |
+| [arch-manager](./arch-manager/SKILL.md) | Gestion del sistema Arch Linux: paquetes, servicios, kernel, red, hardware, post-instalacion |
 
 ## Estructura
 

@@ -17,16 +17,17 @@ description: Use when the user asks about managing, updating, documenting, or cr
 ### Stack Tecnologico
 
 ```
-WM:          Qtile (Python)
-Barra:       Polybar
-Terminal:    Kitty
-Shell:       Zsh + powerlevel10k
-Launcher:    Rofi
-Compositor:  Picom (GLX + dual_kawase blur)
-Editores:    Neovim (LazyVim) / Sublime Text
-File Mgr:    Thunar
-Info:        Fastfetch
-AI:          opencode (skills personalizadas)
+WM:             Qtile (Python)
+Barra:          Polybar
+Terminal:       Kitty
+Shell:          Zsh + powerlevel10k
+Launcher:       Rofi
+Notifications:  Dunst + Rofi notification center
+Compositor:     Picom (GLX + dual_kawase blur)
+Editores:       Neovim (LazyVim) / Sublime Text
+File Mgr:       Thunar
+Info:           Fastfetch
+AI:             opencode (skills personalizadas)
 ```
 
 ### Enlaces Simbolicos
@@ -36,6 +37,7 @@ AI:          opencode (skills personalizadas)
 ~/.config/qtile       -> ~/dotfiles/qtile/
 ~/.config/polybar     -> ~/dotfiles/polybar/
 ~/.config/picom       -> ~/dotfiles/picom/
+~/.config/dunst       -> ~/dotfiles/dunst/
 ~/.config/rofi        -> ~/dotfiles/rofi/
 ~/.config/kitty       -> ~/dotfiles/kitty/
 ~/.config/Thunar      -> ~/dotfiles/Thunar/
@@ -55,7 +57,7 @@ dotfiles/
 │   ├── overview.md, installation.md, keybindings.md, themes.md, automations.md
 │   └── configuration/
 │       ├── qtile.md, polybar.md, kitty.md, zsh.md, rofi.md
-│       ├── picom.md, editors.md, fastfetch.md, thunar.md, extras.md
+│       ├── picom.md, dunst.md, editors.md, fastfetch.md, thunar.md, extras.md
 │
 ├── qtile/                             # Window Manager
 │   ├── config.py                      # Entry point
@@ -100,11 +102,15 @@ dotfiles/
 │       ├── emoji.sh                   # 800+ emojis, copia al clipboard
 │       ├── qtile-action-menu.sh       # Suspend/Reboot/Poweroff/Logout
 │       ├── qtile-workspace-switcher.sh
-│       ├── settings-menu.sh           # Themes, Workspaces, Web search, Backgrounds
+│       ├── notification-center.sh     # Notificaciones en Rofi (Dunst history)
+│       ├── settings-menu.sh           # Themes, Workspaces, Web search, Backgrounds, Notifications
 │       └── web-search.sh              # Google, abre Firefox en WEB workspace
 │
 ├── picom/                             # Compositor
 │   └── picom.conf                     # GLX, vsync, 12px radius, dual_kawase blur (6)
+│
+├── dunst/                             # Notification daemon
+│   └── dunstrc                        # 16px radius, rofi-aligned colors, 85% opacity via picom
 │
 ├── lazy-nvim/                         # Neovim (LazyVim)
 │   ├── init.lua, lazy-lock.json
@@ -214,7 +220,7 @@ dotfiles/
 | `Mod + Ctrl + Arrows` | Redimensionar |
 | `Mod + Ctrl + R` | Recargar Qtile |
 | `Mod + L` | Action menu |
-| `Mod + Shift + Space` | Settings menu |
+| `Mod + Shift + Space` | Settings menu (incluye Notifications) |
 | `Mod + 1-5` | Ir a workspace |
 | `Mod + Shift + 1-5` | Mover ventana a workspace |
 | `Print` / `Mod + Shift + S` | Flameshot |
@@ -314,6 +320,7 @@ La documentacion vive en `docs/` y cubre:
 | `docs/configuration/zsh.md` | Zsh modulos |
 | `docs/configuration/rofi.md` | Rofi scripts |
 | `docs/configuration/picom.md` | Picom efectos |
+| `docs/configuration/dunst.md` | Dunst notification center |
 | `docs/configuration/editors.md` | Neovim + Sublime |
 | `docs/configuration/fastfetch.md` | Fastfetch display |
 | `docs/configuration/thunar.md` | Thunar accels/uca |
