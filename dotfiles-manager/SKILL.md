@@ -142,14 +142,14 @@ dotfiles/
 │   └── node_modules/                  # Runtime (gitignored)
 │
 ├── themes/                            # 8 temas dinamicos
-│   ├── at-at/         (theme.json + wallpaper)
-│   ├── city/
-│   ├── city-sci-fi/
-│   ├── creativity-room/
+│   ├── brown-at-at/   (theme.json + wallpaper)
+│   ├── purple-sky/
+│   ├── ciberpunk/
+│   ├── chill-lofi/
 │   ├── data-center/
-│   ├── hacker/
-│   ├── hacker-setup/
-│   └── kali-red/
+│   ├── green-geek/
+│   ├── gray-terminal/
+│   └── red-japan/
 │
 ├── scripts/
 │   ├── theme-switch.sh                # Cambia polybar/kitty/zsh/qtile/fastfetch
@@ -262,13 +262,13 @@ dotfiles/
 
 | Tema | Wallpaper | Paleta |
 |------|-----------|--------|
-| AT-AT | at-at.png | Marron/gris calido |
-| Kali Red | wallpaper_dark_spaceship.jpg | Rojo oscuro |
-| Hacker | wallpaper hacker.jpg | Verde matrix |
-| Hacker Setup | hacker-setup-dark.jpg | Beige/teal |
-| City | wallpaper_city.jpg | Rosa/purpura |
-| City Sci-Fi | wallpaper_city_sci-fi.jpg | Teal/gris |
-| Creativity Room | wallpaper_Creativity_Room.jpg | Tierra calido |
+| Brown AT-AT | at-at.png | Marron/gris calido |
+| Red Japan | japan-wallpaper.jpg | Rojo oscuro |
+| Gray Terminal | wallpaper hacker.jpg | Grises |
+| Green Geek | hacker-setup-dark.jpg | Verde terminal |
+| Purple Sky | wallpaper_city.jpg | Violeta |
+| Ciberpunk | wallpaper_city_sci-fi.jpg | Neon magenta/purple |
+| Chill Lofi | wallpaper_Creativity_Room.jpg | Tierra calido |
 | Data Center | Wallpaper data center.jpg | Cian/verde |
 
 ### Estructura de theme.json
