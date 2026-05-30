@@ -203,7 +203,7 @@ print(response["embeddings"])
 import ollama
 
 # Cargar contenido de una skill como contexto
-with open("/home/lcampassi/MY-AGENT-SKILLS/obsidian-manager/SKILL.md") as f:
+with open("$HOME/MY-AGENT-SKILLS/obsidian-manager/SKILL.md") as f:
     skill_context = f.read()
 
 response = ollama.chat(model="whiterabbit-neo:13b", messages=[
@@ -225,7 +225,7 @@ Editar `~/.config/opencode/opencode.jsonc`:
   "provider": "ollama",
   "model": "whiterabbit-neo:13b",
   "skills": {
-    "paths": ["/home/lcampassi/MY-AGENT-SKILLS"]
+    "paths": ["$HOME/MY-AGENT-SKILLS"]
   }
 }
 ```
@@ -240,7 +240,7 @@ Para que opencode cargue una skill al interactuar con Ollama:
   "model": "whiterabbit-neo:13b",
   "systemPrompt": "Sos un asistente experto en gestion de sistemas. Usa las skills disponibles para contexto adicional.",
   "skills": {
-    "paths": ["/home/lcampassi/MY-AGENT-SKILLS"]
+    "paths": ["$HOME/MY-AGENT-SKILLS"]
   }
 }
 ```
