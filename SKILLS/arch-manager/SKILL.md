@@ -5,6 +5,65 @@ description: Use when the user asks about managing their Arch Linux system — p
 
 # Arch Linux System Manager
 
+## 📚 Documentación Persistente (Obsidian Vault)
+
+Este agente tiene acceso completo de **lectura y escritura** al vault de Obsidian para documentar configuraciones, procedimientos y troubleshooting.
+
+### Ruta base de documentación
+```
+/files/Personal-Vault/Manuales/00-FUNDAMENTALS/02-SYSTEMS-OS/LINUX/
+```
+
+### Subcarpetas disponibles
+
+| Carpeta | Contenido |
+|---------|-----------|
+| `01-FUNDAMENTOS/` | Arquitectura, componentes, distros, filosofía, historia |
+| `02-SISTEMA-ARCHIVO/` | FHS, permisos, usuarios, grupos, chmod, chown |
+| `03-COMANDOS-ESCENCIALES/` | Comandos básicos: búsqueda, manipulación, procesos, red |
+| `04-ADMINISTRACION/` | Systemd, servicios, logs, redes, particiones, procesos |
+| `05-KERNEL-SISTEMA/` | Kernel, init/boot, filesystems, memoria, módulos |
+| `06-SEGURIDAD/` | Hardening, SSH, firewall, auditoría, KPCLI |
+| `07-ARCH-LINUX/` | **Documentación específica del sistema**: MI-SISTEMA.md, pacman, AUR, mantenimiento, PipeWire, bootloader, networking, Docker, troubleshooting, power management, dual boot, NVMe |
+| `08-WINDOW-MANAGERS/` | Qtile, Hyprland, i3wm, Wayland/Xorg, autostart |
+| `09-DOTFILES-CONFIG/` | Dotfiles, zshrc config |
+| `10-HERRAMIENTAS/` | OpenSSL, Stow, TUI list, Yazi, Bluetooth, fingerprint, mkinitcpio, display multimonitor |
+
+### Reglas de documentación
+
+1. **Antes de escribir**: Leer primero lo que ya existe para evitar duplicados.
+2. **Formato**: Usar Markdown con frontmatter estándar:
+   ```yaml
+   ---
+   id: MAN-XXXXXX
+   nombre: NOMBRE-DOC
+   tags:
+     - KNOWLEDGE
+     - linux
+     - arch
+   fecha: YYYY-MM-DD
+   ---
+   ```
+3. **Código ejecutable**: Incluir comandos reales con paths del sistema.
+4. **Sistema específico**: Documentar rutas, UUIDs, configuraciones concretas del host `D4rkDr4g0n19`.
+5. **Links entre notas**: Usar wikilinks `[[NOMBRE-DEL-ARCHIVO]]` para conectar documentación relacionada.
+6. **NO tocar `LINUX.md` (MOC)**: El plugin Waypoint de Obsidian actualiza automáticamente el índice. Cualquier cambio manual se pierde al regenerarse.
+7. **Actualizar la SKILL**: Si se crea nueva documentación que cambia cómo el agente opera, reflejarlo en este archivo.
+
+### Para crear/editar documentación
+
+Usar el CLI de obsidian cuando sea posible:
+```bash
+obsidian vault=Personal-Vault create name="TITULO" \
+  path="Manuales/00-FUNDAMENTALS/02-SYSTEMS-OS/LINUX/07-ARCH-LINUX" \
+  content="# Contenido..."
+```
+
+O escribir directamente en la ruta del vault (método recomendado para documentos grandes):
+```
+/files/Personal-Vault/Manuales/00-FUNDAMENTALS/02-SYSTEMS-OS/LINUX/07-ARCH-LINUX/MI-DOC.md
+```
+
 ## System Context
 
 - **Distro:** Arch Linux
