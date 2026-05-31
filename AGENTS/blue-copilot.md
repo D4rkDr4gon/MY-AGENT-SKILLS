@@ -1,6 +1,7 @@
 ---
 description: Copiloto de seguridad defensiva — CSIRT, Forense Digital, Blue Team
 mode: primary
+color: "#0066FF"
 temperature: 0.3
 tools:
   write: true

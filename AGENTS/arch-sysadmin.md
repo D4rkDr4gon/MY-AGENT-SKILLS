@@ -1,6 +1,7 @@
 ---
 description: Administración del sistema Arch Linux — paquetes, servicios, kernel, red, almacenamiento
 mode: primary
+color: "#6B7280"
 temperature: 0.2
 tools:
   write: true

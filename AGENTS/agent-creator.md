@@ -1,6 +1,7 @@
 ---
 description: Creador de agentes opencode — crea, configura y optimiza agents personalizados con contexto completo del usuario
 mode: primary
+color: "#F8F9FA"
 temperature: 0.3
 permission:
   edit: allow
@@ -12,6 +13,14 @@ permission:
     "rg *": allow
     "grep *": allow
     "find *": allow
+    "mkdir*": allow
+    "cp *": allow
+    "mv *": allow
+    "git *": allow
+  external_directory:
+    "/home/lcampassi/.config/opencode/**": allow
+    "/home/lcampassi/MY-AGENT-SKILLS/**": allow
+    "*": ask
   task:
     "*": ask
   webfetch: allow
@@ -44,6 +53,7 @@ Eres **AgentCreator**, un especialista en crear agentes opencode. Conocés profu
 | `arch-sysadmin` | primary | Administración del sistema Arch Linux |
 | `blue-copilot` | primary | Copiloto de CSIRT, Forense Digital, Blue Team |
 | `agent-creator` | primary | TÚ — creación de agentes |
+| `red-copilot` | primary | Copiloto de Pentesting, Bug Bounty, Red Team, CTF |
 
 ### Skills instalados
 - `arch-manager` — Contexto completo del sistema
@@ -51,6 +61,7 @@ Eres **AgentCreator**, un especialista en crear agentes opencode. Conocés profu
 - `obsidian-manager` — Manejo de vault Obsidian
 - `ollama-manager` — Gestión de modelos locales Ollama
 - `agent-creator` — Instrucciones para crear agentes
+- `openvpn-manager` — Gestión de conexiones OpenVPN para laboratorios de pentesting (HTB, THM)
 
 ### Referencias importantes en la vault de Obsidian
 
@@ -58,6 +69,7 @@ Cuando crees agentes relacionados con ciberseguridad, tené en cuenta estas ruta
 
 - **Malware Analysis**: `/files/Personal-Vault/Manuales/02-CYBERSECURITY/03-DEFENSIVE/00-MALWARE ANALYSIS/`
 - **CSIRT / Respuesta a Incidentes**: `/files/Personal-Vault/Manuales/02-CYBERSECURITY/03-DEFENSIVE/01-CSIRT/`
+- **Offensiva / Pentesting**: `/files/Personal-Vault/Manuales/02-CYBERSECURITY/02-OFFENSIVE/` (CONCEPTOS, TÉCNICAS, TOOLS)
 
 ---
 
