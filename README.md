@@ -16,6 +16,7 @@ Skills que cargan contexto especializado en opencode.
 | [ollama-manager](./SKILLS/ollama-manager/SKILL.md) | 🐧 Linux | Gestión de modelos locales Ollama: ejecución, GPU, API REST |
 | [agent-creator](./SKILLS/agent-creator/SKILL.md) | 🐧🪟 Cross | Instrucciones para crear, configurar y optimizar agents personalizados |
 | [openvpn-manager](./SKILLS/openvpn-manager/SKILL.md) | 🐧🪟 Cross | Conexiones OpenVPN para pentesting labs (HTB, THM). Linux + Windows |
+| [docker-manager](./SKILLS/docker-manager/SKILL.md) | 🐧🪟 Cross | Docker/Podman cross-platform: containers, images, compose, sandboxing malware |
 
 ## Agents
 
@@ -30,6 +31,7 @@ Archivos de configuración de agentes para copiar a `~/.config/opencode/agents/`
 | [blue-copilot](./AGENTS/blue-copilot.md) | 🐧🪟 Cross | Copiloto de CSIRT, Forense Digital, Blue Team |
 | [red-copilot](./AGENTS/red-copilot.md) | 🐧🪟 Cross | Copiloto de Pentesting, Bug Bounty, Red Team, CTF |
 | [agent-creator](./AGENTS/agent-creator.md) | 🐧🪟 Cross | Creador de agentes opencode con contexto completo del usuario |
+| [dev-copilot](./AGENTS/dev-copilot.md) | 🐧🪟 Cross | Copiloto de desarrollo: Python, Shell, JS, Rust, C |
 
 ### Subagentes (mode: subagent)
 
@@ -40,6 +42,10 @@ Archivos de configuración de agentes para copiar a `~/.config/opencode/agents/`
 | [arch-Obsidian](./AGENTS/arch-Obsidian.md) | arch-sysadmin | 🐧 Linux | Documentación Linux en Obsidian |
 | [windows-delegate](./AGENTS/windows-delegate.md) | windows-sysadmin | 🪟 Windows | Investigación, diagnóstico, fixes en Windows |
 | [windows-docs](./AGENTS/windows-docs.md) | windows-sysadmin | 🪟 Windows | Documentación Windows en Obsidian |
+| [malware-analyst](./AGENTS/malware-analyst.md) | blue-copilot | 🐧🪟 Cross | Análisis de malware — estático, dinámico, YARA, reversing, IOC extraction |
+| [log-analyst](./AGENTS/log-analyst.md) | blue-copilot, arch-sysadmin, windows-sysadmin | 🐧🪟 Cross | Análisis de logs y SIEM — parseo, correlación, reglas Sigma, timeline forense |
+| [network-forensics](./AGENTS/network-forensics.md) | blue-copilot | 🐧🪟 Cross | Forense de red y PCAP — tshark, tcpdump, Zeek, captura y procesamiento de tráfico |
+| [osint-agent](./AGENTS/osint-agent.md) | blue-copilot, red-copilot | 🐧🪟 Cross | OSINT — dominios, emails, redes sociales, breaches, footprinting |
 
 ## Estructura
 
@@ -57,7 +63,12 @@ MY-AGENT-SKILLS/
 │   ├── windows-delegate.md       # 🪟 Windows
 │   ├── windows-docs.md           # 🪟 Windows
 │   ├── blue-copilot.md           # 🐧🪟 Cross
-│   └── red-copilot.md            # 🐧🪟 Cross
+│   ├── red-copilot.md            # 🐧🪟 Cross
+│   ├── dev-copilot.md            # 🐧🪟 Cross
+│   ├── malware-analyst.md        # 🐧🪟 Cross
+│   ├── log-analyst.md            # 🐧🪟 Cross
+│   ├── network-forensics.md      # 🐧🪟 Cross
+│   └── osint-agent.md            # 🐧🪟 Cross
 └── SKILLS/
     ├── agent-creator/
     │   └── SKILL.md              # 🐧🪟 Cross
@@ -71,7 +82,9 @@ MY-AGENT-SKILLS/
     │   └── SKILL.md              # 🐧🪟 Cross
     ├── ollama-manager/
     │   └── SKILL.md              # 🐧 Linux
-    └── openvpn-manager/
+    ├── openvpn-manager/
+    │   └── SKILL.md              # 🐧🪟 Cross
+    └── docker-manager/
         └── SKILL.md              # 🐧🪟 Cross
 ```
 
