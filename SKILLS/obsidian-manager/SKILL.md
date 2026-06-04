@@ -1,17 +1,32 @@
 ---
 name: obsidian-manager
-description: Use when the user asks about managing their Obsidian vault, taking notes, creating notes from templates, searching, managing tasks, daily notes, or syncing their Personal-Vault at /files/Personal-Vault via the obsidian CLI.
+description: Use when managing the Obsidian vault (Personal-Vault) — cross-platform. Create notes, search, manage tasks, daily notes, templates, or sync. Adapts paths automatically for Linux and Windows.
 ---
 
 # obsidian-manager
 
+## Cross-Platform — Detección de SO
+
+Este skill funciona en **Arch Linux** y **Windows 11**. Los paths cambian según el SO:
+
+| Recurso | Linux | Windows |
+|---|---|---|
+| Vault root | `/files/Personal-Vault` | `C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\Personal-Vault` |
+| CLI | `obsidian vault=Personal-Vault <cmd>` | `obsidian vault=Personal-Vault <cmd>` (si está en PATH) |
+| Scripts sync | `~/dotfiles/automat/vault-pull.sh` / `vault-push.sh` | *(no aplica)* |
+| Ruta relativa base | `Manuales/` | `Manuales/` |
+
+> **Regla**: Siempre operá con rutas **relativas al vault** cuando sea posible (ej: `Manuales/00-FUNDAMENTALS/...`). Solo usá paths absolutos cuando sea estrictamente necesario y detectá el SO automáticamente.
+
 ## Contexto del Vault
 
 **Vault**: Personal-Vault
-**Path**: `/files/Personal-Vault`
-**CLI**: `obsidian vault=Personal-Vault <command>`
-**Remote**: `https://github.com/<usuario>/<vault>.git`
-**Git user**: `<usuario>`
+**Path**: 
+  - **Linux**: `/files/Personal-Vault`
+  - **Windows**: `C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\Personal-Vault`
+**CLI**: `obsidian vault=Personal-Vault <command>` (en ambos SO si está en PATH)
+**Remote**: `https://github.com/D4rkDr4g0n/<vault>.git`
+**Git user**: `D4rkDr4g0n`
 
 ### Estructura de carpetas
 

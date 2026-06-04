@@ -102,6 +102,46 @@ La interfaz suele ser `tun0` también.
 | `Route already exists` | Conexión duplicada | Matar todas las instancias: `sudo killall openvpn` y reconectar |
 | DNS no resuelve después de VPN | systemd-resolved conflicto | Verificar `/etc/resolv.conf` y probablemente reiniciar resolved: `sudo systemctl restart systemd-resolved` |
 
+## Windows — Conexiones OpenVPN
+
+### Contexto
+- OpenVPN se instala via `winget install OpenVPN.OpenVPN` o desde openvpn.net
+- También se puede usar `openvpn` directamente desde PowerShell si está en PATH
+- Las conexiones requieren **ejecutar PowerShell como Administrador**
+
+### Ubicaciones comunes de archivos .ovpn
+- `C:\Users\lcampassi\lab\htb\` — perfiles de Hack The Box
+- `C:\Users\lcampassi\lab\thm\` — perfiles de TryHackMe
+- `C:\Users\lcampassi\lab\vpn\` — otros perfiles
+- Descargas recientes → `$env:USERPROFILE\Downloads\*.ovpn`
+
+### Comandos básicos
+
+```powershell
+# Conectar (primer plano)
+openvpn "C:\Users\lcampassi\lab\htb\perfil.ovpn"
+
+# Verificar conexión activa
+ipconfig
+# Buscar adaptador "OpenVPN TAP-Windows6" o similar
+
+# Verificar ruta/routing
+route print
+# Buscar rutas 10.0.0.0/8 o similares
+
+# Desconectar
+taskkill /F /IM openvpn.exe
+# O desde el icono de system tray
+```
+
+### Troubleshooting en Windows
+| Problema | Solución |
+|----------|----------|
+| `openvpn` no se reconoce | Agregar `C:\Program Files\OpenVPN\bin\` al PATH |
+| `TAP-Windows` no instalado | Reinstalar OpenVPN con el driver TAP |
+| Error de credenciales | Regenerar el .ovpn desde la plataforma |
+| Bloqueo por firewall | Agregar regla para openvpn.exe |
+
 ## Buenas prácticas
 
 - **Siempre** verificar conectividad con `ping` después de conectar
