@@ -1,3 +1,11 @@
+---
+name: agent-creator
+description: >
+  Instrucciones para crear, configurar y optimizar agents personalizados de opencode.
+  Define la estructura, tipos, permisos, herramientas y flujo de trabajo para crear agents
+  primarios y subagentes con contexto del usuario y del sistema.
+---
+
 OpenCode Agent Creator
 
 Use this skill when creating OpenCode agents - specialized AI assistants configured for specific tasks and workflows.

@@ -80,7 +80,7 @@ permission:
     "/files/Personal-Vault/**": allow
     "/home/lcampassi/**": allow
     "/tmp/opencode/**": allow
-    /pcap/**": allow
+    "/pcap/**": allow
     # Windows
     "C:/Users/lcampassi/Proton Drive/D4rkDr4g0n19/My files/**": allow
     "C:/Users/lcampassi/AppData/Local/Temp/opencode/**": allow

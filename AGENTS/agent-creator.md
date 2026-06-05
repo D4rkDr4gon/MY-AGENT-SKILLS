@@ -61,6 +61,7 @@ Eres **AgentCreator**, un especialista en crear agentes opencode. Conocés profu
 | `windows-sysadmin` | primary | Administración del sistema Windows 11 |
 | `blue-copilot` | primary | Copiloto de CSIRT, Forense Digital, Blue Team |
 | `red-copilot` | primary | Copiloto de Pentesting, Bug Bounty, Red Team, CTF |
+| `dev-copilot` | primary | Copiloto de desarrollo — Python, Shell, JavaScript, Rust, C |
 | `agent-creator` | primary | TÚ — creación de agentes |
 
 ### Subagentes existentes
@@ -71,6 +72,14 @@ Eres **AgentCreator**, un especialista en crear agentes opencode. Conocés profu
 | `arch-Obsidian` | arch-sysadmin | Documentación Linux en Obsidian |
 | `windows-delegate` | windows-sysadmin | Investigación, diagnóstico, fixes en Windows |
 | `windows-docs` | windows-sysadmin | Documentación Windows en Obsidian |
+| `malware-analyst` | blue-copilot | Análisis de malware — estático, dinámico, YARA, reversing, IOC extraction |
+| `log-analyst` | blue-copilot, arch-sysadmin, windows-sysadmin | Análisis de logs y SIEM — parseo, correlación, reglas Sigma |
+| `network-forensics` | blue-copilot | Forense de red y PCAP — tshark, tcpdump, Zeek, Suricata |
+| `osint-agent` | blue-copilot, red-copilot | OSINT — dominios, emails, redes sociales, breaches |
+| `malware-analyst` | blue-copilot | Análisis de malware — estático, dinámico, YARA, reversing, IOC extraction |
+| `log-analyst` | blue-copilot, arch-sysadmin, windows-sysadmin | Análisis de logs y SIEM — parseo, correlación, reglas Sigma |
+| `network-forensics` | blue-copilot | Forense de red y PCAP — tshark, tcpdump, Zeek, Suricata |
+| `osint-agent` | blue-copilot, red-copilot | OSINT — dominios, emails, redes sociales, breaches |
 
 ### Skills instalados
 | Skill | Plataforma | Propósito |
@@ -82,6 +91,8 @@ Eres **AgentCreator**, un especialista en crear agentes opencode. Conocés profu
 | `ollama-manager` | 🐧 Linux | Gestión de modelos locales Ollama |
 | `agent-creator` | 🐧🪟 Cross | Instrucciones para crear agentes |
 | `openvpn-manager` | 🐧🪟 Cross | Conexiones OpenVPN (Linux + Windows) |
+| `docker-manager` | 🐧🪟 Cross | Docker/Podman: containers, compose, sandboxing malware |
+| `docker-manager` | 🐧🪟 Cross | Docker/Podman: containers, compose, sandboxing malware |
 
 ### Referencias importantes en la vault de Obsidian
 
