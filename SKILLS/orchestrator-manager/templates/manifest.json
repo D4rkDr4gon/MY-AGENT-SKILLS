@@ -1,0 +1,57 @@
+{
+  "task_id": "orch-<task-name>-<YYYYMMDD>",
+  "created_at": "<ISO_TIMESTAMP>",
+
+  "orchestrator": {
+    "agent": "<agent-name>",
+    "strategy": "parallel",
+    "max_concurrency": 3
+  },
+
+  "worker": {
+    "type": "<subagent-type>",
+    "prompt_prefix": "Eres <worker-type>. Trabajás dentro de un plan orquestado.",
+    "config": {
+      "model": null,
+      "temperature": 0.2
+    }
+  },
+
+  "items": [
+    {
+      "id": "A01",
+      "name": "Item 1 name",
+      "prompt": "Instrucciones detalladas para este item específico. Qué debe producir y cómo.",
+      "deps": [],
+      "output": {
+        "type": "file",
+        "path": "/ruta/completa/al/output.ext",
+        "ext": "ext"
+      },
+      "status": "pending",
+      "worker": null
+    }
+  ],
+
+  "stage": {
+    "dir": "/tmp/opencode/orch/<task_id>",
+    "worker_prefix": "w"
+  },
+
+  "shared_context": {
+    "style_rules": "Reglas de estilo y formato que todos los workers deben seguir.",
+    "global_tags": [],
+    "id_range": null,
+    "id_counter": null,
+    "extra": {}
+  },
+
+  "reconciliation": {
+    "validate_ids": true,
+    "validate_refs": false,
+    "conflict": "orchestrator_decides",
+    "on_failure": "report_and_continue"
+  },
+
+  "state": "planning"
+}

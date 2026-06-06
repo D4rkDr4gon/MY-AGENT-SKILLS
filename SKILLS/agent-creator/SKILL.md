@@ -9,6 +9,9 @@ description: >
 OpenCode Agent Creator
 
 Use this skill when creating OpenCode agents - specialized AI assistants configured for specific tasks and workflows.
+
+> **Skill relacionado:** `orchestrator-manager` — para coordinar múltiples subagentes en paralelo.
+> Cuando tengas que descomponer una tarea grande y paralelizarla, cargá ese skill junto con este.
 When to Use
 
 Use this skill when the user wants to:

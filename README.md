@@ -1,6 +1,6 @@
 # MY-AGENT-SKILLS
 
-Skills y Agents personalizados para Agentes de IA (opencode).
+Skills, Agents y MCP Servers personalizados para Agentes de IA (opencode).
 Ecosistema **cross-platform**: Arch Linux 🐧 + Windows 11 🪟
 
 ## Skills
@@ -17,6 +17,7 @@ Skills que cargan contexto especializado en opencode.
 | [agent-creator](./SKILLS/agent-creator/SKILL.md) | 🐧🪟 Cross | Instrucciones para crear, configurar y optimizar agents personalizados |
 | [openvpn-manager](./SKILLS/openvpn-manager/SKILL.md) | 🐧🪟 Cross | Conexiones OpenVPN para pentesting labs (HTB, THM). Linux + Windows |
 | [docker-manager](./SKILLS/docker-manager/SKILL.md) | 🐧🪟 Cross | Docker/Podman cross-platform: containers, images, compose, sandboxing malware |
+| [mcp-ollama](./SKILLS/mcp-ollama/SKILL.md) | 🐧 Linux | MCP server para modelos locales Ollama — tools de IA local sin consumir tokens |
 
 ## Agents
 
@@ -46,6 +47,28 @@ Archivos de configuración de agentes para copiar a `~/.config/opencode/agents/`
 | [log-analyst](./AGENTS/log-analyst.md) | blue-copilot, arch-sysadmin, windows-sysadmin | 🐧🪟 Cross | Análisis de logs y SIEM — parseo, correlación, reglas Sigma, timeline forense |
 | [network-forensics](./AGENTS/network-forensics.md) | blue-copilot | 🐧🪟 Cross | Forense de red y PCAP — tshark, tcpdump, Zeek, captura y procesamiento de tráfico |
 | [osint-agent](./AGENTS/osint-agent.md) | blue-copilot, red-copilot | 🐧🪟 Cross | OSINT — dominios, emails, redes sociales, breaches, footprinting |
+| [local-quick](./AGENTS/local-quick.md) | Cualquiera | 🐧 Linux | Subagente local ultrarrápido (gemma3:270m) via MCP — sin consumir tokens |
+| [local-reason](./AGENTS/local-reason.md) | Cualquiera | 🐧 Linux | Subagente local de razonamiento (whiterabbit-neo:13b) via MCP — sin consumir tokens |
+
+## MCP Servers
+
+Servidores MCP (Model Context Protocol) que exponen herramientas locales
+a los agentes de opencode.
+
+| Server | Descripción | Tools expuestas |
+|--------|-------------|-----------------|
+| [ollama-mcp-server](./MCP/ollama-server/README.md) | Modelos locales de IA vía Ollama | `ollama_generate`, `ollama_chat`, `ollama_list_models`, `ollama_ps`, `ollama_embed`, `ollama_pull` |
+
+### Instalación de MCP servers
+
+Cada servidor tiene su propio README con instrucciones. En general:
+
+1. Instalar dependencias (usar `requirements.txt` del server)
+2. Agregar la entrada en `opencode.jsonc` bajo `mcp:`
+3. Reiniciar opencode
+
+Ver [MCP/ollama-server/README.md](./MCP/ollama-server/README.md) para
+el server de Ollama.
 
 ## Estructura
 
@@ -68,24 +91,33 @@ MY-AGENT-SKILLS/
 │   ├── malware-analyst.md        # 🐧🪟 Cross
 │   ├── log-analyst.md            # 🐧🪟 Cross
 │   ├── network-forensics.md      # 🐧🪟 Cross
-│   └── osint-agent.md            # 🐧🪟 Cross
-└── SKILLS/
-    ├── agent-creator/
-    │   └── SKILL.md              # 🐧🪟 Cross
-    ├── arch-manager/
-    │   └── SKILL.md              # 🐧 Linux
-    ├── windows-manager/
-    │   └── SKILL.md              # 🪟 Windows
-    ├── dotfiles-manager/
-    │   └── SKILL.md              # 🐧 Linux
-    ├── obsidian-manager/
-    │   └── SKILL.md              # 🐧🪟 Cross
-    ├── ollama-manager/
-    │   └── SKILL.md              # 🐧 Linux
-    ├── openvpn-manager/
-    │   └── SKILL.md              # 🐧🪟 Cross
-    └── docker-manager/
-        └── SKILL.md              # 🐧🪟 Cross
+│   ├── osint-agent.md            # 🐧🪟 Cross
+│   ├── local-quick.md            # 🐧 Linux — IA local (gemma3:270m)
+│   └── local-reason.md           # 🐧 Linux — IA local (whiterabbit-neo:13b)
+├── SKILLS/
+│   ├── agent-creator/
+│   │   └── SKILL.md              # 🐧🪟 Cross
+│   ├── arch-manager/
+│   │   └── SKILL.md              # 🐧 Linux
+│   ├── windows-manager/
+│   │   └── SKILL.md              # 🪟 Windows
+│   ├── dotfiles-manager/
+│   │   └── SKILL.md              # 🐧 Linux
+│   ├── obsidian-manager/
+│   │   └── SKILL.md              # 🐧🪟 Cross
+│   ├── ollama-manager/
+│   │   └── SKILL.md              # 🐧 Linux
+│   ├── openvpn-manager/
+│   │   └── SKILL.md              # 🐧🪟 Cross
+│   ├── docker-manager/
+│   │   └── SKILL.md              # 🐧🪟 Cross
+│   └── mcp-ollama/
+│       └── SKILL.md              # 🐧 Linux — MCP + Ollama
+└── MCP/
+    └── ollama-server/
+        ├── server.py             # MCP server — Ollama bridge
+        ├── requirements.txt      # Dependencias
+        └── README.md             # Docs del server
 ```
 
 ## Instalación en opencode
@@ -101,6 +133,8 @@ Para que opencode cargue estos skills, agregar en `opencode.json`:
 ```
 
 Los agents se instalan copiando el `.md` correspondiente a `~/.config/opencode/agents/` y reiniciando opencode.
+
+Los MCP servers se instalan registrándolos bajo `mcp:` en `opencode.jsonc` (ver docs de cada server).
 
 ### Windows
 
