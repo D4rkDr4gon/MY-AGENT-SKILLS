@@ -45,12 +45,12 @@ Usá `orchestrator-manager` cuando:
 
 | Tipo de tarea | `output.type` | Ejemplo concreto |
 |---------------|---------------|------------------|
-| Documentación | `file` | Crear 20 notas de criptografía con crypto-copilot |
-| Análisis | `data` | Analizar 100 muestras de malware con malware-analyst |
-| Búsqueda | `data` | Escanear 50 hosts con osint-agent |
-| Código | `file` | Generar 10 scripts de automatización con dev-copilot |
+| Documentación | `file` | Crear 20 notas de criptografía con proteo |
+| Análisis | `data` | Analizar 100 muestras de malware con hecate |
+| Búsqueda | `data` | Escanear 50 hosts con argos |
+| Código | `file` | Generar 10 scripts de automatización con prometeo |
 | Refactor | `file` | Renombrar 30 archivos siguiendo una convención |
-| Reporte | `data` | Correlacionar logs de 5 fuentes con log-analyst |
+| Reporte | `data` | Correlacionar logs de 5 fuentes con apolo |
 
 **No** usarlo para:
 - Tareas estrictamente secuenciales (item B depende de item A)
@@ -64,7 +64,7 @@ Usá `orchestrator-manager` cuando:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    ORCHESTRATOR                              │
-│  (agent-creator, arch-sysadmin, o cualquier agente primario) │
+│  (hefesto, atlas, o cualquier agente primario) │
 └──────────┬──────────┬──────────┬──────────┬─────────────────┘
            │          │          │          │
            ▼          ▼          ▼          ▼
@@ -169,9 +169,9 @@ El worker **debe**:
 
 ```
 # El orquestador hace:
-1. task(subagent_type="crypto-copilot", prompt="...", con MANIFEST_PATH, WORKER_ID="w-1", ASSIGNED_ITEMS=[...])
-2. task(subagent_type="crypto-copilot", prompt="...", con MANIFEST_PATH, WORKER_ID="w-2", ASSIGNED_ITEMS=[...])
-3. task(subagent_type="crypto-copilot", prompt="...", con MANIFEST_PATH, WORKER_ID="w-3", ASSIGNED_ITEMS=[...])
+1. task(subagent_type="proteo", prompt="...", con MANIFEST_PATH, WORKER_ID="w-1", ASSIGNED_ITEMS=[...])
+2. task(subagent_type="proteo", prompt="...", con MANIFEST_PATH, WORKER_ID="w-2", ASSIGNED_ITEMS=[...])
+3. task(subagent_type="proteo", prompt="...", con MANIFEST_PATH, WORKER_ID="w-3", ASSIGNED_ITEMS=[...])
 ```
 
 ---
@@ -232,14 +232,14 @@ El orquestador mueve los outputs validados a su destino final.
   "created_at": "2026-06-05T20:00:00Z",
 
   "orchestrator": {
-    "agent": "agent-creator",
+    "agent": "hefesto",
     "strategy": "parallel",
     "max_concurrency": 4
   },
 
   "worker": {
-    "type": "crypto-copilot",
-    "prompt_prefix": "Eres crypto-copilot. Trabajás dentro de un plan orquestado. Lee el manifest en MANIFEST_PATH.",
+    "type": "proteo",
+    "prompt_prefix": "Eres proteo. Trabajás dentro de un plan orquestado. Lee el manifest en MANIFEST_PATH.",
     "config": {
       "model": null,
       "temperature": 0.2
@@ -401,14 +401,14 @@ def validate(manifest, staging_dir):
 
 ## Ejemplos de Uso
 
-### Ejemplo 1: Documentación paralela con crypto-copilot
+### Ejemplo 1: Documentación paralela con proteo
 
 ```json
 // manifest.json
 {
   "task_id": "orch-crypto-20260605",
-  "orchestrator": { "agent": "agent-creator", "strategy": "parallel", "max_concurrency": 3 },
-  "worker": { "type": "crypto-copilot" },
+  "orchestrator": { "agent": "hefesto", "strategy": "parallel", "max_concurrency": 3 },
+  "worker": { "type": "proteo" },
   "items": [
     { "id": "A01", "name": "RSA", "prompt": "Crear nota RSA...", "deps": [], "output": {"type":"file","path":"02-CRIPTOGRAFIA/03-ASIMETRICA/01-RSA.md"} },
     { "id": "A02", "name": "ECC", "prompt": "Crear nota ECC...", "deps": [], "output": {"type":"file","path":"02-CRIPTOGRAFIA/03-ASIMETRICA/02-ECC.md"} },
@@ -421,12 +421,12 @@ def validate(manifest, staging_dir):
 }
 ```
 
-### Ejemplo 2: Análisis de logs con log-analyst
+### Ejemplo 2: Análisis de logs con apolo
 
 ```json
 {
   "task_id": "orch-loganalysis-20260605",
-  "worker": { "type": "log-analyst" },
+  "worker": { "type": "apolo" },
   "items": [
     { "id": "L01", "name": "auth.log", "prompt": "Analizar /var/log/auth.log en busca de bruteforce...", "deps": [], "output": {"type":"data","path":"/tmp/analysis/auth_results.json"} },
     { "id": "L02", "name": "syslog", "prompt": "Analizar /var/log/syslog en busca de anomalías...", "deps": [], "output": {"type":"data","path":"/tmp/analysis/syslog_results.json"} }
@@ -442,12 +442,12 @@ def validate(manifest, staging_dir):
 }
 ```
 
-### Ejemplo 3: Análisis de malware con malware-analyst
+### Ejemplo 3: Análisis de malware con hecate
 
 ```json
 {
   "task_id": "orch-malware-20260605",
-  "worker": { "type": "malware-analyst" },
+  "worker": { "type": "hecate" },
   "items": [
     { "id": "M01", "name": "sample1.exe", "prompt": "Analizar sample1.exe...", "deps": [], "output": {"type":"data","path":"/tmp/analysis/sample1.json"} },
     { "id": "M02", "name": "sample2.exe", "prompt": "Analizar sample2.exe...", "deps": [], "output": {"type":"data","path":"/tmp/analysis/sample2.json"} }
@@ -474,18 +474,18 @@ skill(name="orchestrator-manager")
 
 | Agente | ¿Puede ser orquestador? | ¿Puede ser worker? | ¿Qué tipo de tareas puede orquestar? |
 |--------|------------------------|---------------------|--------------------------------------|
-| `agent-creator` | ✅ | ❌ | Creación de agentes, skills, documentación |
-| `arch-sysadmin` | ✅ | ❌ | Mantenimiento del sistema en múltiples equipos |
-| `windows-sysadmin` | ✅ | ❌ | Mantenimiento de Windows en varios equipos |
-| `blue-copilot` | ✅ | ❌ | Análisis forense, CSIRT, threat hunting |
-| `red-copilot` | ✅ | ❌ | Pentesting en múltiples targets |
-| `dev-copilot` | ✅ | ❌ | Generación de código, refactors |
-| `crypto-copilot` | ❌ | ✅ | Creación de documentación criptográfica |
-| `malware-analyst` | ❌ | ✅ | Análisis de muestras de malware |
-| `log-analyst` | ❌ | ✅ | Análisis de logs |
-| `network-forensics` | ❌ | ✅ | Análisis de PCAPs |
-| `osint-agent` | ❌ | ✅ | OSINT |
-| `audit-copilot` | ❌ | ✅ | Auditoría y compliance |
+| `hefesto` | ✅ | ❌ | Creación de agentes, skills, documentación |
+| `atlas` | ✅ | ❌ | Mantenimiento del sistema en múltiples equipos |
+| `hestia` | ✅ | ❌ | Mantenimiento de Windows en varios equipos |
+| `atenea` | ✅ | ❌ | Análisis forense, CSIRT, threat hunting |
+| `ares` | ✅ | ❌ | Pentesting en múltiples targets |
+| `prometeo` | ✅ | ❌ | Generación de código, refactors |
+| `proteo` | ❌ | ✅ | Creación de documentación criptográfica |
+| `hecate` | ❌ | ✅ | Análisis de muestras de malware |
+| `apolo` | ❌ | ✅ | Análisis de logs |
+| `hermes` | ❌ | ✅ | Análisis de PCAPs |
+| `argos` | ❌ | ✅ | OSINT |
+| `temis` | ❌ | ✅ | Auditoría y compliance |
 
 ### Flujo de integración
 

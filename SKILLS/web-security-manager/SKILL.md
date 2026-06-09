@@ -9,7 +9,7 @@ Guía de seguridad de aplicaciones web para pentesting y blue team. Cubre herram
 
 ## Contexto del usuario
 
-- **Rol:** Pentester (red-copilot) + Blue Team (blue-copilot)
+- **Rol:** Pentester (ares) + Blue Team (atenea)
 - **SO:** Arch Linux (Burp Suite via AUR, ZAP via snap/pkg)
 - **Windows:** Burp Suite (installer), Fiddler, ZAP
 - **Navegadores:** Firefox + Chromium para pruebas

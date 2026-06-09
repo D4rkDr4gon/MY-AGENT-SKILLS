@@ -4,6 +4,8 @@ description: >
   Instrucciones para crear, configurar y optimizar agents personalizados de opencode.
   Define la estructura, tipos, permisos, herramientas y flujo de trabajo para crear agents
   primarios y subagentes con contexto del usuario y del sistema.
+  Los agentes del usuario usan nombres de dioses griegos y el vault de conocimiento
+  se llama "Babilonia" (fuente de verdad máxima).
 ---
 
 OpenCode Agent Creator

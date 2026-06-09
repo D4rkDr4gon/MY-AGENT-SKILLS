@@ -5,7 +5,7 @@ description: Use when managing network configuration — nftables/iptables, Wire
 
 # network-manager
 
-Guía de administración de redes para Linux y Windows. Cubre firewall, VPN site-to-site, bridges, VLANs, routing avanzado y troubleshooting. Complementa a arch-sysadmin/windows-sysadmin con networking profundo.
+Guía de administración de redes para Linux y Windows. Cubre firewall, VPN site-to-site, bridges, VLANs, routing avanzado y troubleshooting. Complementa a atlas/hestia con networking profundo.
 
 ## Contexto del usuario
 

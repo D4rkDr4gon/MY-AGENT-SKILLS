@@ -21,34 +21,44 @@ Skills que cargan contexto especializado en opencode.
 
 ## Agents
 
-Archivos de configuración de agentes para copiar a `~/.config/opencode/agents/`.
+Archivos de configuración de agentes (nombres de dioses griegos). Copiar a `~/.config/opencode/agents/` o `.opencode/agents/`.
 
 ### Primarios (mode: primary)
 
 | Agent | Plataforma | Propósito |
 |-------|-----------|-----------|
-| [arch-sysadmin](./AGENTS/arch-sysadmin.md) | 🐧 Linux | Administración del sistema Arch Linux |
-| [windows-sysadmin](./AGENTS/windows-sysadmin.md) | 🪟 Windows | Administración del sistema Windows 11 |
-| [blue-copilot](./AGENTS/blue-copilot.md) | 🐧🪟 Cross | Copiloto de CSIRT, Forense Digital, Blue Team |
-| [red-copilot](./AGENTS/red-copilot.md) | 🐧🪟 Cross | Copiloto de Pentesting, Bug Bounty, Red Team, CTF |
-| [agent-creator](./AGENTS/agent-creator.md) | 🐧🪟 Cross | Creador de agentes opencode con contexto completo del usuario |
-| [dev-copilot](./AGENTS/dev-copilot.md) | 🐧🪟 Cross | Copiloto de desarrollo: Python, Shell, JS, Rust, C |
+| [atlas](./AGENTS/atlas.md) | 🐧 Linux | Administración del sistema Arch Linux |
+| [hestia](./AGENTS/hestia.md) | 🪟 Windows | Administración del sistema Windows 11 |
+| [atenea](./AGENTS/atenea.md) | 🐧🪟 Cross | CSIRT, Forense Digital, Blue Team |
+| [ares](./AGENTS/ares.md) | 🐧🪟 Cross | Pentesting, Bug Bounty, Red Team, CTF |
+| [prometeo](./AGENTS/prometeo.md) | 🐧🪟 Cross | Desarrollo: Python, Shell, JavaScript, Rust, Go, D, C |
+| [hefesto](./AGENTS/hefesto.md) | 🐧🪟 Cross | Creador de agentes opencode con contexto completo del usuario |
 
 ### Subagentes (mode: subagent)
 
 | Agent | Padre | Plataforma | Propósito |
 |-------|-------|-----------|-----------|
-| [arch-delegate](./AGENTS/arch-delegate.md) | arch-sysadmin | 🐧 Linux | Investigación, diagnóstico, fixes en Linux |
-| [arch-dotfiles](./AGENTS/arch-dotfiles.md) | arch-sysadmin | 🐧 Linux | Documentación de dotfiles |
-| [arch-Obsidian](./AGENTS/arch-Obsidian.md) | arch-sysadmin | 🐧 Linux | Documentación Linux en Obsidian |
-| [windows-delegate](./AGENTS/windows-delegate.md) | windows-sysadmin | 🪟 Windows | Investigación, diagnóstico, fixes en Windows |
-| [windows-docs](./AGENTS/windows-docs.md) | windows-sysadmin | 🪟 Windows | Documentación Windows en Obsidian |
-| [malware-analyst](./AGENTS/malware-analyst.md) | blue-copilot | 🐧🪟 Cross | Análisis de malware — estático, dinámico, YARA, reversing, IOC extraction |
-| [log-analyst](./AGENTS/log-analyst.md) | blue-copilot, arch-sysadmin, windows-sysadmin | 🐧🪟 Cross | Análisis de logs y SIEM — parseo, correlación, reglas Sigma, timeline forense |
-| [network-forensics](./AGENTS/network-forensics.md) | blue-copilot | 🐧🪟 Cross | Forense de red y PCAP — tshark, tcpdump, Zeek, captura y procesamiento de tráfico |
-| [osint-agent](./AGENTS/osint-agent.md) | blue-copilot, red-copilot | 🐧🪟 Cross | OSINT — dominios, emails, redes sociales, breaches, footprinting |
-| [local-quick](./AGENTS/local-quick.md) | Cualquiera | 🐧 Linux | Subagente local ultrarrápido (gemma3:270m) via MCP — sin consumir tokens |
-| [local-reason](./AGENTS/local-reason.md) | Cualquiera | 🐧 Linux | Subagente local de razonamiento (whiterabbit-neo:13b) via MCP — sin consumir tokens |
+| [iris](./AGENTS/iris.md) | atlas | 🐧 Linux | Investigación, diagnóstico, fixes en Linux |
+| [clio](./AGENTS/clio.md) | atlas | 🐧 Linux | Documentación de dotfiles |
+| [mnemosina](./AGENTS/mnemosina.md) | atlas | 🐧 Linux | Documentación Linux en Obsidian |
+| [angelos](./AGENTS/angelos.md) | hestia | 🪟 Windows | Investigación, diagnóstico, fixes en Windows |
+| [polimnia](./AGENTS/polimnia.md) | hestia | 🪟 Windows | Documentación Windows en Obsidian |
+| [hecate](./AGENTS/hecate.md) | atenea | 🐧🪟 Cross | Análisis de malware — estático, dinámico, YARA, reversing, IOC extraction |
+| [apolo](./AGENTS/apolo.md) | atenea, atlas, hestia | 🐧🪟 Cross | Análisis de logs y SIEM — parseo, correlación, reglas Sigma, timeline forense |
+| [hermes](./AGENTS/hermes.md) | atenea | 🐧🪟 Cross | Forense de red y PCAP — tshark, tcpdump, Zeek, captura y procesamiento de tráfico |
+| [argos](./AGENTS/argos.md) | atenea, ares | 🐧🪟 Cross | OSINT — dominios, emails, redes sociales, breaches, footprinting |
+| [proteo](./AGENTS/proteo.md) | atenea | 🐧🪟 Cross | Criptografía — estudio, implementación y herramientas criptográficas |
+| [temis](./AGENTS/temis.md) | atenea | 🐧🪟 Cross | Auditoría y cumplimiento normativo |
+| [nemesis](./AGENTS/nemesis.md) | atenea | 🐧🪟 Cross | Forense digital — disco, memoria, file carving, Windows artifacts |
+| [eris](./AGENTS/eris.md) | ares | 🐧🪟 Cross | Seguridad web ofensiva — Burp Suite, ZAP, OWASP Top 10, fuzzing |
+| [zeus](./AGENTS/zeus.md) | atenea | 🐧🪟 Cross | Orquestación de respuesta a incidentes |
+| [dolos](./AGENTS/dolos.md) | atenea | 🐧🪟 Cross | Análisis de phishing — headers email, URLs, attachments, IOCs |
+| [epimeteo](./AGENTS/epimeteo.md) | atenea, atlas, hestia | 🐧🪟 Cross | Gestión de vulnerabilidades — CVE tracking, escaneo, patch management |
+| [quiron](./AGENTS/quiron.md) | ares, atenea | 🐧🪟 Cross | Gestión de laboratorios — HTB/THM/VulnHub, VMs, tracking, writeups |
+| [caliope](./AGENTS/caliope.md) | atenea, ares | 🐧🪟 Cross | Reportes profesionales — pentest, forense, auditoría, executive summary |
+| [eos](./AGENTS/eos.md) | Todos (cross) | 🐧🪟 Cross | Asistente personal diario — rutina, tareas, aprendizaje, daily notes |
+| [eolo](./AGENTS/eolo.md) | Cualquiera | 🐧 Linux | Subagente local ultrarrápido (qwen3:1.7b) via MCP — sin consumir tokens |
+| [crono](./AGENTS/crono.md) | Cualquiera | 🐧 Linux | Subagente local de razonamiento (qwen2.5:7b, fallback whiterabbit-neo:13b) via MCP — sin consumir tokens |
 
 ## MCP Servers
 
@@ -77,23 +87,33 @@ MY-AGENT-SKILLS/
 ├── README.md
 ├── LICENSE
 ├── AGENTS/
-│   ├── agent-creator.md          # 🐧🪟 Cross
-│   ├── arch-sysadmin.md          # 🐧 Linux
-│   ├── arch-delegate.md          # 🐧 Linux
-│   ├── arch-dotfiles.md          # 🐧 Linux
-│   ├── arch-Obsidian.md          # 🐧 Linux
-│   ├── windows-sysadmin.md       # 🪟 Windows
-│   ├── windows-delegate.md       # 🪟 Windows
-│   ├── windows-docs.md           # 🪟 Windows
-│   ├── blue-copilot.md           # 🐧🪟 Cross
-│   ├── red-copilot.md            # 🐧🪟 Cross
-│   ├── dev-copilot.md            # 🐧🪟 Cross
-│   ├── malware-analyst.md        # 🐧🪟 Cross
-│   ├── log-analyst.md            # 🐧🪟 Cross
-│   ├── network-forensics.md      # 🐧🪟 Cross
-│   ├── osint-agent.md            # 🐧🪟 Cross
-│   ├── local-quick.md            # 🐧 Linux — IA local (gemma3:270m)
-│   └── local-reason.md           # 🐧 Linux — IA local (whiterabbit-neo:13b)
+│   ├── hefesto.md                # 🐧🪟 Cross — Creador de agentes
+│   ├── atlas.md                  # 🐧 Linux — Sysadmin Arch
+│   ├── hestia.md                 # 🪟 Windows — Sysadmin Windows
+│   ├── atenea.md                 # 🐧🪟 Cross — CSIRT, Blue Team
+│   ├── ares.md                   # 🐧🪟 Cross — Pentesting, Red Team
+│   ├── prometeo.md               # 🐧🪟 Cross — Desarrollo
+│   ├── iris.md                   # 🐧 Linux — Delegado atlas
+│   ├── clio.md                   # 🐧 Linux — Dotfiles
+│   ├── mnemosina.md              # 🐧 Linux — Docs Linux en Obsidian
+│   ├── angelos.md                # 🪟 Windows — Delegado hestia
+│   ├── polimnia.md               # 🪟 Windows — Docs Windows en Obsidian
+│   ├── hecate.md                 # 🐧🪟 Cross — Malware analysis
+│   ├── apolo.md                  # 🐧🪟 Cross — Logs & SIEM
+│   ├── hermes.md                 # 🐧🪟 Cross — Network forensics
+│   ├── argos.md                  # 🐧🪟 Cross — OSINT
+│   ├── proteo.md                 # 🐧🪟 Cross — Criptografía
+│   ├── temis.md                  # 🐧🪟 Cross — Auditoría
+│   ├── nemesis.md                # 🐧🪟 Cross — Forense digital
+│   ├── eris.md                   # 🐧🪟 Cross — Web security
+│   ├── zeus.md                   # 🐧🪟 Cross — IR orchestrator
+│   ├── dolos.md                  # 🐧🪟 Cross — Phishing analysis
+│   ├── epimeteo.md               # 🐧🪟 Cross — Vulnerability mgmt
+│   ├── quiron.md                 # 🐧🪟 Cross — Labs (HTB/THM)
+│   ├── caliope.md                # 🐧🪟 Cross — Reportes
+│   ├── eos.md                    # 🐧🪟 Cross — Daily assistant
+│   ├── eolo.md                   # 🐧 Linux — IA local (qwen3:1.7b)
+│   └── crono.md                  # 🐧 Linux — IA local (qwen2.5:7b)
 ├── SKILLS/
 │   ├── agent-creator/
 │   │   └── SKILL.md              # 🐧🪟 Cross
@@ -150,5 +170,5 @@ En Linux los paths son:
 
 ## Documentación en Vault
 
-La documentación detallada del ecosistema se mantiene en Obsidian:
+La documentación detallada del ecosistema se mantiene en el vault Babilonia (Obsidian):
 `Manuales/04-SPECIALIZED-DOMAINS/03-AI/03-OPENCODE-AGENTS-SKILLS/`

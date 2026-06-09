@@ -113,17 +113,17 @@ usá `ollama_generate` con el modelo apropiado según la complejidad:
 
 ## Integración con subagentes
 
-Los subagentes `local-quick` y `local-reason` son wrappers pre-configurados
+Los subagentes `eolo` y `crono` son wrappers pre-configurados
 que usan el MCP server automáticamente:
 
-- `@local-quick` → gemma3:270m (tareas rápidas, temperatura baja)
-- `@local-reason` → whiterabbit-neo:13b (razonamiento, temperatura media)
+- `@eolo` → gemma3:270m (tareas rápidas, temperatura baja)
+- `@crono` → whiterabbit-neo:13b (razonamiento, temperatura media)
 
 Invocarlos desde cualquier agente primario:
 
 ```
-@local-quick Resumí este texto en 3 líneas
-@local-reason Analizá este código en busca de vulnerabilidades
+@eolo Resumí este texto en 3 líneas
+@crono Analizá este código en busca de vulnerabilidades
 ```
 
 ## Verificación de estado

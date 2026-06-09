@@ -5,7 +5,7 @@ description: Use when performing digital forensics — disk forensics (dd, guyma
 
 # forensic-manager
 
-Guía de forense digital para CSIRT y blue team. Complementa `malware-analyst`, `log-analyst` y `network-forensics` con el enfoque de adquisición y análisis forense de disco y memoria.
+Guía de forense digital para CSIRT y blue team. Complementa `hecate`, `apolo` y `hermes` con el enfoque de adquisición y análisis forense de disco y memoria.
 
 ## Contexto del usuario
 

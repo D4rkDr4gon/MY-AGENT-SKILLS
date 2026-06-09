@@ -12,7 +12,7 @@ Guía de threat intelligence para CSIRT y blue team. Cubre recolección, procesa
 - **Rol:** CSIRT / Blue Team
 - **Plataformas:** MISP (local o cloud), OpenCTI (opcional)
 - **Formatos:** STIX 2.1, TAXII, OpenIOC, YARA
-- **Integraciones:** OSINT (ver `osint-agent`), SIEM, logs (ver `log-analyst`)
+- **Integraciones:** OSINT (ver `argos`), SIEM, logs (ver `apolo`)
 - **Feeds:** AlienVault OTX, VirusTotal, AbuseIPDB, FeodoTracker, URLhaus
 
 ---
@@ -370,9 +370,9 @@ sigma convert -t qradar sigma-rule.yml
 ```
 1. RECOLECCIÓN
    ├── Feeds automáticos (AbuseIPDB, URLhaus, Feodo)
-   ├── OSINT (osint-agent)
+   ├── OSINT (argos)
    ├── Comunidad (MISP sharing groups)
-   └── Análisis propio (malware-analyst)
+   └── Análisis propio (hecate)
 
 2. PROCESAMIENTO
    ├── Validar IOCs (falsos positivos)
