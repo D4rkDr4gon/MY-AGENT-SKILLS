@@ -18,6 +18,31 @@ Skills que cargan contexto especializado en opencode.
 | [openvpn-manager](./SKILLS/openvpn-manager/SKILL.md) | 🐧🪟 Cross | Conexiones OpenVPN para pentesting labs (HTB, THM). Linux + Windows |
 | [docker-manager](./SKILLS/docker-manager/SKILL.md) | 🐧🪟 Cross | Docker/Podman cross-platform: containers, images, compose, sandboxing malware |
 | [mcp-ollama](./SKILLS/mcp-ollama/SKILL.md) | 🐧 Linux | MCP server para modelos locales Ollama — tools de IA local sin consumir tokens |
+| [git-manager](./SKILLS/git-manager/SKILL.md) | 🐧🪟 Cross | Git avanzado: branching, rebase, bisect, hooks, GPG, submodules, worktrees |
+| [secret-manager](./SKILLS/secret-manager/SKILL.md) | 🐧🪟 Cross | Gestión de secrets: pass, age, sops, GPG, API keys, .env cifrados |
+| [reverse-engineering-manager](./SKILLS/reverse-engineering-manager/SKILL.md) | 🐧🪟 Cross | RE de binarios: radare2, Ghidra, GDB, unpacking, YARA, firmware |
+| [hardening-manager](./SKILLS/hardening-manager/SKILL.md) | 🐧🪟 Cross | Hardening: CIS benchmarks, lynis, OpenSCAP, AppArmor, firewall |
+| [threat-intel-manager](./SKILLS/threat-intel-manager/SKILL.md) | 🐧🪟 Cross | Threat intel: MISP, STIX/TAXII, IOC management, OpenCTI |
+| [backup-manager](./SKILLS/backup-manager/SKILL.md) | 🐧🪟 Cross | Backups: restic, borg, rsync, 3-2-1 strategy, snapshots |
+| [database-manager](./SKILLS/database-manager/SKILL.md) | 🐧🪟 Cross | Bases de datos: SQLite, PostgreSQL, MariaDB, queries, backups, migrations |
+| [network-manager](./SKILLS/network-manager/SKILL.md) | 🐧🪟 Cross | Redes: nftables, WireGuard, bridges, VLANs, DNS, routing |
+| [container-security-manager](./SKILLS/container-security-manager/SKILL.md) | 🐧🪟 Cross | Seguridad de containers: Trivy, Docker Bench, SBOM, cosign |
+| [forensic-manager](./SKILLS/forensic-manager/SKILL.md) | 🐧🪟 Cross | Forense digital: sleuthkit, Volatility, file carving, Windows artifacts |
+| [web-security-manager](./SKILLS/web-security-manager/SKILL.md) | 🐧🪟 Cross | Seguridad web: OWASP Top 10, Burp Suite, ZAP, SSL/TLS, fuzzing |
+| [homelab-manager](./SKILLS/homelab-manager/SKILL.md) | 🐧🪟 Cross | Homelab pentesting: VMs (KVM/VirtualBox), HTB/THM, VulnHub |
+| [ci-cd-manager](./SKILLS/ci-cd-manager/SKILL.md) | 🐧🪟 Cross | CI/CD: GitHub Actions, Git hooks, builds, tests, deploy |
+| [automation-manager](./SKILLS/automation-manager/SKILL.md) | 🐧🪟 Cross | Automatización: systemd timers, cron, PowerShell Scheduled Tasks |
+| [monitoring-manager](./SKILLS/monitoring-manager/SKILL.md) | 🐧🪟 Cross | Monitoreo: health checks, métricas, alertas, performance baselines |
+| [learning-manager](./SKILLS/learning-manager/SKILL.md) | 🐧🪟 Cross | Roadmaps de aprendizaje, cursos, CTF progress, skill trees |
+| [portfolio-manager](./SKILLS/portfolio-manager/SKILL.md) | 🐧🪟 Cross | Portfolio personal (lcampassi.com): diseño, secciones, deploy |
+| [orchestrator-manager](./SKILLS/orchestrator-manager/SKILL.md) | 🐧🪟 Cross | Orquestación paralela de subagentes para tareas grandes |
+| [blog-writer](./SKILLS/blog-writer/SKILL.md) | 🐧🪟 Cross | Escritura de blogs para lcampassi.com/docs |
+| [dedalo-cert-manager](./SKILLS/dedalo-cert-manager/SKILL.md) | 🐧🪟 Cross | Certificados IDM/NAM — keystores, keytool, OpenSSL, iManager |
+| [dedalo-wf-json](./SKILLS/dedalo-wf-json/SKILL.md) | 🐧🪟 Cross | Workflows JSON IDM — Form Builder, componentes, botones, eventos |
+| [dedalo-drivers-manager](./SKILLS/dedalo-drivers-manager/SKILL.md) | 🐧🪟 Cross | Drivers IDM — AD, API Rest, Remote Loader, policies, XPATH |
+| [dedalo-server-manager](./SKILLS/dedalo-server-manager/SKILL.md) | 🐧🪟 Cross | Servidores IDM/NAM — Tomcat, Identity Apps, logs, health checks |
+| [dedalo-tools-errors](./SKILLS/dedalo-tools-errors/SKILL.md) | 🐧🪟 Cross | Tools y errores IDM/NAM — troubleshooting, iManager, HiFlow, SSPR |
+| [dedalo-nam-config](./SKILLS/dedalo-nam-config/SKILL.md) | 🐧🪟 Cross | Configuraciones NAM — contratos, user stores, form fills, roles |
 
 ## Agents
 
@@ -33,6 +58,8 @@ Archivos de configuración de agentes (nombres de dioses griegos). Copiar a `~/.
 | [ares](./AGENTS/ares.md) | 🐧🪟 Cross | Pentesting, Bug Bounty, Red Team, CTF |
 | [prometeo](./AGENTS/prometeo.md) | 🐧🪟 Cross | Desarrollo: Python, Shell, JavaScript, Rust, Go, D, C |
 | [hefesto](./AGENTS/hefesto.md) | 🐧🪟 Cross | Creador de agentes opencode con contexto completo del usuario |
+| [merlin](./AGENTS/merlin.md) | 🐧🪟 Cross | Sabio de Babilonia — entry point universal, orquesta dioses |
+| [dedalo](./AGENTS/dedalo.md) | 🐧🪟 Cross | Ayudante laboral IDM/NAM — certificados, workflows, drivers, servers, tools, NAM |
 
 ### Subagentes (mode: subagent)
 
@@ -86,6 +113,18 @@ el server de Ollama.
 MY-AGENT-SKILLS/
 ├── README.md
 ├── LICENSE
+├── opencode.json                 # Config — skills.paths: ["SKILLS"]
+├── .opencode/
+│   └── agents/                   # Copia de agents para opencode
+│       ├── hefesto.md            # 🐧🪟 Cross — Creador de agentes
+│       ├── atlas.md              # 🐧 Linux — Sysadmin Arch
+│       ├── hestia.md             # 🪟 Windows — Sysadmin Windows
+│       ├── atenea.md             # 🐧🪟 Cross — CSIRT, Blue Team
+│       ├── ares.md               # 🐧🪟 Cross — Pentesting, Red Team
+│       ├── prometeo.md           # 🐧🪟 Cross — Desarrollo
+│       ├── merlin.md             # 🐧🪟 Cross — Sabio de Babilonia
+│       ├── dedalo.md             # 🐧🪟 Cross — IDM/NAM helper
+│       └── (21 subagentes)
 ├── AGENTS/
 │   ├── hefesto.md                # 🐧🪟 Cross — Creador de agentes
 │   ├── atlas.md                  # 🐧 Linux — Sysadmin Arch
@@ -93,6 +132,8 @@ MY-AGENT-SKILLS/
 │   ├── atenea.md                 # 🐧🪟 Cross — CSIRT, Blue Team
 │   ├── ares.md                   # 🐧🪟 Cross — Pentesting, Red Team
 │   ├── prometeo.md               # 🐧🪟 Cross — Desarrollo
+│   ├── merlin.md                 # 🐧🪟 Cross — Sabio de Babilonia
+│   ├── dedalo.md                 # 🐧🪟 Cross — IDM/NAM helper
 │   ├── iris.md                   # 🐧 Linux — Delegado atlas
 │   ├── clio.md                   # 🐧 Linux — Dotfiles
 │   ├── mnemosina.md              # 🐧 Linux — Docs Linux en Obsidian
@@ -115,24 +156,40 @@ MY-AGENT-SKILLS/
 │   ├── eolo.md                   # 🐧 Linux — IA local (qwen3:1.7b)
 │   └── crono.md                  # 🐧 Linux — IA local (qwen2.5:7b)
 ├── SKILLS/
-│   ├── agent-creator/
-│   │   └── SKILL.md              # 🐧🪟 Cross
-│   ├── arch-manager/
-│   │   └── SKILL.md              # 🐧 Linux
-│   ├── windows-manager/
-│   │   └── SKILL.md              # 🪟 Windows
-│   ├── dotfiles-manager/
-│   │   └── SKILL.md              # 🐧 Linux
-│   ├── obsidian-manager/
-│   │   └── SKILL.md              # 🐧🪟 Cross
-│   ├── ollama-manager/
-│   │   └── SKILL.md              # 🐧 Linux
-│   ├── openvpn-manager/
-│   │   └── SKILL.md              # 🐧🪟 Cross
-│   ├── docker-manager/
-│   │   └── SKILL.md              # 🐧🪟 Cross
-│   └── mcp-ollama/
-│       └── SKILL.md              # 🐧 Linux — MCP + Ollama
+│   ├── agent-creator/            # 🐧🪟 Cross — Creación de agents
+│   ├── arch-manager/             # 🐧 Linux — Admin Arch
+│   ├── windows-manager/          # 🪟 Windows — Admin Windows
+│   ├── dotfiles-manager/         # 🐧 Linux — Dotfiles
+│   ├── obsidian-manager/         # 🐧🪟 Cross — Obsidian vault
+│   ├── ollama-manager/           # 🐧 Linux — Ollama
+│   ├── openvpn-manager/          # 🐧🪟 Cross — OpenVPN
+│   ├── docker-manager/           # 🐧🪟 Cross — Docker/Podman
+│   ├── mcp-ollama/               # 🐧 Linux — MCP + Ollama
+│   ├── git-manager/              # 🐧🪟 Cross — Git avanzado
+│   ├── secret-manager/           # 🐧🪟 Cross — Secrets
+│   ├── reverse-engineering-manager/ # 🐧🪟 Cross — RE
+│   ├── hardening-manager/        # 🐧🪟 Cross — Hardening
+│   ├── threat-intel-manager/     # 🐧🪟 Cross — Threat intel
+│   ├── backup-manager/           # 🐧🪟 Cross — Backups
+│   ├── database-manager/         # 🐧🪟 Cross — DBs
+│   ├── network-manager/          # 🐧🪟 Cross — Redes
+│   ├── container-security-manager/ # 🐧🪟 Cross — Container sec
+│   ├── forensic-manager/         # 🐧🪟 Cross — Forense
+│   ├── web-security-manager/     # 🐧🪟 Cross — Web sec
+│   ├── homelab-manager/          # 🐧🪟 Cross — Homelab
+│   ├── ci-cd-manager/            # 🐧🪟 Cross — CI/CD
+│   ├── automation-manager/       # 🐧🪟 Cross — Automatización
+│   ├── monitoring-manager/       # 🐧🪟 Cross — Monitoreo
+│   ├── learning-manager/         # 🐧🪟 Cross — Aprendizaje
+│   ├── portfolio-manager/        # 🐧🪟 Cross — Portfolio web
+│   ├── orchestrator-manager/     # 🐧🪟 Cross — Orquestación
+│   ├── blog-writer/              # 🐧🪟 Cross — Blog
+│   ├── dedalo-cert-manager/      # 🐧🪟 Cross — Certificados IDM/NAM
+│   ├── dedalo-wf-json/           # 🐧🪟 Cross — Workflows JSON IDM
+│   ├── dedalo-drivers-manager/   # 🐧🪟 Cross — Drivers IDM
+│   ├── dedalo-server-manager/    # 🐧🪟 Cross — Servidores IDM
+│   ├── dedalo-tools-errors/      # 🐧🪟 Cross — Tools/errores IDM
+│   └── dedalo-nam-config/        # 🐧🪟 Cross — Config NAM
 └── MCP/
     └── ollama-server/
         ├── server.py             # MCP server — Ollama bridge
