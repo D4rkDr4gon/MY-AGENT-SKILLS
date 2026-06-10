@@ -95,17 +95,19 @@ a los agentes de opencode.
 | Server | Descripción | Tools expuestas |
 |--------|-------------|-----------------|
 | [ollama-mcp-server](./MCP/ollama-server/README.md) | Modelos locales de IA vía Ollama | `ollama_generate`, `ollama_chat`, `ollama_list_models`, `ollama_ps`, `ollama_embed`, `ollama_pull` |
+| [obsidian-mcp-server](#) | Obsidian vault via REST API + MCP | 16 herramientas MCP (vault CRUD, search, tags, commands, active file, periodic notes) |
 
 ### Instalación de MCP servers
 
 Cada servidor tiene su propio README con instrucciones. En general:
 
 1. Instalar dependencias (usar `requirements.txt` del server)
-2. Agregar la entrada en `opencode.jsonc` bajo `mcp:`
-3. Reiniciar opencode
+2. Los MCP servers ya están configurados en `opencode.json` bajo `mcp:`
+3. Requiere `OBSIDIAN_API_KEY` en el entorno (ya seteada)
+4. Reiniciar opencode
 
 Ver [MCP/ollama-server/README.md](./MCP/ollama-server/README.md) para
-el server de Ollama.
+el server de Ollama. Para Obsidian, ver [obsidian-manager](./SKILLS/obsidian-manager/SKILL.md).
 
 ## Estructura
 
@@ -113,19 +115,7 @@ el server de Ollama.
 MY-AGENT-SKILLS/
 ├── README.md
 ├── LICENSE
-├── opencode.json                 # Config — skills.paths: ["SKILLS"]
-├── .opencode/
-│   └── agents/                   # Copia de agents para opencode
-│       ├── hefesto.md            # 🐧🪟 Cross — Creador de agentes
-│       ├── atlas.md              # 🐧 Linux — Sysadmin Arch
-│       ├── hestia.md             # 🪟 Windows — Sysadmin Windows
-│       ├── atenea.md             # 🐧🪟 Cross — CSIRT, Blue Team
-│       ├── ares.md               # 🐧🪟 Cross — Pentesting, Red Team
-│       ├── prometeo.md           # 🐧🪟 Cross — Desarrollo
-│       ├── merlin.md             # 🐧🪟 Cross — Sabio de Babilonia
-│       ├── dedalo.md             # 🐧🪟 Cross — IDM/NAM helper
-│       └── (21 subagentes)
-├── AGENTS/
+├── AGENTS/                       # Agents — junction → ~/.config/opencode/agents/
 │   ├── hefesto.md                # 🐧🪟 Cross — Creador de agentes
 │   ├── atlas.md                  # 🐧 Linux — Sysadmin Arch
 │   ├── hestia.md                 # 🪟 Windows — Sysadmin Windows
@@ -199,19 +189,22 @@ MY-AGENT-SKILLS/
 
 ## Instalación en opencode
 
-Para que opencode cargue estos skills, agregar en `opencode.json`:
+La configuración es **global** (no requiere config por proyecto):
 
-```json
-{
-  "skills": {
-    "paths": ["$HOME/MY-AGENT-SKILLS"]
-  }
-}
+| Recurso | Configuración en `~/.config/opencode/` |
+|---------|----------------------------------------|
+| **Agentes** | Junction desde `agents/` → `AGENTS/` de este repo |
+| **Skills** | `paths` absoluto en `opencode.jsonc` → `SKILLS/` del repo |
+| **MCP (Ollama)** | `command` con ruta absoluta a `MCP/ollama-server/server.py` |
+| **MCP (Obsidian)** | URL remota `https://127.0.0.1:27124/mcp/` + `OBSIDIAN_API_KEY` |
+
+Si clonás este repo, creá el junction:
+
+```powershell
+cmd /c "mklink /J `"$HOME\.config\opencode\agents`" `"$PWD\AGENTS`""
 ```
 
-Los agents se instalan copiando el `.md` correspondiente a `~/.config/opencode/agents/` y reiniciando opencode.
-
-Los MCP servers se instalan registrándolos bajo `mcp:` en `opencode.jsonc` (ver docs de cada server).
+Y agregá skills + MCP en `~/.config/opencode/opencode.jsonc` con rutas absolutas al repo.
 
 ### Windows
 

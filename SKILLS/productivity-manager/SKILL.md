@@ -1,3 +1,8 @@
+---
+name: productivity-manager
+description: Use when managing personal productivity — tasks, habits, goals, time tracking, weekly reviews, daily notes in Obsidian. Cross-platform (Linux + Windows).
+---
+
 # Productivity Manager
 
 Skill para gestionar la productividad personal — tareas, hábitos, metas, tiempo y revisión semanal. Integrado con Obsidian daily notes y rutinas multiplataforma (Linux + Windows).

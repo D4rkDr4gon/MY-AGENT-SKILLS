@@ -1,3 +1,8 @@
+---
+name: document-manager
+description: Use when processing documents — PDF, metadata, OCR, images, format conversion, EXIF analysis. Cross-platform (Linux + Windows).
+---
+
 # Document Manager
 
 **Autor:** Lucciano Campassi (D4rkDr4g0n)

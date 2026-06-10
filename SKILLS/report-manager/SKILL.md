@@ -1,3 +1,8 @@
+---
+name: report-manager
+description: Use when generating professional reports — pentest reports, forensic reports, audit reports, executive summaries. Subagente de atenea y ares. Cross-platform (Linux + Windows).
+---
+
 # Report Manager — Gestión de Reportes Profesionales
 
 > **Autor:** Lucciano Campassi (D4rkDr4g0n)  

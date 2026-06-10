@@ -1,3 +1,8 @@
+---
+name: phishing-manager
+description: Use when analyzing phishing attacks — email headers, URLs, attachments, sandbox analysis, IOC extraction, reporting. Subagente de atenea. Cross-platform (Linux + Windows).
+---
+
 # Phishing Manager — Análisis y Respuesta ante Phishing
 
 ## Descripción General
