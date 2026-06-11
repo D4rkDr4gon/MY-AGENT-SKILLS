@@ -1,4 +1,4 @@
----
+﻿---
 name: IDM-identity-servers
 description: >
   Use when managing IDM servers — eDirectory, Identity Engine, Identity Apps (Tomcat),
@@ -182,6 +182,16 @@ Usar `obsidian-manager` para crear documento en `$BABILONIA_IDM/00-ERRORES/` o `
 | `ndsd.service` | eDirectory | `systemctl start/stop/restart/status ndsd` |
 | `novell-idp.service` | NAM Identity Server | `systemctl start/stop/restart/status novell-idp` |
 | `novell-mag.service` | NAM Access Gateway | `systemctl start/stop/restart/status novell-mag` |
+
+---
+
+## Archivos de configuración
+
+| Archivo | Ruta | Propósito |
+|---------|------|-----------|
+| `ism-configuration.properties` | `/opt/netiq/idm/apps/tomcat/conf/ism-configuration.properties` | **Propiedades principales de Identity Applications**. Acá se configuran URLs de OSP, SSPR, User App, Role Service, conexiones a base de datos, etc. **NO** usar osp.properties para props de idmapps — ese archivo es del NAM Identity Server, no del IDM OSP. |
+| `sspr.properties` | `/opt/netiq/idm/sspr/sspr.properties` | Configuración de SSPR. |
+| `server.xml` | `/opt/netiq/idm/apps/tomcat/conf/server.xml` | Configuración del conector HTTPS de Tomcat (puertos, keystore, ciphers). |
 
 ---
 
