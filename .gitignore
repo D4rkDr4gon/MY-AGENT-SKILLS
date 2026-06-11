@@ -1,3 +1,14 @@
-# Windows
+# OS
 desktop.ini
 Thumbs.db
+.DS_Store
+
+# Sensitive / local config
+opencode.jsonc
+opencode.json
+*.local.*
+
+# Editor
+*.swp
+*.swo
+*~

@@ -110,16 +110,16 @@ La interfaz suele ser `tun0` también.
 - Las conexiones requieren **ejecutar PowerShell como Administrador**
 
 ### Ubicaciones comunes de archivos .ovpn
-- `C:\Users\lcampassi\lab\htb\` — perfiles de Hack The Box
-- `C:\Users\lcampassi\lab\thm\` — perfiles de TryHackMe
-- `C:\Users\lcampassi\lab\vpn\` — otros perfiles
+- `%USERPROFILE%\lab\htb\` — perfiles de Hack The Box
+- `%USERPROFILE%\lab\thm\` — perfiles de TryHackMe
+- `%USERPROFILE%\lab\vpn\` — otros perfiles
 - Descargas recientes → `$env:USERPROFILE\Downloads\*.ovpn`
 
 ### Comandos básicos
 
 ```powershell
 # Conectar (primer plano)
-openvpn "C:\Users\lcampassi\lab\htb\perfil.ovpn"
+openvpn "%USERPROFILE%\lab\htb\perfil.ovpn"
 
 # Verificar conexión activa
 ipconfig

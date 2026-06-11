@@ -41,7 +41,7 @@ trivy image --format json --output scan.json nginx:1.25
 ### Escaneo de filesystem y repos
 ```bash
 # Escanear proyecto local
-trivy fs /home/lcampassi/projects/my-app
+trivy fs $HOME/projects/my-app
 
 # Escanear repositorio git
 trivy repo https://github.com/user/repo.git
@@ -134,7 +134,7 @@ syft ubuntu:22.04 -o cyclonedx-json > ubuntu-sbom.cyclonedx.json
 syft ubuntu:22.04 -o syft-json > ubuntu-sbom.syft.json
 
 # SBOM de un proyecto
-syft dir:/home/lcampassi/projects/my-app -o spdx-json
+syft dir:$HOME/projects/my-app -o spdx-json
 
 # Verificar SBOM con el propio syft
 syft packages sbom:ubuntu-sbom.spdx.json
@@ -249,7 +249,7 @@ docker pull alpine:latest   # Fallará si no está firmada
 docker push my-image:tag    # Forzará firmar
 
 # Escanear dependencias del proyecto
-trivy fs --scanners vuln --severity HIGH,CRITICAL /home/lcampassi/projects/my-app
+trivy fs --scanners vuln --severity HIGH,CRITICAL $HOME/projects/my-app
 
 # Verificar checksums de imágenes
 docker image inspect --format '{{.RepoDigests}}' alpine:latest
@@ -274,7 +274,7 @@ docker run -it --rm \
   --memory 512m \                             # Límite RAM
   --cpus 0.5 \                                # Límite CPU
   --pids-limit 50 \                           # Límite de procesos
-  -v /home/lcampassi/samples:/samples:ro \    # Muestras RO
+  -v $HOME/samples:/samples:ro \    # Muestras RO
   ubuntu:22.04 bash
 ```
 

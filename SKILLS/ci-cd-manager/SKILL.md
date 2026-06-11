@@ -10,7 +10,7 @@ Guía de CI/CD para automatización de builds, tests y deploys. Orientada a proy
 ## Contexto del usuario
 
 - **Plataforma:** GitHub (gh CLI + GitHub Actions)
-- **Repos:** `D4rkDr4g0n/dotfiles`, proyectos en `~/projects/`
+- **Repos:** `${DOTFILES_REPO}`, proyectos en `$HOME/projects/`
 - **Lenguajes:** Python, Go, Shell, JavaScript/TypeScript, Rust
 - **Editor:** Neovim (LazyVim)
 

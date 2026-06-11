@@ -140,7 +140,7 @@ PermitEmptyPasswords no
 ChallengeResponseAuthentication no
 UsePAM yes
 X11Forwarding no
-AllowUsers lcampassi                  # Solo este usuario
+AllowUsers $USER                      # Solo este usuario
 ClientAliveInterval 300
 ClientAliveCountMax 2
 Protocol 2

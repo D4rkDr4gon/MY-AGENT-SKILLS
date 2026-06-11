@@ -244,7 +244,7 @@ bw get password <id>
 bw get username <id>
 
 # Agregar item
-bw get template item | jq '.name = "lab/vpn/htb" | .login.username = "lcampassi"' | bw encode | bw create item
+bw get template item | jq '.name = "lab/vpn/htb" | .login.username = "$USER"' | bw encode | bw create item
 
 # Editar
 bw edit item <id>

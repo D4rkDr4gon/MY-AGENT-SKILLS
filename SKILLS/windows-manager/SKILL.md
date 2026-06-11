@@ -22,13 +22,12 @@ description: Use when managing Windows 11 system — services, packages, process
 
 | Resource | Path |
 |---|---|
-| Vault Obsidian | `C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\Personal-Vault` |
-| Windows docs in vault | `...\Personal-Vault\Manuales\00-FUNDAMENTALS\02-SYSTEMS-OS\WINDOWS\` |
-| MY-AGENT-SKILLS | `C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\MY-AGENT-SKILLS` |
-| Dotfiles (git) | `C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\dotfiles` |
-| Proton Drive root | `C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\` |
-| PROGRESS.md | `C:\Users\lcampassi\Downloads\opencode\windows-progress.md` |
-| Temp dir | `C:\Users\lcampassi\AppData\Local\Temp\opencode` |
+| Vault Obsidian | `$BABILONIA` (se resuelve por SO desde `~/.zshenv`) |
+| Windows docs in vault | dentro de `$BABILONIA` |
+| MY-AGENT-SKILLS | `$HOME/MY-AGENT-SKILLS` (o `%USERPROFILE%\MY-AGENT-SKILLS` en Windows) |
+| Dotfiles (git) | `$DOTFILES` (en Linux; en Windows usa `git clone` donde corresponda) |
+| PROGRESS.md | `%USERPROFILE%\Downloads\opencode\windows-progress.md` |
+| Temp dir | `%TEMP%\opencode` |
 
 ---
 
@@ -381,8 +380,8 @@ Get-ItemProperty HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | S
 # Look for Proton Drive process
 Get-Process ProtonDrive*
 
-# Sync location
-# C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\
+# Sync location (ruta específica del usuario, consultar env vars)
+# %USERPROFILE%\Proton Drive\...\My files\
 ```
 
 ---

@@ -49,7 +49,7 @@ OpenCode agents can be defined in two ways:
 
 Create .md files in:
 
-    Global: ~/MY-AGENT-SKILLS/AGENTS/
+    Global: $MY_AGENTS/
     Per-project: .opencode/agents/
 
 Format:
@@ -275,7 +275,7 @@ When creating an agent:
         Subagent for specialized tasks
 
     Choose location:
-        Global (~/MY-AGENT-SKILLS/AGENTS/) for reusable agents
+        Global ($MY_AGENTS/) for reusable agents
         Project (.opencode/agents/) for project-specific agents
 
     Define configuration:

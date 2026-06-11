@@ -59,7 +59,7 @@ virt-install \
   --os-variant debian12 \
   --network network=default \
   --graphics vnc,listen=0.0.0.0 \
-  --cdrom /home/lcampassi/iso/debian-12.iso
+  --cdrom $HOME/iso/debian-12.iso
 
 # VM Windows (con drivers virtio)
 virt-install \
@@ -67,11 +67,11 @@ virt-install \
   --ram 4096 \
   --vcpus 4 \
   --disk path=/var/lib/libvirt/images/win10-lab.qcow2,size=60 \
-  --disk path=/home/lcampassi/iso/virtio-win.iso,device=cdrom \
+  --disk path=$HOME/iso/virtio-win.iso,device=cdrom \
   --os-variant win10 \
   --network network=isolated-lab \
   --graphics spice \
-  --cdrom /home/lcampassi/iso/Win10.iso
+  --cdrom $HOME/iso/Win10.iso
 ```
 
 #### Gestión con virsh
@@ -121,7 +121,7 @@ virt-install \
   --video virtio \
   --sound none \
   --channel unix,target_type=virtio,name=org.qemu.guest_agent \
-  --cdrom /home/lcampassi/iso/kali-linux.iso
+  --cdrom $HOME/iso/kali-linux.iso
 ```
 
 #### Template XML personalizado
@@ -698,7 +698,7 @@ Para incluir screenshots en los writeups:
 ![nmap scan](./loot/nmap-inicial.png)
 
 <!-- O ruta absoluta -->
-![Puerto 80](file:///home/lcampassi/lab/htb/Maquina/loot/web-login.png)
+![Puerto 80](file://$HOME/lab/htb/Maquina/loot/web-login.png)
 ```
 
 En Obsidian, usar `![[imagen.png]]` para embed automático desde el vault.
@@ -743,7 +743,7 @@ $vbox = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
 # Crear VM desde PowerShell
 & $vbox createvm --name "Win10-Analysis" --ostype Windows10_64 --register
 & $vbox modifyvm "Win10-Analysis" --memory 4096 --cpus 2
-& $vbox createmedium disk --filename "C:\Users\lcampassi\VirtualBox VMs\Win10-Analysis.vdi" --size 51200
+& $vbox createmedium disk --filename "%USERPROFILE%\VirtualBox VMs\Win10-Analysis.vdi" --size 51200
 & $vbox startvm "Win10-Analysis"
 
 # Función helper para no escribir la ruta completa cada vez

@@ -1,23 +1,23 @@
 ---
 name: blog-writer
-description: Use when the user asks to write, update, or edit a blog post for lcampassi.com/docs. Covers research, drafting, revision rounds, index updates, and deployment.
+description: Use when the user asks to write, update, or edit a blog post. Covers research, drafting, revision rounds, index updates, and deployment.
 ---
 
 # blog-writer
 
-Skill para escribir posts del blog de [lcampassi.com/docs](https://lcampassi.com/docs). Garantiza consistencia en tono, estructura, nivel técnico y estilo editorial.
+Skill para escribir posts del blog de [${BLOG_DOMAIN}/docs](https://${BLOG_DOMAIN}/docs). Garantiza consistencia en tono, estructura, nivel técnico y estilo editorial.
 
 ## Datos del Proyecto
 
 | Campo | Valor |
 |-------|-------|
-| **URL** | `https://lcampassi.com/docs/` |
-| **Local** | `/files/my-web/docs/` |
-| **Posts** | `/files/my-web/docs/posts/` |
-| **Blog index** | `/files/my-web/docs/index.html` |
-| **Portfolio** | `/files/my-web/index.html` |
-| **GitHub** | `D4rkDr4gon/D4rkDr4gon.github.io` |
-| **CNAME** | `lcampassi.com` (custom domain, archivo en `public/CNAME`) |
+| **URL** | `https://${BLOG_DOMAIN}/docs/` |
+| **Local** | `${BLOG_ROOT}/docs/` |
+| **Posts** | `${BLOG_ROOT}/docs/posts/` |
+| **Blog index** | `${BLOG_ROOT}/docs/index.html` |
+| **Portfolio** | `${BLOG_ROOT}/index.html` |
+| **GitHub** | `${BLOG_REPO}` |
+| **CNAME** | `${BLOG_CNAME}` (custom domain, archivo en `public/CNAME`) |
 | **Deploy** | GitHub Actions — push a master → build Vite → GitHub Pages |
 | **Server local** | `npm run dev` (Vite, http://localhost:8080) |
 | **Build tool** | **Vite 6** — dev server con HMR, production builds con hashing |
@@ -41,12 +41,12 @@ Antes de escribir CUALQUIER post, consultar estas fuentes para verificar datos t
 
 | Tema | Fuente |
 |------|--------|
-| **Arquitectura del sistema (Arch Linux)** | `~/dotfiles/docs/` — documentación real de la máquina |
-| **Configuración de dotfiles** | `~/dotfiles/` — los archivos mismos |
-| **Herramientas, scripts, automatización** | `~/dotfiles/`, `~/code/`, `~/MY-AGENT-SKILLS/` |
-| **IAM, NetIQ, papers técnicos** | `/files/Personal-Vault/Manuales/` — vault de Obsidian |
-| **Proyectos, agentes, skills** | `~/MY-AGENT-SKILLS/SKILLS/` — las skills mismas |
-| **Historial de decisiones del blog** | `~/.config/opencode/projects/` — anchored summaries de sesiones previas |
+| **Arquitectura del sistema (Arch Linux)** | `$DOTFILES/docs/` — documentación real de la máquina |
+| **Configuración de dotfiles** | `$DOTFILES/` — los archivos mismos |
+| **Herramientas, scripts, automatización** | `$DOTFILES/`, `$MY_SKILLS/` |
+| **IAM, NetIQ, papers técnicos** | `$BABILONIA/Manuales/` — vault de Obsidian |
+| **Proyectos, agentes, skills** | `$MY_SKILLS/` — las skills mismas |
+| **Historial de decisiones del blog** | `$HOME/.config/opencode/projects/` — anchored summaries de sesiones previas |
 | **Datos personales (setup, hardware, OS)** | Preguntar al usuario directamente si no está en las fuentes |
 
 ## Voice & Tone
@@ -90,7 +90,7 @@ Body:
 
 ## Reglas de formato
 
-- Usar el template HTML de los posts existentes en `/files/my-web/docs/posts/` (mismo navbar, footer, colores, tipografía).
+- Usar el template HTML de los posts existentes en `${BLOG_ROOT}/docs/posts/` (mismo navbar, footer, colores, tipografía).
 - Fecha en el nombre del archivo: `YYYY-MM-DD-titulo-en-ingles.html`
 - Tags en minúscula, una palabra.
 - Código: `<pre><code>` con sintaxis limpia.
@@ -138,7 +138,7 @@ Cada post debe tener:
 
 ### 5. Actualizar el blog index
 
-**IMPORTANTE**: después de crear un post, hay que agregar su card en `/files/my-web/docs/index.html`.
+**IMPORTANTE**: después de crear un post, hay que agregar su card en `${BLOG_ROOT}/docs/index.html`.
 
 Cada post tiene una card con esta estructura (copiar el patrón de las existentes):
 
@@ -199,13 +199,13 @@ Al agregar un post nuevo, insertarlo en la posición #2 (después de Bienvenidos
 ### 7. Deploy
 
 ```bash
-cd /files/my-web
+cd "$BLOG_ROOT"
 npm run build           # Build producción a dist/
 npm run preview         # Preview local (opcional, puede colgarse)
 git add -A && git commit -m "blog: add post TITULO" && git push
 ```
 
-**Importante**: el deploy usa GitHub Actions. No depende de "auto-deploy desde master branch". El Action buildéa con Vite y deploya `dist/`. Esperar ~1-2 min para que se refleje en https://lcampassi.com/docs/.
+**Importante**: el deploy usa GitHub Actions. No depende de "auto-deploy desde master branch". El Action buildéa con Vite y deploya `dist/`. Esperar ~1-2 min para que se refleje en https://${BLOG_DOMAIN}/docs/.
 
 No es necesario correr `npm run build` manualmente antes del push (el Action lo hace), pero es buena práctica para verificar que no haya errores.
 
@@ -213,7 +213,7 @@ No es necesario correr `npm run build` manualmente antes del push (el Action lo 
 
 ## Post-template (HTML)
 
-Usar siempre la misma estructura que los posts existentes. Copiar de `/files/my-web/docs/posts/` un post existente como base. La estructura incluye:
+Usar siempre la misma estructura que los posts existentes. Copiar de `${BLOG_ROOT}/docs/posts/` un post existente como base. La estructura incluye:
 
 - Nav fijo con clase `blog-nav` (no `post-nav`), brand `lc.`, wrapper `nav-links` con links a home, blog
 - Header con fecha, tag, título, reading time

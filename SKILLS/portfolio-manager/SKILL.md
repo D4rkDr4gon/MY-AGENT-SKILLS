@@ -1,6 +1,6 @@
 ---
 name: portfolio-manager
-description: Use when the user asks to update, modify, or maintain their personal portfolio/landing page at /files/my-web/ (GitHub Pages). Covers design system, sections, content, blog integration, and deployment.
+description: Use when the user asks to update, modify, or maintain their personal portfolio/landing page (GitHub Pages). Covers design system, sections, content, blog integration, and deployment.
 ---
 
 # portfolio-manager
@@ -9,10 +9,10 @@ description: Use when the user asks to update, modify, or maintain their persona
 
 | Campo | Valor |
 |-------|-------|
-| **Local** | `/files/my-web/` |
-| **Foto perfil** | `/files/my-web/public/profile.png` |
-| **GitHub** | `D4rkDr4gon/D4rkDr4gon.github.io` |
-| **URL live** | `https://lcampassi.com` |
+| **Local** | `$BLOG_ROOT/` |
+| **Foto perfil** | `$BLOG_ROOT/public/profile.png` |
+| **GitHub** | `$BLOG_REPO` |
+| **URL live** | `https://$BLOG_DOMAIN` |
 | **Deploy** | GitHub Actions (`.github/workflows/deploy.yml`) — push a master |
 | **Server local** | `npm run dev` (Vite, http://localhost:8080) |
 | **Build tool** | **Vite 6** — dev server HMR + production builds |
@@ -33,7 +33,7 @@ description: Use when the user asks to update, modify, or maintain their persona
 ## Estructura del Proyecto
 
 ```
-/files/my-web/
+$BLOG_ROOT/
 ├── index.html                       # Portfolio entry (template con @include)
 ├── package.json                     # Vite + scripts
 ├── vite.config.js                   # HTML includes + multi-page entries
@@ -320,13 +320,13 @@ En GitHub → Settings → Pages → Source: **GitHub Actions** (no "Deploy from
 El workflow de GitHub Actions (`.github/workflows/deploy.yml`) buildéa con Vite y deploya `dist/` a GitHub Pages automáticamente al pushear a `master`.
 
 ```bash
-cd /files/my-web
+cd "$BLOG_ROOT"
 git add -A && git commit -m "mensaje" && git push
 ```
 
 - El build produce: portfolio (`/`) + blog listing (`/docs/`) + posts (`/docs/posts/*.html`) + assets hasheados en `/assets/`
 - GitHub Actions detecta el push, buildéa y deploya
-- Esperar ~1-2 min para que se refleje en https://lcampassi.com/
+- Esperar ~1-2 min para que se refleje en https://${BLOG_DOMAIN}/
 - Build output: `dist/` (gitignored)
 
 ### Notas

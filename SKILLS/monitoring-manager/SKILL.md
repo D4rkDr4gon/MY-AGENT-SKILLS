@@ -252,14 +252,14 @@ Get-WinEvent -LogName Application -MaxEvents 100 | Export-Csv C:\PerfLogs\app-lo
 
 ```bash
 # /etc/logrotate.d/custom-monitoring
-/home/lcampassi/monitoring/*.log {
+$HOME/monitoring/*.log {
     weekly
     rotate 4
     compress
     delaycompress
     missingok
     notifempty
-    create 0644 lcampassi lcampassi
+    create 0644 $USER $USER
 }
 ```
 
@@ -273,8 +273,8 @@ Get-WinEvent -LogName Application -MaxEvents 100 | Export-Csv C:\PerfLogs\app-lo
 Description=Health check monitor
 [Service]
 Type=oneshot
-ExecStart=/home/lcampassi/dotfiles/scripts/health-check.sh
-User=lcampassi
+ExecStart=$HOME/dotfiles/scripts/health-check.sh
+User=$USER
 
 # /etc/systemd/system/health-check.timer
 [Unit]
@@ -292,8 +292,8 @@ sudo systemctl daemon-reload && sudo systemctl enable --now health-check.timer
 
 ```bash
 crontab -e
-*/5 * * * * /home/lcampassi/dotfiles/scripts/health-check.sh
-0 */6 * * * /home/lcampassi/dotfiles/scripts/baseline.sh
+*/5 * * * * $HOME/dotfiles/scripts/health-check.sh
+0 */6 * * * $HOME/dotfiles/scripts/baseline.sh
 0 0 * * 0 /usr/bin/logwatch --detail High --mailto lcampassi
 ```
 

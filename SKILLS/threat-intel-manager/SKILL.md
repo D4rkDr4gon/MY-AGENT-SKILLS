@@ -182,7 +182,7 @@ curl -s -H "x-apikey: <key>" \
 # Script simple para consolidar feeds
 #!/bin/bash
 # save as ~/scripts/intel-feeds.sh
-OUTDIR="/home/lcampassi/threat-intel/feeds"
+OUTDIR="$HOME/threat-intel/feeds"
 DATE=$(date +%Y%m%d)
 
 mkdir -p $OUTDIR/$DATE

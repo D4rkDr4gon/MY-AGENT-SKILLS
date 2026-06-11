@@ -7,26 +7,26 @@ description: Use when the user asks about managing, updating, documenting, or cr
 
 ## Contexto del Repositorio
 
-**Ubicacion**: `~/dotfiles`
-**Remote**: `git@github.com:D4rkDr4g0n/dotfiles.git` (branch: `main`)
-**Autor**: Lucciano Campassi (D4rkDr4g0n) -- Ciberseguridad & Desarrollo
-**Distro**: Arch Linux / Kali Linux
-**WM**: Qtile (Python) — X11 + Wayland dual-backend
+**Ubicacion**: `$DOTFILES`
+**Remote**: `git@github.com:${DOTFILES_REPO}.git` (branch: `main`)
+**Autor**: D4rkDr4g0n — Ciberseguridad & Desarrollo
+**Distro**: Arch Linux
+**WM**: Qtile (Python, Wayland)
 **License**: MIT
 
 ### Stack Tecnologico
 
 ```
-WM:             Qtile (Python) — X11 + Wayland
-Barra:          Polybar (X11) / Waybar (Wayland)
-Terminal:       Kitty (X11 + Wayland nativo)
+WM:             Qtile (Python, Wayland)
+Barra:          Waybar (Wayland)
+Terminal:       Kitty (Wayland nativo)
 Shell:          Zsh + powerlevel10k
-Launcher:       Rofi (X11 + Wayland nativo)
-Notifications:  Dunst + Rofi notification center
-Compositor:     Picom (GLX + blur — X11) / wlroots (Wayland)
-Lock Screen:    betterlockscreen (X11) / gtklock (Wayland)
-Screenshots:    Flameshot (X11) / grim+slurp (Wayland)
-Monitores:      xrandr (X11) / wlr-randr (Wayland)
+Launcher:       Rofi (Wayland nativo)
+Notifications:  Dunst
+Compositor:     Qtile built-in (Wayland)
+Lock Screen:    gtklock (Wayland)
+Screenshots:    grim+slurp (Wayland)
+Monitores:      wlr-randr (Wayland)
 Editores:       Neovim (LazyVim) / Sublime Text
 File Mgr:       Thunar
 Info:           Fastfetch
@@ -36,19 +36,17 @@ AI:             opencode (skills personalizadas)
 ### Enlaces Simbolicos
 
 ```
-~/.zshrc              -> ~/dotfiles/zsh/zshrc
-~/.config/qtile       -> ~/dotfiles/qtile/
-~/.config/polybar     -> ~/dotfiles/polybar/
-~/.config/waybar      -> ~/dotfiles/waybar/
-~/.config/gtklock     -> ~/dotfiles/gtklock/
-~/.config/picom       -> ~/dotfiles/picom/
-~/.config/dunst       -> ~/dotfiles/dunst/
-~/.config/rofi        -> ~/dotfiles/rofi/
-~/.config/kitty       -> ~/dotfiles/kitty/
-~/.config/Thunar      -> ~/dotfiles/Thunar/
-~/.config/zsh         -> ~/dotfiles/zsh/
-~/.config/automat     -> ~/dotfiles/automat/
-~/.config/opencode    -> ~/dotfiles/opencode/
+~/.zshrc              -> $DOTFILES/zsh/zshrc
+~/.config/qtile       -> $DOTFILES/qtile/
+~/.config/waybar      -> $DOTFILES/waybar/
+~/.config/gtklock     -> $DOTFILES/gtklock/
+~/.config/dunst       -> $DOTFILES/dunst/
+~/.config/rofi        -> $DOTFILES/rofi/
+~/.config/kitty       -> $DOTFILES/kitty/
+~/.config/Thunar      -> $DOTFILES/Thunar/
+~/.config/zsh         -> $DOTFILES/zsh/
+~/.config/automat     -> $DOTFILES/automat/
+~/.config/opencode    -> $DOTFILES/opencode/
 ```
 
 ---
@@ -242,12 +240,12 @@ dotfiles/
 | `Mod + T` | Float toggle |
 | `Mod + Shift + Arrows` | Mover ventana |
 | `Mod + Ctrl + Arrows` | Redimensionar |
-| `Mod + Ctrl + R` | Recargar Qtile + barra (Polybar/Waybar según backend) |
+| `Mod + Ctrl + R` | Recargar Qtile + Waybar |
 | `Mod + L` | Action menu (Lock/Reboot/Poweroff/Logout) |
 | `Mod + Shift + Space` | Settings menu (incluye Notifications) |
 | `Mod + 1-5` | Ir a workspace |
 | `Mod + Shift + 1-5` | Mover ventana a workspace |
-| `Print` / `Mod + Shift + S` | Screenshot (Flameshot X11 / grim+slurp Wayland) |
+| `Print` / `Mod + Shift + S` | Screenshot (grim+slurp) |
 
 ### Kitty
 
@@ -263,7 +261,7 @@ dotfiles/
 
 | Alias | Comando |
 |-------|---------|
-| `theme` | `~/dotfiles/scripts/theme-switch.sh` |
+| `theme` | `$DOTFILES/scripts/theme-switch.sh` |
 | `vi` | `nvim` |
 | `cat` | `bat` |
 | `ls`/`l`/`ll`/`la`/`lla` | `lsd` variants |
@@ -275,8 +273,7 @@ dotfiles/
 | `launchgemma` | Ollama + Gemma |
 | `n8nstart`/`n8nstop` | n8n service |
 | `zshconfig` | `nvim ~/.zshrc` |
-| `polybarupdate` | Relaunch polybar (X11) |
-| `barupdate` | Relaunch bar según backend (Polybar/Waybar) |
+| `barupdate` | Relaunch Waybar |
 | `hosts` | `sudo nvim /etc/hosts` |
 
 ---
@@ -387,9 +384,9 @@ Seguir estos pasos exactos:
 
 ### 3. Agregar un nuevo componente
 
-1. Crear la carpeta en `~/dotfiles/` con su configuracion
+1. Crear la carpeta en `$DOTFILES/` con su configuracion
 2. Agregar el enlace simbolico en la seccion de estructura
-3. Crear el enlace real: `ln -sf ~/dotfiles/<carpeta> ~/.config/<carpeta>`
+3. Crear el enlace real: `ln -sf $DOTFILES/<carpeta> ~/.config/<carpeta>`
 4. Crear `docs/configuration/<nombre>.md` con:
    - Proposito del componente
    - Archivos que contiene

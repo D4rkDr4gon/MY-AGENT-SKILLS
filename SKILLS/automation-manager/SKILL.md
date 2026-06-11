@@ -49,7 +49,7 @@ Description=Backup diario de datos críticos
 
 [Service]
 Type=oneshot
-ExecStart=/home/lcampassi/scripts/backup.sh
+ExecStart=$HOME/scripts/backup.sh
 StandardOutput=journal
 StandardError=journal
 ```
@@ -120,7 +120,7 @@ Description=Rotar logs personales
 
 [Service]
 Type=oneshot
-ExecStart=/home/lcampassi/scripts/rotate-logs.sh
+ExecStart=$HOME/scripts/rotate-logs.sh
 Nice=19
 IOSchedulingClass=idle
 ```
@@ -183,12 +183,12 @@ Ejemplo de entrada en crontab:
 # ──────────────────────────────────────────────
 # Backup diario — 03:00
 # ──────────────────────────────────────────────
-0 3 * * * /home/lcampassi/scripts/backup.sh >> "${HOME}/logs/cron-$(date +\%Y\%m).log" 2>&1
+0 3 * * * $HOME/scripts/backup.sh >> "${HOME}/logs/cron-$(date +\%Y\%m).log" 2>&1
 
 # ──────────────────────────────────────────────
 # Health check — cada 5 minutos
 # ──────────────────────────────────────────────
-*/5 * * * * /home/lcampassi/scripts/health-check.sh
+*/5 * * * * $HOME/scripts/health-check.sh
 ```
 
 ### Variables de entorno en cron
@@ -198,8 +198,8 @@ Cron ejecuta con un entorno mínimo (`SHELL=/bin/sh`, `PATH` reducido). Siempre 
 ```bash
 # Al inicio del crontab
 SHELL=/bin/bash
-PATH=/usr/local/bin:/usr/bin:/bin:/home/lcampassi/.local/bin
-HOME=/home/lcampassi
+PATH=/usr/local/bin:/usr/bin:/bin:$HOME/.local/bin
+HOME=$HOME
 MAILTO=lcampassi@localhost
 ```
 
@@ -214,8 +214,8 @@ sudo pacman -S anacron
 Config en `/etc/anacrontab`:
 ```
 # period delay job-identifier command
-@daily  10  backup.daily   /home/lcampassi/scripts/backup.sh
-@weekly 20  cleanup.weekly /home/lcampassi/scripts/cleanup.sh
+@daily  10  backup.daily   $HOME/scripts/backup.sh
+@weekly 20  cleanup.weekly $HOME/scripts/cleanup.sh
 ```
 
 - **period**: frecuencia en días (`@daily` = 1, `@weekly` = 7)
@@ -477,9 +477,9 @@ tar --zstd \
     --exclude=".cache" \
     --exclude=".local/share/Trash" \
     -cf "$BACKUP_FILE" \
-    -C / home/lcampassi/Documents \
-    -C / home/lcampassi/.config \
-    -C / home/lcampassi/scripts
+    -C / home/Documents \
+    -C / home/.config \
+    -C / home/scripts
 
 # Rotación: eliminar backups más viejos que RETENTION_DAYS
 find "$BACKUP_DEST" -name "home-*.tar.zst" -mtime "+${RETENTION_DAYS}" -delete

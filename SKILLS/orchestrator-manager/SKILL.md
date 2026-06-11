@@ -453,7 +453,7 @@ def validate(manifest, staging_dir):
     { "id": "M02", "name": "sample2.exe", "prompt": "Analizar sample2.exe...", "deps": [], "output": {"type":"data","path":"/tmp/analysis/sample2.json"} }
   ],
   "shared_context": {
-    "extra": { "yara_rules_path": "/home/lcampassi/yara/rules/", "sandbox": "docker" }
+    "extra": { "yara_rules_path": "$HOME/yara/rules/", "sandbox": "docker" }
   }
 }
 ```

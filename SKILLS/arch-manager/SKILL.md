@@ -5,65 +5,6 @@ description: Use when the user asks about managing their Arch Linux system — p
 
 # Arch Linux System Manager
 
-## 📚 Documentación Persistente (Obsidian Vault)
-
-Este agente tiene acceso completo de **lectura y escritura** al vault de Obsidian para documentar configuraciones, procedimientos y troubleshooting.
-
-### Ruta base de documentación
-```
-/files/Personal-Vault/Manuales/00-FUNDAMENTALS/02-SYSTEMS-OS/LINUX/
-```
-
-### Subcarpetas disponibles
-
-| Carpeta | Contenido |
-|---------|-----------|
-| `01-FUNDAMENTOS/` | Arquitectura, componentes, distros, filosofía, historia |
-| `02-SISTEMA-ARCHIVO/` | FHS, permisos, usuarios, grupos, chmod, chown |
-| `03-COMANDOS-ESCENCIALES/` | Comandos básicos: búsqueda, manipulación, procesos, red |
-| `04-ADMINISTRACION/` | Systemd, servicios, logs, redes, particiones, procesos |
-| `05-KERNEL-SISTEMA/` | Kernel, init/boot, filesystems, memoria, módulos |
-| `06-SEGURIDAD/` | Hardening, SSH, firewall, auditoría, KPCLI |
-| `07-ARCH-LINUX/` | **Documentación específica del sistema**: MI-SISTEMA.md, pacman, AUR, mantenimiento, PipeWire, bootloader, networking, Docker, troubleshooting, power management, dual boot, NVMe |
-| `08-WINDOW-MANAGERS/` | Qtile, Hyprland, i3wm, Wayland/Xorg, autostart |
-| `09-DOTFILES-CONFIG/` | Dotfiles, zshrc config |
-| `10-HERRAMIENTAS/` | OpenSSL, Stow, TUI list, Yazi, Bluetooth, fingerprint, mkinitcpio, display multimonitor |
-
-### Reglas de documentación
-
-1. **Antes de escribir**: Leer primero lo que ya existe para evitar duplicados.
-2. **Formato**: Usar Markdown con frontmatter estándar:
-   ```yaml
-   ---
-   id: MAN-XXXXXX
-   nombre: NOMBRE-DOC
-   tags:
-     - KNOWLEDGE
-     - linux
-     - arch
-   fecha: YYYY-MM-DD
-   ---
-   ```
-3. **Código ejecutable**: Incluir comandos reales con paths del sistema.
-4. **Sistema específico**: Documentar rutas, UUIDs, configuraciones concretas del host `D4rkDr4g0n19`.
-5. **Links entre notas**: Usar wikilinks `[[NOMBRE-DEL-ARCHIVO]]` para conectar documentación relacionada.
-6. **NO tocar `LINUX.md` (MOC)**: El plugin Waypoint de Obsidian actualiza automáticamente el índice. Cualquier cambio manual se pierde al regenerarse.
-7. **Actualizar la SKILL**: Si se crea nueva documentación que cambia cómo el agente opera, reflejarlo en este archivo.
-
-### Para crear/editar documentación
-
-Usar el CLI de obsidian cuando sea posible:
-```bash
-obsidian vault=Personal-Vault create name="TITULO" \
-  path="Manuales/00-FUNDAMENTALS/02-SYSTEMS-OS/LINUX/07-ARCH-LINUX" \
-  content="# Contenido..."
-```
-
-O escribir directamente en la ruta del vault (método recomendado para documentos grandes):
-```
-/files/Personal-Vault/Manuales/00-FUNDAMENTALS/02-SYSTEMS-OS/LINUX/07-ARCH-LINUX/MI-DOC.md
-```
-
 ## System Context
 
 - **Distro:** Arch Linux
@@ -79,9 +20,9 @@ O escribir directamente en la ruta del vault (método recomendado para documento
 - **Bluetooth:** Bluez
 - **Fingerprint:** Goodix — `libfprint-2-tod1-goodix`
 - **Shell:** Zsh + Powerlevel10k
-- **WM:** Qtile (X11)
+- **WM:** Qtile (Wayland)
 - **Display Manager:** LightDM
-- **Dotfiles:** `~/dotfiles/` (Git repo at `github.com/D4rkDr4g0n/dotfiles`)
+- **Dotfiles:** `$DOTFILES` (Git repo at `github.com/$DOTFILES_REPO`)
 
 ---
 
@@ -122,9 +63,14 @@ sudo pacman -Sc       # keep current only
 paccache -r           # keep last 3 versions
 ```
 
-### AUR Packages Installed
+### AUR helper
 
-`betterlockscreen`, `conan`, `cura-bin`, `forticlient-vpn`, `i3lock-color`, `n8n`, `onedrive-abraunegg`, `onedriver`, `onlyoffice-bin`, `polyclipping`, `proton-drive-sync-bin`, `proton-mail`, `sigma-file-manager-bin`, `spotify`, `sublime-text-4`, `zoom`
+```bash
+yay -Syu              # sync + upgrade (includes AUR)
+yay -Ss <term>        # search AUR
+yay -Si <pkg>         # show package info from AUR
+yay -Qm               # list installed AUR packages
+```
 
 ### Repositories
 
@@ -226,21 +172,10 @@ sudo systemctl restart NetworkManager
 | Component | Config |
 |---|---|
 | Display Manager | LightDM (`/etc/lightdm/lightdm.conf`) |
-| WM | Qtile (`~/.config/qtile/config.py`) |
-| Compositor | Picom (`~/.config/picom/picom.conf`) |
-| Wallpaper | Nitrogen / Qtile built-in |
-| Dual monitors | `xrandr` managed by `display-monitors.sh` |
-
-### Picom features
-
-```
-backend: glx
-corner-radius: 12
-blur: dual_kawase (strength 6)
-shadow: disabled
-vsync: true
-opacity-by-rule for kitty, rofi, dunst, sublime
-```
+| WM | Qtile (Wayland, `~/.config/qtile/config.py`) |
+| Bar | Waybar (`~/.config/waybar/`) |
+| Wallpaper | Qtile built-in / swww |
+| Dual monitors | Managed by `$DOTFILES/automat/display-monitors.sh` |
 
 ### LightDM
 
@@ -406,14 +341,14 @@ UUID=xxxx-xxxx  /boot vfat  fmask=0022,dmask=... 0 2
 ### Clone & stow
 
 ```bash
-git clone https://github.com/D4rkDr4g0n/dotfiles ~/dotfiles
-cd ~/dotfiles
+git clone "https://github.com/${DOTFILES_REPO}" "$DOTFILES"
+cd "$DOTFILES"
 
 # Install stow
 sudo pacman -S stow
 
 # Create symlinks component by component:
-stow -t ~/.config qtile polybar picom kitty rofi Thunar dunst fastfetch
+stow -t ~/.config qtile waybar kitty rofi dunst fastfetch
 stow -t ~/.config onedrive opencode
 stow -t ~/.config/sublime-text sublime-text
 stow -t ~/ zsh  # creates ~/.zshrc
@@ -423,23 +358,22 @@ stow -t ~/.config lazy-nvim
 nvim  # auto-installs plugins
 
 # Autostart directory
-ln -sf ~/dotfiles/automat/ ~/.config/automat
+ln -sf "$DOTFILES/automat/" ~/.config/automat
 ```
 
-Or use the install scripts in `~/dotfiles/automat/install/` in order.
+Or use the install scripts in `$DOTFILES/automat/install/` in order.
 
 ### Verification
 
 ```bash
 # Check all symlinks
-ls -la ~/dotfiles/qtile ~/dotfiles/polybar ~/.config/qtile ~/.config/polybar
+ls -la "$DOTFILES/qtile" "$DOTFILES/waybar" ~/.config/qtile ~/.config/waybar
 
 # Verify Qtile config
 qtile check
 
 # Launch components
-polybar ~/.config/polybar/launch.sh
-picom --config ~/.config/picom/picom.conf
+bash ~/.config/waybar/launch.sh
 dunst -config ~/.config/dunst/dunstrc
 
 # Verify fonts
@@ -450,12 +384,12 @@ fc-list | grep "Hack.*Nerd"
 
 ## 15. Theme Management
 
-8 themes in `~/dotfiles/themes/<name>/theme.json`.
+8 themes in `$DOTFILES/themes/<name>/theme.json`.
 
 ```bash
 # List themes
 theme --list
-ls ~/dotfiles/themes/
+ls "$DOTFILES/themes/"
 
 # Apply theme
 theme at-at
@@ -468,34 +402,20 @@ cat ~/.config/qtile/current_theme.json
 
 ### Creating a new theme
 
-1. Create `~/dotfiles/themes/<name>/`
-2. Create `theme.json`:
-   ```json
-   {
-     "name": "Theme Name",
-     "wallpaper": "/path/to/wallpaper",
-     "primary": "#hex",
-     "secondary": "#hex",
-     "background": "#hex",
-     "foreground": "#hex",
-     "chip_battery": "#hex",
-     "chip_bluetooth": "#hex",
-     "chip_wlan": "#hex",
-     "chip_audio": "#hex"
-   }
-   ```
-3. Copy wallpaper to `~/dotfiles/recursos/wallpapers/`
-4. Update `docs/themes.md` table
+1. Create `$DOTFILES/themes/<name>/`
+2. Create `theme.json` (see `$DOTFILES/themes/` for existing examples)
+3. Copy wallpaper to `$DOTFILES/recursos/wallpapers/`
+4. Update `$DOTFILES/docs/themes.md` table
 5. Test: `theme <name>`
 
 ### Theme components updated
 
-- `polybar/colors.ini`
+- `waybar/theme.css`
 - `kitty/colors.conf`
 - `~/.zsh_colors`
 - `qtile/current_theme.json`
 - `qtile/modules/screens.py` (wallpaper path)
-- Polybar + Qtile are reloaded automatically
+- Waybar + Qtile are reloaded automatically
 
 ---
 
@@ -504,20 +424,20 @@ cat ~/.config/qtile/current_theme.json
 ### Important paths
 
 ```
-~/dotfiles/                    # Dotfiles Git repository
-~/dotfiles/recursos/wallpapers/ # Wallpaper collection (18+ images)
-~/dotfiles/recursos/finnancials/gastos.py  # Expense manager TUI
-~/dotfiles/automat/install/    # Installation scripts (13 scripts)
-~/dotfiles/scripts/            # theme-switch.sh, vpn-replace.sh
-~/dotfiles/docs/               # Documentation
-~/dotfiles/themes/             # Dynamic themes
+$DOTFILES/                    # Dotfiles Git repository
+$DOTFILES/recursos/wallpapers/ # Wallpaper collection
+$DOTFILES/recursos/finnancials/gastos.py  # Expense manager TUI
+$DOTFILES/automat/install/    # Installation scripts
+$DOTFILES/scripts/            # theme-switch.sh, vpn-replace.sh
+$DOTFILES/docs/               # Documentation
+$DOTFILES/themes/             # Dynamic themes
 ```
 
 ### Data partitions
 
 ```
 /files     — bulk storage (music, videos, projects, etc.)
-~/OneDrive — cloud sync (OneDrive + Obsidian vault)
+$HOME/OneDrive — cloud sync (OneDrive + Obsidian vault)
 ```
 
 ---
@@ -530,19 +450,16 @@ onedrive --synchronize
 onedrive --monitor
 
 # OneDrive FUSE (on demand mount)
-onedriver mount ~/OneDrive
+onedriver mount "$HOME/OneDrive"
 
 # Config: ~/.config/onedrive/config
-#   sync_dir = "~/OneDrive"
-#   skip_file = "~*|.~*|*.tmp|*.swp|*.partial"
 ```
 
-### Obsidian Vault Git Sync
+### Obsidian Vault Git Sync (Linux only)
 
 ```
-~/OneDrive/vault/ — Git repo
-vault-pull.service  → pulls on boot
-vault-push.service  → commits "D4 - YYYY-MM-DD" + pushes force on shutdown
+$DOTFILES/automat/vault-pull.service  → pulls on boot
+$DOTFILES/automat/vault-push.service  → commits on shutdown
 ```
 
 ---
@@ -659,14 +576,8 @@ qtile check
 # Restart Qtile without logout
 Mod+Ctrl+R
 
-# Check Xorg logs
-cat ~/.local/share/xorg/Xorg.0.log | grep -iE "(error|fail)"
-
-# Picom issues
-pkill picom && picom --config ~/.config/picom/picom.conf
-
-# Polybar issues
-pkill polybar && bash ~/.config/polybar/launch.sh
+# Waybar issues
+pkill waybar && bash ~/.config/waybar/launch.sh
 ```
 
 ### Network issues

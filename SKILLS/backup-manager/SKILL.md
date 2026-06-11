@@ -13,7 +13,7 @@ Guía de estrategias de backup para sistemas Linux y Windows. Orientada a admini
 - **Herramientas Linux:** `restic`, `rsync`, `borg`, `systemd-timers`
 - **Herramientas Windows:** `robocopy`, `Windows Backup`, `restic`
 - **Destinos:** Disco local, USB externo, servidor remoto (SFTP/S3)
-- **Datos críticos:** `~/dotfiles/`, `~/projects/`, `~/lab/`, Obsidian vault, `/files/Personal-Vault/`, GPG keys, SSH keys
+- **Datos críticos:** `$DOTFILES/`, `$HOME/projects/`, `$HOME/lab/`, Obsidian vault (`$BABILONIA`), GPG keys, SSH keys
 
 ---
 
@@ -33,7 +33,7 @@ restic init --repo rclone:cloud:backup/restic-repo          # Cloud (via rclone)
 ### Backup
 ```bash
 # Backup básico
-restic --repo /mnt/backup/restic-repo backup /home/lcampassi/projects
+restic --repo /mnt/backup/restic-repo backup $HOME/projects
 
 # Con exclusiones
 restic --repo /mnt/backup/restic-repo backup \
@@ -42,18 +42,18 @@ restic --repo /mnt/backup/restic-repo backup \
   --exclude="node_modules" \
   --exclude=".cache" \
   --exclude="target" \
-  /home/lcampassi
+  $HOME
 
 # Backup de directorios específicos
 restic backup \
-  /home/lcampassi/dotfiles \
-  /home/lcampassi/.config \
-  /home/lcampassi/.ssh \
-  /files/Personal-Vault
+  $HOME/dotfiles \
+  $HOME/.config \
+  $HOME/.ssh \
+  $BABILONIA
 
 # Taggear snapshot
-restic backup --tag dotfiles /home/lcampassi/dotfiles
-restic backup --tag vault /files/Personal-Vault
+restic backup --tag dotfiles $HOME/dotfiles
+restic backup --tag vault $BABILONIA
 ```
 
 ### Gestión y restore
@@ -70,7 +70,7 @@ restic restore latest --target /tmp/restore
 
 # Restore de archivos específicos
 restic restore latest --target /tmp/restore \
-  --include /home/lcampassi/dotfiles/.gitconfig
+  --include $HOME/dotfiles/.gitconfig
 
 # Montar repositorio como FUSE
 mkdir /tmp/restic-mount
@@ -79,18 +79,18 @@ restic mount /tmp/restic-mount
 
 ### Automatización
 ```bash
-# Script — /home/lcampassi/scripts/backup.sh
+# Script — $HOME/scripts/backup.sh
 #!/bin/bash
 REPO="/mnt/backup/restic-repo"
 export RESTIC_PASSWORD="<pass>"
 
 restic -r $REPO backup \
   --tag automated \
-  --exclude-file=/home/lcampassi/.restic-excludes \
-  /home/lcampassi/dotfiles \
-  /home/lcampassi/.config \
-  /home/lcampassi/.ssh \
-  /files/Personal-Vault
+  --exclude-file=$HOME/.restic-excludes \
+  $HOME/dotfiles \
+  $HOME/.config \
+  $HOME/.ssh \
+  $BABILONIA
 
 # Olvidar snapshots viejos (retention)
 restic -r $REPO forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
@@ -109,8 +109,8 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/lcampassi/scripts/backup.sh
-User=lcampassi
+ExecStart=$HOME/scripts/backup.sh
+User=$USER
 Nice=19
 IOSchedulingClass=idle
 
@@ -143,8 +143,8 @@ borg init --encryption=repokey /mnt/backup/borg-repo
 # Backup
 borg create --stats --progress \
   /mnt/backup/borg-repo::{hostname}-{now:%Y-%m-%d} \
-  /home/lcampassi/dotfiles \
-  /home/lcampassi/.config \
+  $HOME/dotfiles \
+  $HOME/.config \
   --exclude '*.cache' \
   --exclude '*/node_modules/*'
 
@@ -168,11 +168,11 @@ borg compact /mnt/backup/borg-repo
 
 ```bash
 # Backup local
-rsync -avh --delete /home/lcampassi/dotfiles/ /mnt/backup/dotfiles/
+rsync -avh --delete $HOME/dotfiles/ /mnt/backup/dotfiles/
 
 # Backup remoto (SSH)
 rsync -avh --delete -e ssh \
-  /home/lcampassi/dotfiles/ \
+  $HOME/dotfiles/ \
   user@server:/backup/dotfiles/
 
 # Con exclusiones
@@ -180,11 +180,11 @@ rsync -avh --delete \
   --exclude=".cache" \
   --exclude="node_modules" \
   --exclude="__pycache__" \
-  /home/lcampassi/projects/ /mnt/backup/projects/
+  $HOME/projects/ /mnt/backup/projects/
 
 # Snapshot incremental con hardlinks
 rsync -avh --delete --link-dest=/mnt/backup/daily/yesterday \
-  /home/lcampassi/projects/ /mnt/backup/daily/$(date +%Y%m%d)
+  $HOME/projects/ /mnt/backup/daily/$(date +%Y%m%d)
 ```
 
 ---
@@ -200,14 +200,14 @@ rsync -avh --delete --link-dest=/mnt/backup/daily/yesterday \
 ### Implementación práctica
 ```bash
 # Backup local (diario)
-restic backup --tag local /home/lcampassi
+restic backup --tag local $HOME
 
 # Backup a USB externo (semanal)
 # Conectar USB en /mnt/usb-backup
-restic -r /mnt/usb-backup/restic-repo backup --tag usb /home/lcampassi
+restic -r /mnt/usb-backup/restic-repo backup --tag usb $HOME
 
 # Backup remoto (diario)
-restic -r sftp:server:/backup/restic-repo backup --tag remote /home/lcampassi
+restic -r sftp:server:/backup/restic-repo backup --tag remote $HOME
 ```
 
 ### Rotación recomendada
@@ -243,10 +243,10 @@ cp /mnt/backup/crypto-keys.tar.gz.age /mnt/usb-backup/
 ### Robocopy (built-in)
 ```powershell
 # Backup de dotfiles
-robocopy C:\Users\lcampassi\.config C:\Backup\.config /MIR /R:3 /W:5 /LOG:C:\Backup\logs\config.log
+robocopy %USERPROFILE%\.config C:\Backup\.config /MIR /R:3 /W:5 /LOG:C:\Backup\logs\config.log
 
 # Backup de proyectos
-robocopy "C:\Users\lcampassi\source\repos" "D:\Backup\repos" /MIR /R:3 /W:5 /XD node_modules __pycache__
+robocopy "%USERPROFILE%\source\repos" "D:\Backup\repos" /MIR /R:3 /W:5 /XD node_modules __pycache__
 
 # Parámetros clave
 # /MIR = mirror (borra archivos que ya no existen en origen)
@@ -259,7 +259,7 @@ robocopy "C:\Users\lcampassi\source\repos" "D:\Backup\repos" /MIR /R:3 /W:5 /XD 
 ### Windows Task Scheduler
 ```powershell
 # Crear tarea programada
-$action = New-ScheduledTaskAction -Execute "robocopy" -Argument "C:\Users\lcampassi\.config D:\Backup\.config /MIR /R:3 /W:5"
+$action = New-ScheduledTaskAction -Execute "robocopy" -Argument "%USERPROFILE%\.config D:\Backup\.config /MIR /R:3 /W:5"
 $trigger = New-ScheduledTaskTrigger -Daily -At "03:00"
 $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -RunLevel Highest
 Register-ScheduledTask -TaskName "Backup-Config" -Action $action -Trigger $trigger -Principal $principal
@@ -269,7 +269,7 @@ Register-ScheduledTask -TaskName "Backup-Config" -Action $action -Trigger $trigg
 ```powershell
 # restic funciona nativo en Windows
 restic.exe init --repo D:\Backup\restic-repo
-restic.exe backup C:\Users\lcampassi\source\repos
+restic.exe backup %USERPROFILE%\source\repos
 ```
 
 ---
@@ -285,11 +285,11 @@ borg check /mnt/backup/borg-repo
 restic restore latest --target /tmp/restore-test
 
 # Verificar que los archivos están completos
-diff -r /home/lcampassi/dotfiles /tmp/restore-test/home/lcampassi/dotfiles
+diff -r $HOME/dotfiles /tmp/restore-test$HOME/dotfiles
 
 # Probar restore de un archivo específico
 restic restore latest --target /tmp/restore-single \
-  --include /home/lcampassi/.ssh/id_ed25519
+  --include $HOME/.ssh/id_ed25519
 ```
 
 ---

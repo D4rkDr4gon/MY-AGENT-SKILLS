@@ -1,582 +1,510 @@
 ---
 name: obsidian-manager
-description: Use when managing the Obsidian vault (Personal-Vault) — cross-platform. Create notes, search, manage tasks, daily notes, templates, or sync. Adapts paths automatically for Linux and Windows.
+description: >
+  Gestión completa del vault Obsidian Personal-Vault (Babilonia).
+  Opera en 3 modos (REST API, MCP, Filesystem), usa templates con ID registry,
+  búsqueda semántica multi-estrategia, y respeta permisos estrictos por zona.
+  Único skill autorizado para leer/escribir en el vault desde agentes.
 ---
 
-# obsidian-manager
+# obsidian-manager ⚡
 
-## ⚡ Resumen ejecutivo
+## ⚡ Resumen Ejecutivo
 
-Este skill opera en **3 modos**, en orden de preferencia:
+Este skill es la **única puerta de entrada autorizada** para que cualquier agente de OpenCODE interactúe con el vault Babilonia. Opera en **3 modos**, en orden de preferencia:
 
-| Modo | Canal | Rápido | Requiere |
-|------|-------|--------|----------|
-| **1. REST API** | `curl -k https://127.0.0.1:27124/vault/...` | ✅ Instantáneo | Obsidian abierto + plugin REST API |
-| **2. MCP** | `POST /mcp/` (con session ID) | ✅ Rápido (2 requests) | Obsidian abierto + plugin REST API |
-| **3. Filesystem** | Lectura directa de archivos `.md` | ✅ Rapidísimo | Nada (sin dependencias) |
+| Modo | Canal | Ideal para |
+|------|-------|------------|
+| **1. Filesystem** | `cat`, `rg`, lectura/escritura directa de archivos | Leer/escribir archivos completos, búsquedas masivas con `rg` |
+| **2. REST API** | `curl -k https://127.0.0.1:27124/vault/...` | CRUD + Abrir en UI + Search estructurado (1 request) |
+| **3. MCP** | `POST /mcp/` (con session ID, 2 requests) | Tags, patches quirúrgicos, nota activa, búsqueda JsonLogic |
 
-**Regla de oro**: Para cualquier operación, intentá en este orden:
-1. Si es **leer/escribir archivo** → **Filesystem** (no requiere red, es lo más rápido)
-2. Si es **CRUD + abrir en UI + search** → **REST API** (1 solo request, sin sesión)
-3. Si es **tags + comandos + patches quirúrgicos + nota activa** → **MCP** (requiere sesión)
-4. Si no responde REST API ni MCP → **Filesystem** como fallback
+**Regla de decisión:**
+- Si es **leer o escribir un archivo completo** → **Filesystem** (sin red, instantáneo)
+- Si es **CRUD + abrir en UI + search** → **REST API** (1 request, sin sesión)
+- Si es **tags + patches + nota activa + search estructurado** → **MCP** (requiere sesión)
+- Si no responde REST API ni MCP → **Filesystem** como fallback universal
 
 ---
 
-## Detección automática de conectividad
+## 🧩 Variables de Entorno — Único Origen de Verdad
+
+> ⚠️ **No existe ninguna ruta absoluta hardcodeada en este skill.**
+> TODO se resuelve vía env vars definidas en `~/.zshenv`.
+
+| Variable | Valor | Propósito |
+|----------|-------|-----------|
+| `$BABILONIA` | Raíz del vault | Path base para TODAS las operaciones |
+| `$BABILONIA_OPENCODE` | `$BABILONIA/.../03-OPENCODE-AGENTS-SKILLS` | Docs de agentes, skills, ID registry |
+| `$OBSIDIAN_API_KEY` | API key | Autenticación REST API y MCP |
+| `$DOTFILES` | `~/dotfiles` | Scripts auxiliares (git sync, etc.) |
+| `$GITHUB_USER` | Usuario GitHub | Remote del vault |
+
+**Derivadas (si no existen, se construyen en el momento):**
+
+```bash
+OBSIDIAN_URL="${OBSIDIAN_URL:-https://127.0.0.1:27124}"
+TEMPLATE_NOTA="${TEMPLATE_NOTA:-$BABILONIA/TEMPLATES/Notas generales.md}"
+TEMPLATE_MOC="${TEMPLATE_MOC:-$BABILONIA/TEMPLATES/MOCs.md}"
+ID_REGISTRY="${ID_REGISTRY:-$BABILONIA_OPENCODE/ID-REGISTRY.md}"
+NEXT_ID_SCRIPT="${NEXT_ID_SCRIPT:-$BABILONIA/Manuales/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/next-id.py}"
+```
+
+> Cualquier referencia a paths dentro del vault **siempre** usa `$BABILONIA/...`.  
+> Cualquier referencia a scripts **siempre** usa su env var correspondiente.
+
+---
+
+## 🔌 Detección Automática de Conectividad
 
 Antes de operar, verificá qué canales están disponibles:
 
 ```bash
-# 1. ¿REST API disponible?
+# 1. REST API disponible?
 REST_OK=$(curl -sk -o /dev/null -w "%{http_code}" \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  https://127.0.0.1:27124/ 2>/dev/null)
-# 200 = OK
+  "${OBSIDIAN_URL}/" 2>/dev/null)
 
-# 2. ¿MCP disponible? (requiere inicializar sesión)
-MCP_OK=no
-if [ "$REST_OK" = "200" ]; then
-  MCP_SESSION=$(curl -sk -X POST "https://127.0.0.1:27124/mcp/" \
-    -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json, text/event-stream" \
-    -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"opencode","version":"1.0.0"}}}' \
-    2>/dev/null | grep -o '"mcp-session-id": "[^"]*"' | cut -d'"' -f4)
-  [ -n "$MCP_SESSION" ] && MCP_OK=yes
-fi
-
-# 3. Filesystem siempre disponible (es el fallback final)
-FS_OK=yes
-```
-
-**Variables de configuración** (ya seteada en el entorno):
-- `OBSIDIAN_API_KEY` = `7363b03610341c448ae340e556ea11ef644c54a0ddcbbd0e3b8fc0d1c8fadf8d`
-- `OBSIDIAN_URL` = `https://127.0.0.1:27124`
-- `OBSIDIAN_VAULT` = `/files/Personal-Vault` (Linux)
-- `OBSIDIAN_BASE` = `https://127.0.0.1:27124/vault`
-
----
-
-## Cross-Platform — Detección de SO
-
-Este skill funciona en **Arch Linux** y **Windows 11**. Los paths cambian según el SO:
-
-| Recurso | Linux | Windows |
-|---|---|---|
-| Vault root | `/files/Personal-Vault` | `C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\Personal-Vault` |
-| CLI | `obsidian vault=Personal-Vault <cmd>` | `obsidian vault=Personal-Vault <cmd>` (si está en PATH) |
-| REST API | `https://127.0.0.1:27124` | `https://127.0.0.1:27124` |
-| Scripts sync | `~/dotfiles/automat/vault-pull.sh` / `vault-push.sh` | *(no aplica)* |
-| Ruta relativa base | `Manuales/` | `Manuales/` |
-
-> **Regla**: Siempre operá con rutas **relativas al vault** cuando sea posible (ej: `Manuales/00-FUNDAMENTALS/...`). Solo usá paths absolutos cuando sea estrictamente necesario y detectá el SO automáticamente.
-
-## Contexto del Vault
-
-**Vault**: Personal-Vault
-**Path**: 
-  - **Linux**: `/files/Personal-Vault`
-  - **Windows**: `C:\Users\lcampassi\Proton Drive\D4rkDr4g0n19\My files\Personal-Vault`
-**CLI**: `obsidian vault=Personal-Vault <command>` (en ambos SO si está en PATH)
-**Remote**: `https://github.com/D4rkDr4g0n/<vault>.git`
-**Git user**: `D4rkDr4g0n`
-
-### Estructura de carpetas
-
-```
-/files/Personal-Vault/
-├── .obsidian/                 # Config de Obsidian
-├── IMAGES/                    # Imagenes adjuntas
-├── INBOX/                     # Captura rapida y bandeja de entrada
-│   ├── DOCUMENTS/             # Documentos personales
-│   │   ├── LABORAL/
-│   │   ├── MIS-FINANZAS/
-│   │   │   └── RECIBOS-DE-SUELDO/
-│   │   └── OTROS/
-│   │       └── Certificaciones/
-│   ├── General/               # Notas generales
-│   │   ├── fotos/
-│   │   ├── LIST/
-│   │   └── OTHER/
-│   ├── HOME/                  # Cosas del hogar
-│   ├── Journal/               # Daily notes
-│   │   └── 2026/
-│   ├── MAMO/                  # Notas de mama
-│   └── TODOLIST/              # Listas de tareas
-├── Manuales/                  # Manuales de referencia
-├── TEMPLATES/                 # Plantillas
-├── UFASTA/                    # Facultad
-│   ├── 01-Introduccion a la informatica/
-│   ├── 02-Introduccion a la programacion/
-│   ├── 03-Taller de comunicacion eficaz/
-│   ├── 04-Matematica y logica/
-│   ├── 05-Aspectos Legales de la ciberseguridad/
-│   ├── 06-CRIPTOGRAFIA/
-│   ├── 07-ANTROPOLOGIA 1/
-│   ├── 08-CIBERSEGURIDAD 1/
-│   ├── 09-INGLES TECNICO/
-│   ├── CALENDAR/
-│   ├── Other/
-│   └── PENDIENTES FACULTAD.md
-├── WORK/                      # Trabajo (clientes anonimizados)
-│   ├── 00-CLIENTE-A/
-│   ├── 01-CLIENTE-B/
-│   ├── 02-CLIENTE-C/
-│   ├── 03-CLIENTE-D/
-│   ├── 2026/
-│   └── PENDIENTES TRABAJO.md
-└── PENDIENTES FACULTAD.md
-└── PENDIENTES TRABAJO.md
-```
-
-### Configuracion clave
-
-| Setting | Value |
-|---------|-------|
-| Daily notes folder | `INBOX/Journal/2026` |
-| Daily format | `DD MMMM` (ej: `24 mayo`) |
-| Template | `TEMPLATES/Daily note` |
-| Use markdown links | `true` |
-| Attachment folder | `./attachments` |
-| Trash option | none (permanent delete) |
-| Prompt delete | false |
-
-### Plugins instalados (19)
-
-`advanced-canvas`, `beautitab`, `calendar`, `code-styler`, `file-explorer-note-count`, `folder-notes`, `full-calendar-remastered`, `highlightr-plugin`, `manual-sorting`, `nerdfont-icon-picker`, `obsidian-better-command-palette`, `obsidian-file-color`, `obsidian-icon-folder`, `obsidian-kanban`, `obsidian-smart-typography`, `ollama`, `oz-clear-unused-images`, `pdf-plus`, `waypoint`
-
----
-
-## Modo 1: REST API (primer nivel, recomendado para CRUD + UI)
-
-> **Endpoints base**: `https://127.0.0.1:27124`
-> **Auth**: `Authorization: Bearer ${OBSIDIAN_API_KEY}`
-> **SSL**: `-k` (certificado autofirmado)
-
-### Healthcheck rápido
-
-```bash
-curl -sk -o /dev/null -w "%{http_code}" \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  https://127.0.0.1:27124/
-# → 200 si está vivo
-```
-
-### Operaciones disponibles
-
-| Operación | Endpoint | Método | Descripción |
-|-----------|----------|--------|-------------|
-| **Listar vault** | `/vault/` | GET | Lista raíz del vault |
-| **Listar carpeta** | `/vault/ruta/` | GET | Lista contenido de carpeta |
-| **Leer nota** | `/vault/ruta/nota.md` | GET | Lee contenido completo |
-| **Leer heading** | `/vault/ruta/nota.md/heading/Sección` | GET | Lee sección específica |
-| **Crear nota** | `/vault/ruta/nota.md` | PUT | Crea o sobrescribe |
-| **Editar nota** | `/vault/ruta/nota.md` | POST | Agrega contenido (append) |
-| **Patch heading** | `/vault/ruta/nota.md` | PATCH | Edición quirúrgica |
-| **Eliminar nota** | `/vault/ruta/nota.md` | DELETE | Borra la nota |
-| **Abrir en UI** | `/open/ruta/nota.md` | POST | Abre en la interfaz gráfica |
-| **Buscar texto** | `/search/simple/?query=...` | POST | Búsqueda full-text |
-| **Buscar JsonLogic** | `/search/` | POST | Búsqueda estructurada |
-| **Tags** | `/tags/` | GET | Todos los tags con counts |
-| **Comandos** | `/commands/` | GET | Lista comandos disponibles |
-| **Ejecutar comando** | `/commands/{id}/` | POST | Ejecuta un comando |
-| **Nota activa** | `/active/` | GET | Nota abierta en UI |
-| **Nota periódica** | `/periodic/daily/` | GET | Nota del día |
-
-### Ejemplos concretos
-
-```bash
-# Leer nota
-curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/vault/INBOX/General/OTHER/Clave%20de%20windows%2011%20PRO.md"
-
-# Abrir nota en la UI
-curl -sk -X POST \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/open/INBOX/General/OTHER/Clave%20de%20windows%2011%20PRO.md"
-
-# Crear nota (PUT)
-curl -sk -X PUT \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  -H "Content-Type: text/markdown" \
-  --data "# Mi nueva nota\n\nContenido" \
-  "https://127.0.0.1:27124/vault/INBOX/General/mi-nota.md"
-
-# Buscar texto
-curl -sk -X POST \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/search/simple/?query=windows+key"
-
-# Listar tags
-curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/tags/"
-
-# Ejecutar comando (ej: guardar)
-curl -sk -X POST \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/commands/editor:save-file/"
-
-# Patch quirúrgico: reemplazar frontmatter
-curl -sk -X PATCH \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  -H "Operation: replace" \
-  -H "Target-Type: frontmatter" \
-  -H "Target: status" \
-  -H "Content-Type: application/json" \
-  --data '"done"' \
-  "https://127.0.0.1:27124/vault/INBOX/mi-nota.md"
+# 2. Filesystem disponible? (siempre que $BABILONIA exista)
+FS_OK=$([ -d "$BABILONIA" ] && echo "yes" || echo "no")
 ```
 
 ---
 
-## Modo 2: MCP (segundo nivel, para operaciones avanzadas)
+## 📝 Templates Obligatorios
 
-> **Endpoint**: `https://127.0.0.1:27124/mcp/`
-> **Transporte**: Streamable HTTP (requiere inicializar sesión primero)
-> **Usar solo cuando**: Tags, search estructurado, patches, nota activa, notas periódicas
+Toda nota o MOC que se cree **debe** usar el template correspondiente.  
+No se crean notas sin template — el contenido se adapta del template al caso concreto.
 
-### Protocolo MCP (Streamable HTTP)
+### Template: Nota General
 
-El MCP requiere **2 requests**:
+**Ubicación:** `$TEMPLATE_NOTA` → `$BABILONIA/TEMPLATES/Notas generales.md`
 
-**Paso 1**: Inicializar sesión (obtener `mcp-session-id`)
+```markdown
+---
+id: MAN-XXXXXX
+nombre: "{{title}}"
+tags:
+  - KNOWLEDGE
+  - KNOWLEDGE/IT
+Fecha de creación: "{{date}}"
+---
+# OBJETIVO
+>[!tip] 
 
-```bash
-RESP=$(curl -sk -i -X POST "https://127.0.0.1:27124/mcp/" \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"opencode","version":"1.0.0"}}}')
-
-# Extraer session ID del header
-MCP_SESSION=$(echo "$RESP" | grep -i "^mcp-session-id:" | awk '{print $2}' | tr -d '\r')
+# DESCRIPCIÓN
 ```
 
-**Paso 2**: Usar la sesión para cualquier herramienta MCP
+**Reglas de uso:**
+- El `id:` se genera con `next-id MAN` (ver sección ID Registry)
+- `nombre:` debe ser descriptivo, en español, con el título real de la nota
+- `tags:` mantener `KNOWLEDGE` + agregar tags específicos del dominio
+- La sección `OBJETIVO` debe responder: *¿Qué problema resuelve o qué concepto explica esta nota?*
+- La sección `DESCRIPCIÓN` debe ser clara, estructurada y fácil de entender para alguien que la lea 6 meses después
 
-```bash
-curl -sk -X POST "https://127.0.0.1:27124/mcp/" \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -H "Mcp-Session-Id: ${MCP_SESSION}" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"NOMBRE_TOOL","arguments":{...}}}'
+### Template: MOC (Map of Content)
+
+**Ubicación:** `$TEMPLATE_MOC` → `$BABILONIA/TEMPLATES/MOCs.md`
+
+```markdown
+---
+id: MOC-XXXXXX
+nombre: "{{title}}"
+tags:
+  - INDEX
+  - MOCs
+Fecha de creación: "{{date}}"
+---
+# {{TITLE}}
+>[!tip] Descripcion de la carpeta
+# INDICE
+%% WAYPOINT %%
+>Borrar esto y cambiar WAYPOINT a Waypoint
 ```
 
-### MCP Tools disponibles (16 herramientas)
+**Reglas de uso:**
+- El `id:` se genera con `next-id MOC`
+- `nombre:` debe reflejar el dominio/área que indexa
+- La descripción en `[!tip]` debe resumir qué agrupa este MOC
+- El `%% WAYPOINT %%` se reemplaza por `%% Waypoint %%` (activa el plugin)
 
-| Tool | Args | Descripción |
-|------|------|-------------|
-| `vault_list` | `path` (str) | Listar archivos en directorio |
-| `vault_read` | `path` (str) | Leer nota (content + frontmatter + tags + stat) |
-| `vault_write` | `path` (str), `content` (str) | Crear/sobrescribir nota |
-| `vault_append` | `path` (str), `content` (str) | Agregar al final |
-| `vault_patch` | `path` (str), `targetType` (str), `target` (str), `operation` (str), `content` (str), `targetScope` (int, opcional) | Patch quirúrgico |
-| `vault_delete` | `path` (str) | Eliminar nota |
-| `vault_move` | `from` (str), `to` (str) | Mover/renombrar |
-| `vault_get_document_map` | `path` (str) | Headings, blocks, frontmatter |
-| `active_file_get_path` | _(none)_ | Ruta de la nota activa |
-| `periodic_note_get_path` | `period` (str: daily/weekly/monthly/quarterly/yearly) | Ruta de nota periódica |
-| `search_query` | `query` (object, JsonLogic) | Búsqueda estructurada |
-| `search_simple` | `query` (str) | Búsqueda full-text |
-| `tag_list` | _(none)_ | Tags con counts |
-| `command_list` | _(none)_ | Comandos registrados |
-| `command_execute` | `commandId` (str) | Ejecutar comando |
-| `open_file` | `path` (str) | Abrir en UI |
+---
 
-### Ejemplo MCP completo
+## 🆔 Sistema de IDs — ID Registry
+
+**Documentación completa:** `$ID_REGISTRY`  
+**Script:** `$NEXT_ID_SCRIPT` (o alias global `next-id` si está configurado)
+
+### Cómo generar un ID
 
 ```bash
-# 1. Inicializar sesión
-SESSION_RESP=$(curl -sk -i -X POST "https://127.0.0.1:27124/mcp/" \
+# Para una NOTA general → prefijo MAN
+next-id MAN
+# → MAN-001237
+
+# Para un MOC → prefijo MOC
+next-id MOC
+# → MOC-000018
+
+# Para un prefijo nuevo (se auto-descubre)
+next-id MI_PROYECTO
+# → MI_PROYECTO-000001
+```
+
+### Reglas de asignación
+
+| Tipo de contenido | Prefijo | Formato |
+|------------------|---------|---------|
+| Nota de conocimiento general | `MAN` | `MAN-######` |
+| Map of Content (MOC) | `MOC` | `MOC-######` |
+| Nota de facultad | `UFA` | `UFA-######` |
+| Nota diaria (journal) | `JOURNAL` | `JOURNAL-####` |
+| Otro (auto-descubierto) | *cualquiera* | `PREFIJO-######` |
+
+> ⚠️ Los prefijos de clientes/ trabajo no se listan en este skill por privacidad. Se resuelven via `next-id <prefijo>` en el momento.
+
+> **Siempre** ejecutar `next-id <PREFIJO>` justo antes de crear la nota para obtener el ID actualizado.
+
+---
+
+## 🔍 Estrategias de Búsqueda Semántica
+
+El skill soporta **4 estrategias** para buscar información, ordenadas de la más a la menos eficiente según el caso:
+
+### Estrategia 1: `rg` (recomendada para búsquedas rápidas y precisas)
+
+```bash
+# Búsqueda por palabra clave exacta en todos los .md
+rg -i "firewall" "$BABILONIA/" -g "*.md"
+
+# Búsqueda por frase exacta
+rg -i "política de backup" "$BABILONIA/" -g "*.md"
+
+# Búsqueda en frontmatter (tags, id, nombre)
+rg -i "tags:.*MOCs" "$BABILONIA/" -g "*.md" --no-heading
+
+# Búsqueda combinando múltiples términos (líneas que contengan ambos)
+rg -i "windows" "$BABILONIA/" -g "*.md" | rg -i "registry"
+
+# Contar ocurrencias
+rg -c "linux" "$BABILONIA/" -g "*.md"
+```
+
+**Cuándo usarla:** Búsqueda rápida, offline (Obsidian cerrado), resultados sin filtro.
+
+### Estrategia 2: REST API Search (recomendada para búsqueda desde Obsidian abierto)
+
+```bash
+# Búsqueda full-text simple
+curl -sk -X POST \
+  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
+  "${OBSIDIAN_URL}/search/simple/?query=firewall+config"
+
+# Búsqueda con filtro por path (solo en una carpeta)
+curl -sk -X POST \
+  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
+  "${OBSIDIAN_URL}/search/simple/?query=firewall&path=Manuales"
+```
+
+**Cuándo usarla:** Obsidian abierto, se necesita resultado estructurado JSON, paths limpios.
+
+### Estrategia 3: MCP Search (recomendada para búsqueda semántica estructurada)
+
+```bash
+# Inicializar sesión MCP (si no se tiene una activa)
+SID=$(curl -sk -i -X POST "${OBSIDIAN_URL}/mcp/" \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"opencode","version":"1.0.0"}}}')
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"opencode","version":"1.0.0"}}}' \
+  | grep -ia "mcp-session-id" | head -1 | sed 's/.*: //' | tr -d '\r\n')
 
-SID=$(echo "$SESSION_RESP" | grep -ia "mcp-session-id" | head -1 | sed 's/.*: //' | tr -d '\r\n')
-
-# 2. Listar tags (solo MCP puede hacerlo con metadata completa)
-curl -sk -X POST "https://127.0.0.1:27124/mcp/" \
+# Búsqueda JsonLogic (estructurada, potente)
+curl -sk -X POST "${OBSIDIAN_URL}/mcp/" \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
   -H "Mcp-Session-Id: ${SID}" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"tag_list","arguments":{}}}'
+  -d '{
+    "jsonrpc":"2.0",
+    "id":2,
+    "method":"tools/call",
+    "params":{
+      "name":"search_query",
+      "arguments":{
+        "query": {
+          "and": [
+            {"or": [{"path": {"contains": "Manuales"}}, {"path": {"contains": "WORK"}}]},
+            {"content": {"contains": "firewall"}}
+          ]
+        }
+      }
+    }
+  }'
 ```
 
----
+**Cuándo usarla:** Búsqueda con múltiples condiciones (path + contenido + tags), filtros anidados.
 
-## Modo 3: Filesystem (fallback universal, sin dependencias)
-
-> Usar cuando Obsidian esté cerrado o para operaciones masivas.
-> **Ventaja**: No requiere red, es lo más rápido para leer/escribir archivos completos.
-
-### Operaciones básicas
+### Estrategia 4: Tags (recomendada para navegación por categorías)
 
 ```bash
-# Leer archivo
-cat "/files/Personal-Vault/ruta/nota.md"
+# Listar todos los tags con su frecuencia
+curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
+  "${OBSIDIAN_URL}/tags/"
 
-# Buscar (grep/rg)
-rg -r "patrón" "/files/Personal-Vault/" --include "*.md"
+# Buscar notas con un tag específico vía rg (filesystem)
+rg "tags:.*KNOWLEDGE" "$BABILONIA/" -g "*.md" --no-heading -l
+```
 
-# Escribir archivo
-cat > "/files/Personal-Vault/ruta/nota.md" << 'EOF'
+**Cuándo usarla:** Para entender la estructura temática del vault, o filtrar por dominio.
+
+### Tabla de ruteo de búsqueda
+
+| Situación | Estrategia | Comando |
+|-----------|-----------|---------|
+| Offline, búsqueda rápida | `rg` (FS) | `rg "término" $BABILONIA -g "*.md"` |
+| Online, quiero JSON estructurado | REST API Search | `POST /search/simple/?query=...` |
+| Búsqueda compleja (path + content + tags) | MCP JsonLogic | `tools/call search_query` |
+| Quiero explorar categorías | Tags | `GET /tags/` |
+| Quiero abrir el resultado en UI | REST API + Open | Search → `POST /open/{path}` |
+
 ---
-tags: [ejemplo]
----
-# Contenido
-EOF
 
-# Listar directorio
-ls "/files/Personal-Vault/ruta/"
+## 📖 Flujo Completo: Crear una Nota de Conocimiento
+
+```bash
+# 1. Obtener ID único
+NOTE_ID=$(next-id MAN)
+# → MAN-001237
+
+# 2. Obtener el template
+TEMPLATE=$(cat "$TEMPLATE_NOTA")
+
+# 3. Adaptar el template
+#    - Reemplazar MAN-XXXXXX por $NOTE_ID
+#    - Reemplazar {{title}} por el título real
+#    - Reemplazar {{date}} por la fecha actual
+#    - Completar OBJETIVO y DESCRIPCIÓN con contenido descriptivo
+
+CONTENT=$(echo "$TEMPLATE" | sed \
+  -e "s/MAN-XXXXXX/$NOTE_ID/" \
+  -e "s/{{title}}/Mi título descriptivo/" \
+  -e "s/{{date}}/$(date '+%Y-%m-%d')/" \
+  -e '/^# OBJETIVO/a\
+> Entender cómo funciona X concepto para aplicarlo en Y contexto.' \
+  -e '/^# DESCRIPCIÓN/a\
+\
+## ¿Qué es?\
+Breve definición.\
+\
+## ¿Cómo funciona?\
+Explicación del mecanismo.\
+\
+## Ejemplo práctico\
+Código o caso de uso.\
+\
+## Referencias\
+Links a notas relacionadas.')
+
+# 4. Guardar la nota (elegir método)
+# Opción A: Filesystem
+echo "$CONTENT" > "$BABILONIA/Manuales/00-FUNDAMENTALS/mi-nota.md"
+
+# Opción B: REST API
+curl -sk -X PUT \
+  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
+  -H "Content-Type: text/markdown" \
+  --data-raw "$CONTENT" \
+  "${OBSIDIAN_URL}/vault/Manuales/00-FUNDAMENTALS/mi-nota.md"
+
+# 5. Abrir en UI (para verificar)
+curl -sk -X POST \
+  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
+  "${OBSIDIAN_URL}/open/Manuales/00-FUNDAMENTALS/mi-nota.md"
+
+# 6. Ofrecer resumen al usuario
+echo "✅ Nota creada: $NOTE_ID — Mi título descriptivo"
+echo "📂 $BABILONIA/Manuales/00-FUNDAMENTALS/mi-nota.md"
+echo "🔗 Abierta en Obsidian UI"
 ```
 
 ---
 
-## Tabla de ruteo completa (qué usar y cuándo)
+## 📖 Flujo Completo: Crear un MOC
+
+```bash
+# 1. Obtener ID único
+MOC_ID=$(next-id MOC)
+# → MOC-000018
+
+# 2. Obtener el template
+TEMPLATE=$(cat "$TEMPLATE_MOC")
+
+# 3. Adaptar el template
+CONTENT=$(echo "$TEMPLATE" | sed \
+  -e "s/MOC-XXXXXX/$MOC_ID/" \
+  -e "s/{{title}}/Mapa de Contenido - Mi Dominio/" \
+  -e "s/{{TITLE}}/Mapa de Contenido - Mi Dominio/" \
+  -e "s/{{date}}/$(date '+%Y-%m-%d')/" \
+  -e 's/%% WAYPOINT %%/%% Waypoint %%' \
+  -e 's/Descripcion de la carpeta/Índice de todos los recursos relacionados con Mi Dominio/')
+
+# 4. Guardar
+echo "$CONTENT" > "$BABILONIA/Manuales/mi-dominio/_MOC_.md"
+
+# 5. Abrir en UI
+curl -sk -X POST \
+  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
+  "${OBSIDIAN_URL}/open/Manuales/mi-dominio/_MOC_.md"
+```
+
+---
+
+## 📖 Flujo: Buscar y Mostrar en UI (Obligatorio al Responder)
+
+> **Cada vez que un usuario pregunte por información que existe en el vault, el agente DEBE:**
+> 1. Buscar la nota en el vault
+> 2. Leer su contenido
+> 3. **Ofrecer activamente abrirla en la UI** (`POST /open/{path}`)
+> 4. Presentar un resumen de lo encontrado
+
+```bash
+# 1. Buscar
+RESULTADOS=$(rg -i "firewall" "$BABILONIA/" -g "*.md" -l)
+# o via REST API:
+# RESULTADOS=$(curl -sk -X POST ... /search/simple/?query=firewall)
+
+# 2. Si hay resultado único → leer y mostrar
+if [ -f "$RESULTADOS" ]; then
+  # 3. Abrir en UI
+  REL_PATH=${RESULTADOS#$BABILONIA/}
+  ENCODED_PATH=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$REL_PATH'))")
+  
+  curl -sk -X POST \
+    -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
+    "${OBSIDIAN_URL}/open/${ENCODED_PATH}"
+  
+  # 4. Leer y mostrar resumen
+  echo "### 📄 Encontrado: $REL_PATH"
+  echo "🔗 Abierto en Obsidian UI"
+  head -30 "$RESULTADOS"
+fi
+```
+
+---
+
+## 🔒 Permisos y Restricciones
+
+### Zonas del Vault
+
+Este skill es el **único autorizado** para acceder al vault. Cualquier agente que necesite leer/escribir notas **debe pasar por este skill**.
+
+| Zona | Acceso por defecto | Acción permitida | Excepción |
+|------|-------------------|------------------|-----------|
+| `$BABILONIA/Manuales/**` | ✅ **Allow** | CRUD total (crear, leer, modificar, borrar) | — |
+| `$BABILONIA/TEMPLATES/**` | ✅ **Allow** | Solo lectura (los templates no se modifican) | — |
+| `$BABILONIA/WORK/**` | ✅ **Allow** | CRUD total en notas de trabajo | — |
+| `$BABILONIA/UFASTA/**` | ✅ **Allow** | CRUD total en notas de facultad | — |
+| `$BABILONIA/IMAGES/**` | ✅ **Allow** | Lectura de imágenes adjuntas | — |
+| `$BABILONIA/INBOX/**` | ❌ **ASK** | **No accesible sin permiso explícito del usuario** | Preguntar siempre |
+| `$BABILONIA/.obsidian/**` | ❌ **Deny** | Config interna de Obsidian | Solo si el usuario lo pide explícitamente |
+| `$BABILONIA/.git/**` | ❌ **Deny** | Directorio git | Solo si el usuario lo pide explícitamente |
+| Cualquier otra ruta no listada | ❓ **ASK** | Preguntar al usuario antes de acceder | — |
+
+### Reglas para Agentes que usan este skill
+
+1. **Nunca** accedas a `$BABILONIA/INBOX/` sin preguntar primero al usuario.
+2. **Nunca** modifiques `.obsidian/` ni `.git/` a menos que el usuario lo ordene explícitamente.
+3. **Siempre** que leas una nota del vault, ofrecé abrirla en la UI de Obsidian.
+4. **Siempre** que crees una nota, usá el template correspondiente y generá el ID con `next-id`.
+5. **Siempre** priorizá rutas relativas a `$BABILONIA` — nunca absolutas.
+
+---
+
+## ⚙️ Cross-Platform
+
+| Recurso | Linux | Windows |
+|---------|-------|---------|
+| Vault root | `$BABILONIA` | `$BABILONIA` (definido en el entorno) |
+| REST API | `https://127.0.0.1:27124` | `https://127.0.0.1:27124` |
+| CLI Obsidian | `obsidian vault=Personal-Vault ...` | `obsidian vault=Personal-Vault ...` |
+| Git sync scripts | `$DOTFILES/automat/vault-pull.sh` / `vault-push.sh` | *(idem si existe)* |
+
+---
+
+## 📋 Tabla de Ruteo Completa: Operación → Canal
 
 | Operación | Canal preferente | Por qué | Fallback |
 |-----------|-----------------|---------|----------|
-| **Leer nota** | 🥇 Filesystem | Sin red, instantáneo | REST API |
-| **Listar directorio** | 🥇 Filesystem | `ls` / `rg` directo | REST API |
-| **Buscar keyword** | 🥇 Filesystem | `rg` / `grep` masivo | REST API search |
-| **Buscar por tags** | 🥇 REST API | `GET /tags/` + filtro | MCP |
-| **Tags + counts** | 🥇 REST API | `GET /tags/` (1 request) | MCP tag_list |
+| **Leer nota** | 🥇 Filesystem | `cat` instantáneo, sin red | REST API |
+| **Listar directorio** | 🥇 Filesystem | `ls` directo, sin dep | REST API |
+| **Buscar keyword (rg)** | 🥇 Filesystem | `rg` masivo, offline | REST API search |
+| **Buscar por tags** | 🥇 REST API | `GET /tags/` + filtro | MCP tag_list |
 | **Crear nota** | 🥇 REST API | `PUT` + validación | Filesystem |
 | **Editar nota completa** | 🥇 REST API | `PUT` reemplazo completo | Filesystem |
 | **Abrir nota en UI** | 🥇 REST API | `POST /open/{path}` (1 request) | MCP open_file |
-| **Patch quirúrgico** | 🥇 MCP | `vault_patch` con targeting preciso | REST API PATCH |
+| **Patch quirúrgico** | 🥇 MCP | `vault_patch` preciso | REST API PATCH |
 | **Nota activa** | 🥇 MCP | `active_file_get_path` | REST API `/active/` |
 | **Notas periódicas** | 🥇 REST API | `GET /periodic/daily/` | MCP |
 | **Ejecutar comandos** | 🥇 REST API | `POST /commands/{id}/` | MCP command_execute |
-| **Búsqueda JsonLogic** | 🥇 MCP | `search_query` con filtros complejos | — |
+| **Búsqueda JsonLogic** | 🥇 MCP | `search_query` con filtros | — |
 | **Document map** | 🥇 MCP | `vault_get_document_map` | — |
 
 ---
 
-## Convenciones de namescape URL encoding
+## ⚠️ Notas y Consideraciones
 
-Al usar la REST API, los espacios y caracteres especiales en rutas deben escaparse:
-
-| Carácter | Encoding |
-|----------|----------|
-| Espacio | `%20` |
-| `#` | `%23` |
-| `?` | `%3F` |
-| `&` | `%26` |
-| `ñ` | `%C3%B1` |
-| `Ñ` | `%C3%91` |
-| `áéíóú` | `%C3%A1%C3%A9%C3%AD%C3%B3%C3%BA` |
-
-**Alternativa**: Usar `printf` para escapar automáticamente:
-```bash
-ENCODED_PATH=$(python3 -c "import urllib.parse; print(urllib.parse.quote('INBOX/General/OTHER/Clave de windows 11 PRO.md'))")
-```
+- **Obsidian debe estar abierto** para usar REST API y MCP. Filesystem funciona siempre.
+- **URL encoding:** Los espacios en paths se escapan con `%20` o usando:
+  ```bash
+  python3 -c "import urllib.parse; print(urllib.parse.quote('$REL_PATH'))"
+  ```
+- **Trash:** El vault usa `trashOption: none` — los borrados son permanentes. Confirmar siempre antes de borrar.
+- **Links:** El vault usa `useMarkdownLinks: true` — los links internos son rutas relativas `.md`.
+- **IOps:** Para operaciones batch (múltiples archivos), preferir **Filesystem**. Para operaciones interactivas, preferir **REST API**.
 
 ---
 
-## Templates disponibles
-
-| Template | File | Uso |
-|----------|------|-----|
-| Daily note | `TEMPLATES/Daily note.md` | Nota diaria con secciones de resumen, importante, reflexiones, aprendizaje, estado |
-| Notas generales | `TEMPLATES/Notas generales.md` | Nota de conocimiento general (tag `KNOWLEDGE`) |
-| MOCs | `TEMPLATES/MOCs.md` | Mapas de contenido (tag `INDEX`, `MOCs`) |
-| NOTA FACULTAD | `TEMPLATES/NOTA FACULTAD.md` | Nota de la facultad (tag `ciberseguridad`, `UNIVERSIDAD`) |
-| Ticket | `TEMPLATES/Ticket - {{DATE}}.md` | Ticket tecnico con RCA, resolucion, lecciones (incluye HTML para OsTicket) |
-
-### Crear nota desde template vía REST API
+## 🩺 Healthcheck Rápido
 
 ```bash
-# Primero leer template
-TEMPLATE=$(curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/vault/TEMPLATES/Notas%20generales.md")
+echo "=== Healthcheck Obsidian Manager ==="
 
-# Luego crear nota con ese contenido (adaptado)
-curl -sk -X PUT \
+# 1. Filesystem
+[ -d "$BABILONIA" ] && echo "✅ Filesystem: $BABILONIA" || echo "❌ Filesystem: no encontrado"
+
+# 2. REST API
+HTTP=$(curl -sk -o /dev/null -w "%{http_code}" \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  -H "Content-Type: text/markdown" \
-  --data "${TEMPLATE}" \
-  "https://127.0.0.1:27124/vault/INBOX/General/mi-nota.md"
-```
+  "${OBSIDIAN_URL}/" 2>/dev/null)
+[ "$HTTP" = "200" ] && echo "✅ REST API: ${OBSIDIAN_URL}" || echo "❌ REST API: no disponible"
 
----
-
-## Flujos de trabajo comunes (versión optimizada)
-
-### 1. Captura rápida (INBOX) — REST API
-
-```bash
-curl -sk -X PUT \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  -H "Content-Type: text/markdown" \
-  --data "# Título\n\nContenido rápido" \
-  "https://127.0.0.1:27124/vault/INBOX/General/mi-nota.md"
-```
-
-### 2. Leer daily note — REST API
-
-```bash
+# 3. Tags
 curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/periodic/daily/"
-```
+  "${OBSIDIAN_URL}/tags/" 2>/dev/null | \
+  python3 -c "import sys,json; d=json.load(sys.stdin); print(f'   Tags: {len(d.get(\"tags\",[]))}')" 2>/dev/null
 
-### 3. Buscar y abrir — REST API
+# 4. next-id disponible
+NEXTID=$(command -v next-id 2>/dev/null || echo "$NEXT_ID_SCRIPT")
+[ -n "$NEXTID" ] && echo "✅ next-id: $NEXTID" || echo "⚠️ next-id: no encontrado (usar script directo)"
 
-```bash
-# 1. Buscar
-RESULT=$(curl -sk -X POST \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/search/simple/?query=clave+windows")
-
-# 2. Abrir el primer resultado
-FILE=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['filename'])")
-curl -sk -X POST \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/open/${FILE}"
-```
-
-### 4. Editar frontmatter de una nota — REST API PATCH
-
-```bash
-curl -sk -X PATCH \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  -H "Operation: replace" \
-  -H "Target-Type: frontmatter" \
-  -H "Target: estado" \
-  -H "Content-Type: application/json" \
-  --data '"revisado"' \
-  "https://127.0.0.1:27124/vault/INBOX/mi-nota.md"
-```
-
-### 5. Ver tags y counts — REST API
-
-```bash
-curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/tags/"
-```
-
-### 6. Ejecutar comando de Obsidian — REST API
-
-```bash
-curl -sk -X POST \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "https://127.0.0.1:27124/commands/editor:save-file/"
-```
-
-### 7. Git Sync
-
-```bash
-# Pull desde GitHub
-bash ~/dotfiles/automat/vault-pull.sh
-
-# Push a GitHub (commitea con fecha)
-bash ~/dotfiles/automat/vault-push.sh
+# 5. Templates
+[ -f "$TEMPLATE_NOTA" ] && echo "✅ Template nota: ok" || echo "⚠️ Template nota: no encontrado"
+[ -f "$TEMPLATE_MOC" ] && echo "✅ Template MOC: ok" || echo "⚠️ Template MOC: no encontrado"
 ```
 
 ---
 
-## Healthcheck completo del stack
+## 📚 Referencias Rápidas
 
-Script para verificar que todo funciona:
-
-```bash
-#!/bin/bash
-# Verificar conectividad con Obsidian en todos los modos
-
-API_KEY="${OBSIDIAN_API_KEY}"
-BASE="https://127.0.0.1:27124"
-VAULT="/files/Personal-Vault"
-
-echo "=== Healthcheck Obsidian ==="
-
-# 1. REST API
-HTTP_CODE=$(curl -sk -o /dev/null -w "%{http_code}" \
-  -H "Authorization: Bearer ${API_KEY}" \
-  "${BASE}/" 2>/dev/null)
-if [ "$HTTP_CODE" = "200" ]; then
-  echo "✅ REST API: OK (${BASE})"
-  
-  # 1b. Tags (operación clave)
-  TAGS=$(curl -sk -H "Authorization: Bearer ${API_KEY}" \
-    "${BASE}/tags/" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'{len(d.get(\"tags\",[]))} tags')" 2>/dev/null)
-  echo "   Tags: ${TAGS:-error}"
-  
-  # 1c. Search
-  SEARCH=$(curl -sk -X POST \
-    -H "Authorization: Bearer ${API_KEY}" \
-    "${BASE}/search/simple/?query=test" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'{len(d)} resultados')" 2>/dev/null)
-  echo "   Search: ${SEARCH:-error}"
-else
-  echo "❌ REST API: No disponible"
-fi
-
-# 2. MCP
-MCP_INIT=$(curl -sk -X POST "${BASE}/mcp/" \
-  -H "Authorization: Bearer ${API_KEY}" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"opencode","version":"1.0.0"}}}' 2>/dev/null)
-SID=$(echo "$MCP_INIT" | grep -ia "mcp-session-id" | head -1 | sed 's/.*: //' | tr -d '\r\n')
-if [ -n "$SID" ]; then
-  echo "✅ MCP: OK (session: ${SID})"
-  
-  # Probar tag_list via MCP
-  MCP_TAGS=$(curl -sk -X POST "${BASE}/mcp/" \
-    -H "Authorization: Bearer ${API_KEY}" \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json, text/event-stream" \
-    -H "Mcp-Session-Id: ${SID}" \
-    -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"tag_list","arguments":{}}}' 2>/dev/null)
-  echo "   MCP tags: OK"
-else
-  echo "❌ MCP: No disponible"
-fi
-
-# 3. Filesystem
-if [ -d "$VAULT" ]; then
-  echo "✅ Filesystem: OK (${VAULT})"
-  echo "   Notas: $(find ${VAULT} -name '*.md' | wc -l)"
-else
-  echo "❌ Filesystem: No encontrado"
-fi
-```
-
----
-
-## Notas importantes
-
-- El REST API y MCP requieren que **Obsidian esté abierto**
-- El filesystem **no requiere** Obsidian, pero no soporta tags, frontmatter queries, ni comandos
-- Siempre codificar URLs con `%20` para espacios (o usar `python3 -c "import urllib.parse; print(urllib.parse.quote(path))"`)
-- El vault usa `useMarkdownLinks: true` — los links internos son rutas relativas `.md`
-- `trashOption: none` — los archivos borrados se pierden permanentemente
-- Para **operaciones batch** (múltiples archivos), siempre preferir filesystem
-- Para **operaciones interactivas** (abrir en UI, comandos), siempre preferir REST API
-- Para **operaciones de metadata** (tags, frontmatter, patches), priorizar MCP
-
----
-
-## Aliases recomendados para `.zshrc`
-
-```zsh
-# CLI de Obsidian
-alias ov='obsidian vault=Personal-Vault'
-alias ovd='obsidian vault=Personal-Vault daily'
-alias ovs='obsidian vault=Personal-Vault search'
-alias ovt='obsidian vault=Personal-Vault tasks'
-
-# REST API directa
-alias ob='curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}"'
-alias ob-open='ob -X POST "https://127.0.0.1:27124/open"'
-alias ob-read='ob "https://127.0.0.1:27124/vault"'
-alias ob-tags='ob "https://127.0.0.1:27124/tags"'
-alias ob-search='ob -X POST "https://127.0.0.1:27124/search/simple/?query"'
-
-# Git sync
-alias ovpush='bash ~/dotfiles/automat/vault-push.sh'
-alias ovpull='bash ~/dotfiles/automat/vault-pull.sh'
-```
+- **ID Registry completo:** `$ID_REGISTRY`
+- **Script next-id:** `$NEXT_ID_SCRIPT`
+- **Alias útil (agregar a zshrc):**
+  ```zsh
+  alias ov='obsidian vault=Personal-Vault'
+  alias ob='curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}"'
+  alias ob-open='ob -X POST "${OBSIDIAN_URL}/open"'
+  alias ob-read='ob "${OBSIDIAN_URL}/vault"'
+  alias ob-tags='ob "${OBSIDIAN_URL}/tags"'
+  alias ob-search='ob -X POST "${OBSIDIAN_URL}/search/simple/?query"'
+  ```

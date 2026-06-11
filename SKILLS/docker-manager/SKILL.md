@@ -126,7 +126,7 @@ Este es un caso de uso específico para tu perfil CSIRT:
 ```bash
 docker pull remnux/remnux-distro
 docker run -it --rm \
-  -v /home/lcampassi/malware-samples:/samples:ro \
+  -v $HOME/malware-samples:/samples:ro \
   --cap-add=SYS_PTRACE \
   --security-opt seccomp=unconfined \
   remnux/remnux-distro bash
@@ -140,7 +140,7 @@ docker network create --internal sandbox-net
 # Ejecutar con red aislada
 docker run -it --rm \
   --net sandbox-net \
-  -v /home/lcampassi/malware-samples:/samples:ro \
+  -v $HOME/malware-samples:/samples:ro \
   ubuntu:22.04 bash
 ```
 
@@ -148,8 +148,8 @@ docker run -it --rm \
 ```bash
 docker pull blacktop/cuckoo
 docker run -d --name cuckoo \
-  -v /home/lcampassi/cuckoo/conf:/conf \
-  -v /home/lcampassi/cuckoo/storage:/storage \
+  -v $HOME/cuckoo/conf:/conf \
+  -v $HOME/cuckoo/storage:/storage \
   -p 8090:8090 \
   blacktop/cuckoo
 ```

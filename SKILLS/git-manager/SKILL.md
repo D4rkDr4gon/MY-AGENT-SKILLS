@@ -10,7 +10,7 @@ Guía práctica para git workflows, orientada a desarrollo de software y gestió
 ## Contexto del usuario
 
 - **Git config global:** `~/.gitconfig`
-- **Repos principales:** `~/dotfiles/` (GitHub: D4rkDr4g0n/dotfiles), proyectos en `~/projects/`
+- **Repos principales:** `$DOTFILES/` (GitHub: ${DOTFILES_REPO}), proyectos en `~/projects/`
 - **Editor:** Neovim (LazyVim)
 - **Firma de commits:** GPG key available via `secret-manager`
 - **Plataforma:** GitHub (CLI: `gh`)
@@ -437,7 +437,7 @@ gh issue create --label bug
 gh issue list
 
 # Repos
-gh repo view D4rkDr4g0n/dotfiles
+gh repo view ${DOTFILES_REPO}
 gh repo fork
 gh repo sync
 
@@ -452,7 +452,7 @@ gh release list
 
 ```bash
 # Git bare repo (estrategia recomendada para dotfiles)
-git init --bare ~/dotfiles
+git init --bare "$DOTFILES"
 alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles --work-tree=$HOME'
 dotfiles config status.showUntrackedFiles no
 
@@ -462,7 +462,7 @@ dotfiles commit -m "chore: agregar init.lua de nvim"
 dotfiles push
 
 # Clonar en nueva máquina
-git clone --bare https://github.com/D4rkDr4g0n/dotfiles.git $HOME/dotfiles
+git clone --bare https://github.com/${DOTFILES_REPO}.git "$DOTFILES"
 alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles --work-tree=$HOME'
 dotfiles checkout
 ```
