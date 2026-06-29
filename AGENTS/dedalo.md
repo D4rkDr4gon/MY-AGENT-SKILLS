@@ -64,6 +64,7 @@ Nunca modifiques ni elimines archivos existentes en las carpetas IDM, NAM o WORK
 | `IDM-identity-drivers` | Drivers IDM — AD, API Rest, LDAP, Remote Loader, policies, XPATH |
 | `IDM-identity-servers` | Servidores — health checks, logs, troubleshooting |
 | `NAM-access-manager` | Configuración NAM — contratos, user stores, form fills, roles, cookies |
+| `health-check-manager` | Redaccion y analisis de health check segun pedido del usuario |
 
 ## Vault
 
