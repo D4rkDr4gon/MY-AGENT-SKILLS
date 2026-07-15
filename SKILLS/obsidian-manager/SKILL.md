@@ -47,7 +47,7 @@ OBSIDIAN_URL="${OBSIDIAN_URL:-https://127.0.0.1:27124}"
 TEMPLATE_NOTA="${TEMPLATE_NOTA:-$BABILONIA/TEMPLATES/Notas generales.md}"
 TEMPLATE_MOC="${TEMPLATE_MOC:-$BABILONIA/TEMPLATES/MOCs.md}"
 ID_REGISTRY="${ID_REGISTRY:-$BABILONIA_OPENCODE/ID-REGISTRY.md}"
-NEXT_ID_SCRIPT="${NEXT_ID_SCRIPT:-$BABILONIA/Manuales/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/next-id.py}"
+NEXT_ID_SCRIPT="${NEXT_ID_SCRIPT:-$BABILONIA/BIBLIOTECA-DE-BABEL/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/next-id.py}"
 ```
 
 > Cualquier referencia a paths dentro del vault **siempre** usa `$BABILONIA/...`.  
@@ -203,7 +203,7 @@ curl -sk -X POST \
 # Búsqueda con filtro por path (solo en una carpeta)
 curl -sk -X POST \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "${OBSIDIAN_URL}/search/simple/?query=firewall&path=Manuales"
+  "${OBSIDIAN_URL}/search/simple/?query=firewall&path=BIBLIOTECA-DE-BABEL"
 ```
 
 **Cuándo usarla:** Obsidian abierto, se necesita resultado estructurado JSON, paths limpios.
@@ -234,7 +234,7 @@ curl -sk -X POST "${OBSIDIAN_URL}/mcp/" \
       "arguments":{
         "query": {
           "and": [
-            {"or": [{"path": {"contains": "Manuales"}}, {"path": {"contains": "WORK"}}]},
+            {"or": [{"path": {"contains": "BIBLIOTECA-DE-BABEL"}}, {"path": {"contains": "EL-EMPORIO"}}]},
             {"content": {"contains": "firewall"}}
           ]
         }
@@ -308,23 +308,23 @@ Links a notas relacionadas.')
 
 # 4. Guardar la nota (elegir método)
 # Opción A: Filesystem
-echo "$CONTENT" > "$BABILONIA/Manuales/00-FUNDAMENTALS/mi-nota.md"
+echo "$CONTENT" > "$BABILONIA/BIBLIOTECA-DE-BABEL/00-FUNDAMENTALS/mi-nota.md"
 
 # Opción B: REST API
 curl -sk -X PUT \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
   -H "Content-Type: text/markdown" \
   --data-raw "$CONTENT" \
-  "${OBSIDIAN_URL}/vault/Manuales/00-FUNDAMENTALS/mi-nota.md"
+  "${OBSIDIAN_URL}/vault/BIBLIOTECA-DE-BABEL/00-FUNDAMENTALS/mi-nota.md"
 
 # 5. Abrir en UI (para verificar)
 curl -sk -X POST \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "${OBSIDIAN_URL}/open/Manuales/00-FUNDAMENTALS/mi-nota.md"
+  "${OBSIDIAN_URL}/open/BIBLIOTECA-DE-BABEL/00-FUNDAMENTALS/mi-nota.md"
 
 # 6. Ofrecer resumen al usuario
 echo "✅ Nota creada: $NOTE_ID — Mi título descriptivo"
-echo "📂 $BABILONIA/Manuales/00-FUNDAMENTALS/mi-nota.md"
+echo "📂 $BABILONIA/BIBLIOTECA-DE-BABEL/00-FUNDAMENTALS/mi-nota.md"
 echo "🔗 Abierta en Obsidian UI"
 ```
 
@@ -350,12 +350,12 @@ CONTENT=$(echo "$TEMPLATE" | sed \
   -e 's/Descripcion de la carpeta/Índice de todos los recursos relacionados con Mi Dominio/')
 
 # 4. Guardar
-echo "$CONTENT" > "$BABILONIA/Manuales/mi-dominio/_MOC_.md"
+echo "$CONTENT" > "$BABILONIA/BIBLIOTECA-DE-BABEL/mi-dominio/_MOC_.md"
 
 # 5. Abrir en UI
 curl -sk -X POST \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "${OBSIDIAN_URL}/open/Manuales/mi-dominio/_MOC_.md"
+  "${OBSIDIAN_URL}/open/BIBLIOTECA-DE-BABEL/mi-dominio/_MOC_.md"
 ```
 
 ---
@@ -401,11 +401,11 @@ Este skill es el **único autorizado** para acceder al vault. Cualquier agente q
 
 | Zona | Acceso por defecto | Acción permitida | Excepción |
 |------|-------------------|------------------|-----------|
-| `$BABILONIA/Manuales/**` | ✅ **Allow** | CRUD total (crear, leer, modificar, borrar) | — |
+| `$BABILONIA/BIBLIOTECA-DE-BABEL/**` | ✅ **Allow** | CRUD total (crear, leer, modificar, borrar) | — |
 | `$BABILONIA/TEMPLATES/**` | ✅ **Allow** | Solo lectura (los templates no se modifican) | — |
-| `$BABILONIA/WORK/**` | ✅ **Allow** | CRUD total en notas de trabajo | — |
-| `$BABILONIA/UFASTA/**` | ✅ **Allow** | CRUD total en notas de facultad | — |
-| `$BABILONIA/IMAGES/**` | ✅ **Allow** | Lectura de imágenes adjuntas | — |
+| `$BABILONIA/EL-EMPORIO/**` | ✅ **Allow** | CRUD total en notas de trabajo | — |
+| `$BABILONIA/EL-OBSERVATORIO-DE-BABILONIA/**` | ✅ **Allow** | CRUD total en notas de facultad | — |
+| `$BABILONIA/LA-VIA-PROCESIONAL/**` | ✅ **Allow** | Lectura de imágenes y capturas adjuntas | — |
 | `$BABILONIA/INBOX/**` | ❌ **ASK** | **No accesible sin permiso explícito del usuario** | Preguntar siempre |
 | `$BABILONIA/.obsidian/**` | ❌ **Deny** | Config interna de Obsidian | Solo si el usuario lo pide explícitamente |
 | `$BABILONIA/.git/**` | ❌ **Deny** | Directorio git | Solo si el usuario lo pide explícitamente |
