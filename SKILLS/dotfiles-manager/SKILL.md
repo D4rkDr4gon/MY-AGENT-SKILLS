@@ -66,7 +66,7 @@ dotfiles/
 │   ├── config.py                      # Entry point, wl_input_rules, cursor
 │   ├── current_theme.json             # Tema activo
 │   └── modules/
-│       ├── groups.py                  # 5 workspaces: NOTES, FILES, DEV, SYS, WEB
+│       ├── groups.py                  # 6 workspaces con íconos (name numérico + label)
 │       ├── keys.py                    # Keybindings (mod4 = Super), dual-backend scripts
 │       ├── layouts.py                 # Columns, MonadTall, Stack
 │       ├── mouse.py                   # Mouse bindings
@@ -120,7 +120,7 @@ dotfiles/
 │       ├── qtile-workspace-switcher.sh
 │       ├── notification-center.sh     # Notificaciones en Rofi (Dunst history)
 │       ├── settings-menu.sh           # Themes, Workspaces, Web search, Backgrounds, Notifications
-│       └── web-search.sh              # Google, abre Firefox en WEB workspace (dual-backend)
+│       └── web-search.sh              # Google, abre Firefox en workspace 5 (dual-backend)
 │
 ├── picom/                             # Compositor (X11 only)
 │   └── picom.conf                     # GLX, vsync, 12px radius, dual_kawase blur (6)
@@ -211,13 +211,14 @@ dotfiles/
 
 ## Workspaces (Qtile Groups)
 
-| # | Nombre | Icono | Uso |
-|---|--------|-------|-----|
-| 1 | NOTES | 󰠮 | Notas y documentacion |
-| 2 | FILES | 󰉋 | Gestion de archivos |
-| 3 | DEV | 󰘦 | Desarrollo / coding |
-| 4 | SYS | 󰣇 | Sistema, terminales |
-| 5 | WEB | 󰖟 | Navegador, web |
+| # | Icono | Nombre |
+|---|-------|--------|
+| 1 |  | Workspace 1 |
+| 2 |  | Workspace 2 |
+| 3 |  | Workspace 3 |
+| 4 |  | Workspace 4 |
+| 5 |  | Workspace 5 |
+| 6 |  | Workspace 6 |
 
 ---
 
@@ -243,8 +244,8 @@ dotfiles/
 | `Mod + Ctrl + R` | Recargar Qtile + Waybar |
 | `Mod + L` | Action menu (Lock/Reboot/Poweroff/Logout) |
 | `Mod + Shift + Space` | Settings menu (incluye Notifications) |
-| `Mod + 1-5` | Ir a workspace |
-| `Mod + Shift + 1-5` | Mover ventana a workspace |
+| `Mod + 1-6` | Ir a workspace |
+| `Mod + Shift + 1-6` | Mover ventana a workspace |
 | `Print` / `Mod + Shift + S` | Screenshot (grim+slurp) |
 
 ### Kitty
