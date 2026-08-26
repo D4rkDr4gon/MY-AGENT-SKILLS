@@ -47,6 +47,7 @@ AI:             opencode (skills personalizadas)
 ~/.config/zsh         -> $DOTFILES/zsh/
 ~/.config/automat     -> $DOTFILES/automat/
 ~/.config/opencode    -> $DOTFILES/opencode/
+~/.config/herdr/config.toml -> $DOTFILES/herdr/config.toml  # solo el archivo, el resto es runtime (sockets/logs/session.json)
 ```
 
 ---
@@ -157,6 +158,10 @@ dotfiles/
 │   ├── package.json                   # Plugin dependencies
 │   └── node_modules/                  # Runtime (gitignored)
 │
+├── herdr/                             # Multiplexor de agentes IA (tmux-like)
+│   ├── config.toml                    # prefix ctrl+space, theme.custom dinamico
+│   └── launch.sh                      # kitty -e herdr (auto_detect_launch nativo)
+│
 ├── themes/                            # 8 temas dinamicos
 │   ├── brown-at-at/   (theme.json + wallpaper)
 │   ├── purple-sky/
@@ -236,6 +241,7 @@ dotfiles/
 | `Mod + P` | Bitwarden |
 | `Mod + S` | Sublime Text |
 | `Mod + V` | CopyQ |
+| `Mod + Shift + Return` | Herdr (multiplexor de agentes IA, prefix ctrl+space) |
 | `Mod + Q` | Cerrar ventana |
 | `Mod + Shift + F` | Fullscreen |
 | `Mod + T` | Float toggle |
@@ -352,6 +358,7 @@ La documentacion vive en `docs/` y cubre:
 | `docs/configuration/thunar.md` | Thunar accels/uca |
 | `docs/configuration/opencode.md` | opencode AI config |
 | `docs/configuration/extras.md` | OneDrive, wallpapers, gastos.py |
+| `docs/configuration/herdr.md` | Herdr: prefix custom, launch, integracion de temas, por que solo se symlinkea config.toml |
 
 ---
 
