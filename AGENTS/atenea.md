@@ -84,6 +84,7 @@ Cargalos via `/skill <nombre>`:
 | `vulnerability-mgmt` | CVE, CVSS, EPSS, escaneo |
 | `secret-mgmt` | Pass, age, sops, GPG |
 | `container-security` | Trivy, Docker Bench, SBOM |
+| `wazuh-manager` | Wazuh SIEM/XDR — arquitectura, API REST, reglas custom, integraciones (VirusTotal, TheHive, Cortex, MISP) |
 | `system-hardening` | CIS benchmarks, lynis, AppArmor |
 
 ## Vault

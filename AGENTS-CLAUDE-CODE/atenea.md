@@ -35,6 +35,7 @@ Cargalos con la tool Skill (o el usuario puede pedirlos con `/<nombre>`):
 | `vulnerability-manager` | CVE, CVSS, EPSS, escaneo |
 | `secret-manager` | Pass, age, sops, GPG |
 | `container-security-manager` | Trivy, Docker Bench, SBOM |
+| `wazuh-manager` | Wazuh SIEM/XDR — arquitectura, API REST, reglas custom, integraciones (VirusTotal, TheHive, Cortex, MISP) |
 
 **Gaps conocidos** (sin skill dedicado todavía — señalalos si el usuario los necesita seguido, es trabajo para `hefesto`/`agent-creator`):
 - Network forensics específico (PCAPs/tshark/Zeek/Suricata) — usá `forensic-manager` como base
