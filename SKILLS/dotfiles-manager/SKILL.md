@@ -119,7 +119,8 @@ dotfiles/
 │       ├── emoji.sh                   # 800+ emojis, copia al clipboard
 │       ├── qtile-action-menu.sh       # Suspend/Reboot/Poweroff/Logout
 │       ├── qtile-workspace-switcher.sh
-│       ├── notification-center.sh     # Notificaciones en Rofi (Dunst history)
+│       ├── notification-center.sh     # Notificaciones en Rofi (Dunst history) + entrada No Molestar
+│       ├── dnd-menu.sh                # No Molestar: toggle global, timer (systemd-run --user), silenciar apps
 │       ├── settings-menu.sh           # Themes, Workspaces, Web search, Backgrounds, Notifications
 │       └── web-search.sh              # Google, abre Firefox en workspace 5 (dual-backend)
 │
@@ -127,7 +128,8 @@ dotfiles/
 │   └── picom.conf                     # GLX, vsync, 12px radius, dual_kawase blur (6)
 │
 ├── dunst/                             # Notification daemon (X11 + Wayland)
-│   └── dunstrc                        # 16px radius, rofi-aligned colors
+│   ├── dunstrc                        # 16px radius, rofi-aligned colors; reglas de apps silenciadas autogeneradas al final
+│   └── blocked-apps.conf              # Estado de apps silenciadas (enabled<TAB>appname), tracked en git
 │
 ├── lazy-nvim/                         # Neovim (LazyVim)
 │   ├── init.lua, lazy-lock.json
@@ -287,49 +289,67 @@ dotfiles/
 
 ## Temas Disponibles
 
-8 temas en `themes/<nombre>/theme.json`:
+17 temas en `themes/<nombre>/theme.json`:
 
 | Tema | Wallpaper | Paleta |
 |------|-----------|--------|
-| Brown AT-AT | at-at.png | Marron/gris calido |
-| Red Japan | japan-wallpaper.jpg | Rojo oscuro |
-| Gray Terminal | wallpaper hacker.jpg | Grises |
-| Green Geek | hacker-setup-dark.jpg | Verde terminal |
-| Purple Sky | wallpaper_city.jpg | Violeta |
-| Ciberpunk | wallpaper_city_sci-fi.jpg | Neon magenta/purple |
-| Chill Lofi | wallpaper_Creativity_Room.jpg | Tierra calido |
-| Data Center | Wallpaper data center.jpg | Cian/verde |
+| Brown AT-AT | STAR-WARS-AT-AT.png | Marron/gris calido |
+| Red Dark | RED-STONE.png | Rojo oscuro, minimalista |
+| Gray Terminal | HACKER.jpg | Grises |
+| Green Geek | HACKER-SETUP-DARK.jpg | Verde terminal |
+| Purple Sky | CITY.jpg | Violeta |
+| Ciberpunk | CITY-SCI-FI.jpg | Neon magenta/purple |
+| Chill Lofi | CREATIVITY-ROOM.jpg | Tierra calido |
+| Data Center | DATA-CENTER.jpg | Cian/verde |
+| Gruvbox | CITYSCAPE-CYBER.png | Retro, tonos tierra, amarillo/verde mate |
+| Everforest | CYBER-SPACE-CITY.png | Bosque neblinoso, verdes calidos |
+| Solarized Dark | CODE.png | Cientifico, contraste calibrado |
+| Atom Dark | INDUSTRIAL-CYBERPUNK-CITY.png | Grises oscuros, acento azul |
+| Nord | DARK-SERVER-ROOM.png | Azul-gris artico |
+| Catppuccin Mocha | DOG-ROOM.jpg | Pastel oscuro |
+| Tokyo Night | CITY-DARK.jpg | Azul-violeta nocturno |
+| Kanagawa Dragon | JAPAN-MYTHOLOGY.png | Neutros calidos tipo tinta sumi-e, acentos azul/malva |
+| Oxocarbon Dark | CYBERPUNK-DATACENTER.png | IBM Carbon, negro carbon con neon purpura/azul |
 
 ### Estructura de theme.json
 
+Schema **plano** (no anidado), leido con `jq`:
+
 ```json
 {
-  "name": "AT-AT",
-  "wallpaper": "$HOME/dotfiles/recursos/wallpapers/at-at.png",
-  "colors": {
-    "primary": "#a0522d",
-    "secondary": "#8b4513",
-    "background": "#1a1a1a",
-    "foreground": "#d4c5a9",
-    "chip": {
-      "battery": "#a0522d",
-      "bluetooth": "#4a90d9",
-      "wlan": "#4a90d9",
-      "audio": "#a0522d"
-    }
-  }
+  "name": "KANAGAWA DRAGON",
+  "icon": "",
+  "wallpaper": "/home/lcampassi/dotfiles/recursos/wallpapers/JAPAN-MYTHOLOGY.png",
+  "primary": "#8ba4b0",
+  "secondary": "#a292a3",
+  "background": "#181616",
+  "foreground": "#c5c9c5",
+  "chip_battery": "#282727",
+  "chip_bluetooth": "#393836",
+  "chip_wlan": "#625e5a",
+  "chip_audio": "#7a8382",
+  "status_ok": "#8a9a7b",
+  "status_warn": "#c4b28a",
+  "status_error": "#c4746e"
 }
 ```
 
+`chip_battery` → `chip_audio` es una rampa de 4 superficies oscuro→claro (reinterpretada como escala de elevacion para dunst, rofi, kitty, HyprFM, Obsidian, VPN TUI). `status_ok`/`status_warn`/`status_error` son colores semanticos (herdr, HyprFM, dunst, agents-tui, VPN TUI, y ahora tambien el statusline de Claude Code). Los tokens de forma (fuente, radios, opacidad, blur) viven como default en `themes/_design-tokens.json`, pero desde el piloto `atom-dark`/`tokyo-night`/`oxocarbon-dark` **sí pueden variar por tema** vía 8 campos opcionales (`radius`, `opacity`, `blur_enabled`, `blur_size`, `blur_passes`, `font_mono`, `icon_theme`, `opencode_theme`) — el resto de los temas todavía no los define y cae al default. Detalle completo en `docs/themes.md`.
+
 ### Componentes que actualiza theme-switch.sh
 
-- `polybar/colors.ini` (X11)
-- `waybar/theme.css` (Wayland)
-- `kitty/colors.conf`
-- `~/.zsh_colors`
-- `qtile/current_theme.json`
-- `qtile/modules/screens.py` (wallpaper)
-- Recarga: polybar (X11), waybar (Wayland), kitty, qtile
+- `polybar/colors.ini` (X11, legacy)
+- `waybar/theme.css` + `waybar/style.css` (radio/fuente)
+- `kitty/colors.conf` + `kitty/kitty.conf` (fuente)
+- `~/.zsh_colors`, `~/.zsh_banner_color`
+- `qtile/current_theme.json`, `qtile/modules/screens.py` (wallpaper — legacy, el WM real en uso es Hyprland)
+- `hypr/hyprland.conf`: colores de borde, `rounding`, opacidad por-app (`windowrule`), `decoration.blur` — **este es el WM que corre de verdad**, no Qtile/picom
+- `rofi/theme*.rasi` (radio), `rofi/colors.rasi` (fuente), `dunst/dunstrc` (radio/transparencia/fuente/colores), `gtklock/style.css` (radio/fuente)
+- `~/.config/gtk-3.0/gtk.css` (colores Thunar/GTK), `~/.config/gtk-3.0/settings.ini` (icon theme)
+- `herdr/config.toml` ([theme.custom]), `opencode/opencode.jsonc` (colores de agente + campo `theme` built-in)
+- `~/.claude/statusline-command.sh` (colores ANSI 24-bit de status_ok/warn/error/primary)
+- Best-effort si existen: HyprFM, Obsidian (lc-red), Sublime Text, LazyVim, Walker
+- Recarga: hyprctl, waybar, kitty, dunst, herdr, thunar
 
 ---
 
@@ -363,6 +383,15 @@ La documentacion vive en `docs/` y cubre:
 ---
 
 ## Instrucciones
+
+### 0. AVISO: mantener D4rkFiles sincronizado
+
+Estos dotfiles reales (`$DOTFILES`) tienen un homonimo generico y publico: **D4rkFiles** (`/files/D4rkFiles`,
+github.com/D4rkDr4gon/D4rkFiles). **Si cambiamos algo en los dotfiles reales, actualizamos tambien D4rkFiles con
+su equivalente generico** (sin rutas, nombres, VPNs, trabajo ni credenciales; lo dependiente del tema va como
+plantilla `.tpl`). Equivalencias: `<app>/` -> `config/<app>/`, `lazy-nvim/` -> `config/nvim/`, `zsh/` -> `home/zsh/`,
+`sddm/` y `systemd/user/` -> `system/`, `recursos/shortcuts/` -> `tools/`. Verificar con
+`scripts/dotfiles-doctor.sh` y `scripts/check-docs.sh` de D4rkFiles, y confirmar con el usuario antes del push.
 
 ### 1. Actualizar documentacion tras un cambio
 

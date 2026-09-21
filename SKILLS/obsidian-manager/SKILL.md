@@ -116,16 +116,40 @@ tags:
 Fecha de creación: "{{date}}"
 ---
 # {{TITLE}}
->[!tip] Descripcion de la carpeta
+>[!tip] Una frase: qué es y qué cubre esta carpeta
+
+**Navegación:** [[BIBLIOTECA-DE-BABEL/BIBLIOTECA-DE-BABEL|BIBLIOTECA]] › [[ruta/al/padre|PADRE]]
+
+## DE QUÉ SE TRATA
+%% 2 a 5 líneas: alcance, para qué sirve, a quién le sirve y qué NO cubre %%
+
+## QUÉ ENCONTRÁS ACÁ
+| Contenido | Qué cubre |
+| :-- | :-- |
+| [[ruta/al/hijo\|HIJO]] | Descripción de una línea |
+
+## RUTA DE LECTURA SUGERIDA
+%% solo si hay orden pedagógico; si no, borrar la sección %%
+
+## RELACIONADO
+%% solo MOCs de otras ramas del árbol; si no hay, borrar la sección %%
+
+## DOCUMENTACION OFICIAL
+%% solo productos o tecnologías con fabricante, con links reales; si no aplica, borrar la sección %%
+
 # INDICE
 %% WAYPOINT %%
 >Borrar esto y cambiar WAYPOINT a Waypoint
 ```
 
 **Reglas de uso:**
+- **Un MOC por carpeta** de la biblioteca (salvo adjuntos: `IMAGES`, `images`, `attachments`), con el nombre de la carpeta: `<carpeta>/<carpeta>.md`. La jerarquía de MOCs es la de las carpetas, de lo general a lo específico; no se crean vistas paralelas.
 - El `id:` se genera con `next-id MOC`
 - `nombre:` debe reflejar el dominio/área que indexa
-- La descripción en `[!tip]` debe resumir qué agrupa este MOC
+- La descripción en `[!tip]` es la **única fuente** del resumen del MOC: el MOC padre la reutiliza en su tabla "QUÉ ENCONTRÁS ACÁ"
+- Los `tags` heredan los del MOC padre y agregan los propios
+- La navegación y las tablas usan wikilinks con ruta (`[[ruta/al/MOC|alias]]`): los nombres de carpeta se repiten en el vault y un wikilink corto sería ambiguo
+- `RUTA DE LECTURA SUGERIDA`, `RELACIONADO` y `DOCUMENTACION OFICIAL` son opcionales: se borran si no aplican
 - El `%% WAYPOINT %%` se reemplaza por `%% Waypoint %%` (activa el plugin)
 
 ---
@@ -330,32 +354,67 @@ echo "🔗 Abierta en Obsidian UI"
 
 ---
 
-## 📖 Flujo Completo: Crear un MOC
+## 🗺️ Gestión de MOCs — Delegada por Completo al Agente
+
+> **Regla de fondo (2026-09-19):** el usuario delegó por completo la creación y el mantenimiento de MOCs. Ningún agente pregunta "¿querés que le cree el MOC?" — se crea o actualiza como parte natural de la tarea, siempre respetando la anatomía del template (`### Template: MOC` más arriba). Solo se pregunta si hay una decisión de contenido genuinamente ambigua (p. ej. cómo agrupar una carpeta enorme y heterogénea).
+
+Toda `BIBLIOTECA-DE-BABEL/**` sigue esta regla: **una carpeta de conocimiento = un MOC** (`<carpeta>/<carpeta>.md`), salvo adjuntos (`IMAGES`, `images`, `Images`, `attachments`). Es una jerarquía única de lo general a lo específico — nunca una vista paralela (por área + por contexto, etc.). Esta reestructuración completa se aplicó el 2026-09-19 (~404 MOCs); a partir de ahí, el trabajo es incremental.
+
+### Disparadores automáticos (sin que el usuario lo pida)
+
+| Situación | Acción automática |
+|---|---|
+| Se crea una nota en una carpeta que **no tiene MOC** | Crear el MOC de esa carpeta (y de cualquier ancestro sin MOC, hasta el primero que sí tenga) en el mismo momento, antes de dar la tarea por terminada |
+| Se crea una **subcarpeta nueva** dentro de una carpeta con MOC | Crear el MOC de la subcarpeta y agregar la fila correspondiente en la tabla `QUÉ ENCONTRÁS ACÁ` del MOC padre |
+| Se agrega una nota a una carpeta **hoja** que ya tiene MOC | Refrescar el bloque Waypoint de ese MOC (agregar la nueva nota al índice); si la nota cambia de qué se trata la carpeta, ajustar `DE QUÉ SE TRATA` |
+| Se borra o renombra una nota/carpeta | Actualizar el MOC afectado (Waypoint, tabla del padre, wikilinks que la citaban) en el mismo momento |
+| El `[!tip]` de un MOC cambia | Propagar el cambio a la fila que lo cita en la tabla del MOC padre (el tip es la única fuente del resumen) |
+
+### Flujo: crear el MOC de una carpeta nueva
 
 ```bash
-# 1. Obtener ID único
+# 1. ID único
 MOC_ID=$(next-id MOC)
-# → MOC-000018
 
-# 2. Obtener el template
-TEMPLATE=$(cat "$TEMPLATE_MOC")
+# 2. Descripción: leer el contenido real de la carpeta antes de escribir el tip
+#    (no inventar — el [!tip] y "DE QUÉ SE TRATA" deben reflejar las notas que hay)
+ls "$BABILONIA/BIBLIOTECA-DE-BABEL/ruta/a/la/carpeta"
 
-# 3. Adaptar el template
-CONTENT=$(echo "$TEMPLATE" | sed \
-  -e "s/MOC-XXXXXX/$MOC_ID/" \
-  -e "s/{{title}}/Mapa de Contenido - Mi Dominio/" \
-  -e "s/{{TITLE}}/Mapa de Contenido - Mi Dominio/" \
-  -e "s/{{date}}/$(date '+%Y-%m-%d')/" \
-  -e 's/%% WAYPOINT %%/%% Waypoint %%' \
-  -e 's/Descripcion de la carpeta/Índice de todos los recursos relacionados con Mi Dominio/')
+# 3. Armar el contenido siguiendo la anatomía del template:
+#    frontmatter (id, nombre, tags heredados del padre + propios) → [!tip] →
+#    Navegación (migas con wikilinks CON RUTA hasta la raíz) → DE QUÉ SE TRATA →
+#    QUÉ ENCONTRÁS ACÁ (una fila por hijo directo, tip del hijo copiado tal cual) →
+#    [RUTA DE LECTURA SUGERIDA / RELACIONADO / DOCUMENTACION OFICIAL si aplican] →
+#    INDICE con %% Begin Waypoint %% / %% End Waypoint %%
 
-# 4. Guardar
-echo "$CONTENT" > "$BABILONIA/BIBLIOTECA-DE-BABEL/mi-dominio/_MOC_.md"
+# 4. Guardar en <carpeta>/<carpeta>.md (Filesystem u REST API)
 
-# 5. Abrir en UI
-curl -sk -X POST \
-  -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "${OBSIDIAN_URL}/open/BIBLIOTECA-DE-BABEL/mi-dominio/_MOC_.md"
+# 5. Actualizar el MOC PADRE: agregar la fila del hijo nuevo en su tabla
+#    QUÉ ENCONTRÁS ACÁ (wikilink con ruta completa + el [!tip] recién escrito)
+
+# 6. Abrir el MOC nuevo en la UI
+curl -sk -X POST -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
+  "${OBSIDIAN_URL}/open/BIBLIOTECA-DE-BABEL/ruta/a/la/carpeta/carpeta.md"
+```
+
+**Reglas al redactar:**
+- El `[!tip]` es una frase, y es la ÚNICA fuente del resumen: no reescribirla distinto en la tabla del padre.
+- `DE QUÉ SE TRATA` (2-5 líneas) debe alcanzar para entender la carpeta sin abrir nada más: alcance, para qué sirve, a quién y qué NO cubre.
+- Wikilinks **con ruta completa** (`[[BIBLIOTECA-DE-BABEL/…/carpeta|ALIAS]]`), nunca cortos: los nombres de carpeta (`00-FUNDAMENTOS`, `00-ARQUITECTURA`, etc.) se repiten en varias ramas del árbol y un wikilink corto queda ambiguo.
+- `tags` hereda los del MOC padre y agrega los propios de esa carpeta.
+- `RELACIONADO` es para vínculos a **otras ramas** del árbol (p. ej. AD ofensivo ↔ AD defensivo ↔ AD administrativo) — es lo único "transversal" permitido; no reemplaza la jerarquía de carpetas.
+- El bloque Waypoint lo mantiene el plugin, pero si se edita a mano tiene que reflejar exactamente el contenido directo de la carpeta (ignora `IMAGES`/`images`/`attachments`, no `Images` con mayúscula mixta).
+
+### Flujo: agregar contenido a una carpeta que YA tiene MOC
+
+```bash
+MOC_FILE="$BABILONIA/BIBLIOTECA-DE-BABEL/ruta/a/la/carpeta/carpeta.md"
+# 1. Crear/editar la nota o subcarpeta normalmente
+# 2. Si es subcarpeta nueva: crearle su propio MOC (ver flujo de arriba) y
+#    agregar su fila en la tabla QUÉ ENCONTRÁS ACÁ de $MOC_FILE
+# 3. El índice Waypoint se actualiza solo si Obsidian está abierto (plugin waypoint);
+#    si se trabaja por filesystem con Obsidian cerrado, agregar la línea a mano
+#    dentro de %% Begin Waypoint %% / %% End Waypoint %%
 ```
 
 ---
@@ -418,6 +477,7 @@ Este skill es el **único autorizado** para acceder al vault. Cualquier agente q
 3. **Siempre** que leas una nota del vault, ofrecé abrirla en la UI de Obsidian.
 4. **Siempre** que crees una nota, usá el template correspondiente y generá el ID con `next-id`.
 5. **Siempre** priorizá rutas relativas a `$BABILONIA` — nunca absolutas.
+6. **Siempre** que una carpeta de `BIBLIOTECA-DE-BABEL` quede sin MOC (nueva, o porque se le agregó contenido) creá/actualizá su MOC como parte de la misma tarea, sin preguntar (ver "🗺️ Gestión de MOCs — Delegada por Completo al Agente").
 
 ---
 
