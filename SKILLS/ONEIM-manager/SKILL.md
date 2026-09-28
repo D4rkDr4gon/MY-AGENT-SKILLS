@@ -5,6 +5,7 @@ description: >
   workflows, connectors (AD, CSV, custom), Manager/Web Portal/Web Designer,
   Job Queue/DBQueue, health checks, logs, troubleshooting, API REST y PowerShell.
   Genérico — aplica a cualquier instalación o cliente. Cross-platform (Linux + Windows).
+  También conduce el curso de implementador ONEIM (syllabus del vault) como tutor.
 ---
 
 # ONEIM-manager
@@ -25,6 +26,29 @@ Este skill se activa cuando el usuario necesita **administrar, operar o diagnost
 
 > [!important] **Genérico por diseño**
 > Este skill NO contiene información de clientes ni infraestructuras prearmadas. Siempre se trabaja en función de la instalación que el usuario describa en cada conversación.
+
+---
+
+## Al iniciar: ¿curso o resolución?
+
+> [!important] **Primera pregunta obligatoria**
+> Antes de cualquier otra cosa, preguntar: **"¿Es para el curso de One Identity Manager o para resolver algo puntual?"**. Sólo se omite si el mensaje del usuario ya lo deja claro (por ejemplo, "arranquemos el paso 03 del curso" o "tengo este error en…").
+
+### Modo CURSO
+
+El curso está definido en el syllabus del vault, que es la fuente de verdad:
+
+`$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/00-IDENTITY GOVERNANCE & ADMINISTRATION/99-ENABLEMENTS/CURSO ONEIM - SYLLABUS.md`
+
+1. Leer el syllabus **completo** con `obsidian-manager` y seguir al pie de la letra su sección **INSTRUCCIONES PARA LA IA TUTORA**: rol de tutor socrático, ciclo de cada paso, reglas, adaptación.
+2. Pedir los datos de **COMO ARRANCAR**: nombre del alumno, versión de One Identity Manager (o "última") y paso actual (o "retomar desde el seguimiento"). Si es "retomar", leer la sección **SEGUIMIENTO**.
+3. En cada paso, el contenido sale **sólo** de las notas listadas en **Leer**. Las preguntas de repaso salen de `TECHNICAL ENABLEMENT - CURSO DE IMPLEMENTADOR.md` (sección PREGUNTAS DE REPASO), y para ubicar conceptos se usa `ONEIM - MAPA DE CONOCIMIENTO.md`. Nunca inventar menús, opciones ni comportamientos.
+4. Al cerrar la sesión, actualizar **SEGUIMIENTO** (checklist y bitácora) con `obsidian-manager`, siempre con la confirmación del alumno.
+5. En este modo **no** se aplica el "Protocolo de actuación" de más abajo, salvo como consulta.
+
+### Modo RESOLUCIÓN
+
+Seguir el **Protocolo de actuación** de esta skill: pedir contexto de la instalación, buscar en el vault, buscar en la documentación oficial y resolver.
 
 ---
 
@@ -90,6 +114,44 @@ Este skill se activa cuando el usuario necesita **administrar, operar o diagnost
 
 - **Standard Edition**: módulos base de gestión de identidades
 - **Full Edition**: incluye todos los módulos de gestión (IT Shop & workflow, delegación, system roles y business roles, role mining, risk assessment, attestation, compliance, company policies, report subscriptions), Unified Namespace y conectores para Active Directory
+
+---
+
+## Documentación de detalle en el vault
+
+> [!important] **Antes de responder desde memoria, consultar el vault**
+> La rama `03-ONEIDENTITY/00-IDENTITY GOVERNANCE & ADMINISTRATION` del vault Babilonia tiene el manual completo de ONEIM en español: **19 secciones, ~150 notas**, contrastadas contra la documentación oficial 10.0 LTS.
+>
+> **Punto de entrada único:**
+> `$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/00-IDENTITY GOVERNANCE & ADMINISTRATION/ONEIM - MAPA DE CONOCIMIENTO.md`
+>
+> Ese mapa es un índice plano de **todas** las notas con *qué pregunta responde cada una* y sus *términos clave en español e inglés*. Se lee primero y después se abre únicamente la nota que corresponda — no hace falta recorrer los MOC.
+>
+> Para leer el vault se usa el skill `obsidian-manager`, que es la única puerta de entrada autorizada.
+
+### Secciones de la rama
+
+| Sección | Cubre |
+|---|---|
+| `00-ARQUITECTURA` | Glosario, componentes y flujo de datos, puertos, dimensionamiento, módulos |
+| `01-INSTALACION` | Prerequisitos, Application Server, API Server, portales, Docker, Job Servers |
+| `02-CONFIGURACION-BASE` | Designer, configuration parameters, staging level, cifrado, idiomas, autenticación |
+| `03-SINCRONIZACION` | Synchronization Editor completo: mappings, schema classes, filtros, workflows, outstanding objects |
+| `04-CONNECTORS` | Matriz de conectores y configuración de AD, LDAP, CSV, Exchange, SAP, Entra ID, SCIM, custom |
+| `05-IDENTIDADES-Y-CICLO-DE-VIDA` | Account definitions, manage levels, IT operating data, JML, borrado diferido |
+| `06-ROLES-Y-HERENCIA` | RBAC, XOrigin, org structures, dynamic roles, role mining |
+| `07-IT-SHOP` | Approval policies y procedures, service items, escalación, validez, delegación |
+| `08-ATTESTATION-COMPLIANCE-RIESGO` | Attestation, identity audit, mitigating controls, risk index, company policies |
+| `09-PASSWORDS` | Password policies, central password, Password Reset Portal |
+| `10-PROCESOS-Y-JOB-QUEUE` | Process orchestration, process steps, Job Queue Info, DBQueue Processor |
+| `11-CUSTOMIZATION` | Método, esquema, templates y scripts, fulfillment processes |
+| `12-WEB-Y-API` | API Server, Administration Portal, Operations Support, API REST |
+| `13-REPORTING` | Reportes y suscripciones |
+| `14-TRANSPORT-Y-UPGRADE` | Change Labels y transporte entre entornos |
+| `15-OPERACION-Y-MONITOREO` | Health check, logs y NLog, mantenimiento de base |
+| `16-SEGURIDAD-Y-HARDENING` | System users y permission groups |
+| `17-TROUBLESHOOTING` | Metodología de diagnóstico y catálogo de errores por área |
+| `99-ENABLEMENTS` | Presales, curso de implementador y **CURSO ONEIM - SYLLABUS** (ver "Al iniciar: ¿curso o resolución?") |
 
 ---
 

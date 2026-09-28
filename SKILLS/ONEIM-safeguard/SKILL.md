@@ -5,6 +5,7 @@ description: >
   Passwords (SPP), Safeguard for Privileged Sessions (SPS), Safeguard for Privileged
   Analytics (SPA). Assets, partitions, profiles, entitlements, access request policies,
   clustering, API REST. Genérico — aplica a cualquier instalación o cliente.
+  También conduce el curso de Safeguard (syllabus del vault) como tutor.
 ---
 
 # ONEIM-safeguard
@@ -26,6 +27,29 @@ Este skill se activa cuando el usuario necesita **administrar, operar o diagnost
 
 > [!important] **Genérico por diseño**
 > Este skill NO contiene información de clientes ni infraestructuras prearmadas. Siempre se trabaja en función de la instalación que el usuario describa en cada conversación.
+
+---
+
+## Al iniciar: ¿curso o resolución?
+
+> [!important] **Primera pregunta obligatoria**
+> Antes de cualquier otra cosa, preguntar: **"¿Es para el curso de Safeguard o para resolver algo puntual?"**. Sólo se omite si el mensaje del usuario ya lo deja claro (por ejemplo, "arranquemos el paso 03 del curso" o "tengo este error en…").
+
+### Modo CURSO
+
+El curso está definido en el syllabus del vault, que es la fuente de verdad:
+
+`$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/02-SAFEGUARD-PAM/99-ENABLEMENTS/CURSO SAFEGUARD - SYLLABUS.md`
+
+1. Leer el syllabus **completo** con `obsidian-manager` y seguir al pie de la letra su sección **INSTRUCCIONES PARA LA IA TUTORA**: rol de tutor socrático, ciclo de cada paso, reglas, adaptación.
+2. Pedir los datos de **COMO ARRANCAR**: nombre del alumno, versión de Safeguard (o "última") y paso actual (o "retomar desde el seguimiento"). Si es "retomar", leer la sección **SEGUIMIENTO**.
+3. En cada paso, el contenido sale **sólo** de las notas listadas en **Leer**. Las preguntas de repaso salen de `SAFEGUARD FOUNDATION (SG-FND) - GUIA DEL CURSO.md`, y para practicar la demo final se usa `DEMO SAFEGUARD.md`. Nunca inventar menús, opciones ni comportamientos.
+4. Al cerrar la sesión, actualizar **SEGUIMIENTO** (checklist y bitácora) con `obsidian-manager`, siempre con la confirmación del alumno.
+5. En este modo **no** se aplica el "Protocolo de actuación" de más abajo, salvo como consulta.
+
+### Modo RESOLUCIÓN
+
+Seguir el **Protocolo de actuación** de esta skill: pedir contexto de la instalación, buscar en el vault, buscar en la documentación oficial y resolver.
 
 ---
 
@@ -139,7 +163,7 @@ Antes de resolver cualquier cosa, preguntar al usuario (si no está explicitado)
 
 ### 2. Buscar en Babilonia
 
-- Buscar en `$BABILONIA_ONEIDENTITY/02-PRIVILEGED ACCESS MANAGEMENT/` — documentación existente (presales PAM)
+- Buscar en `$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/02-SAFEGUARD-PAM/` — manual completo de SPP, SPS y SPA, organizado por secciones (`00-ARQUITECTURA` a `11-SAFEGUARD-REMOTE-ACCESS` y `99-ENABLEMENTS`)
 - Si la info no existe o no alcanza → buscar en internet
 
 ### 3. Buscar en internet (web fallback)
@@ -155,7 +179,7 @@ Antes de resolver cualquier cosa, preguntar al usuario (si no está explicitado)
 
 ### 5. Documentar (solo si el usuario lo pide explícitamente)
 
-- Usar `obsidian-manager` para crear/actualizar notas en `$BABILONIA_ONEIDENTITY/02-PRIVILEGED ACCESS MANAGEMENT/`
+- Usar `obsidian-manager` para crear/actualizar notas en `$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/02-SAFEGUARD-PAM/`
 
 ---
 
