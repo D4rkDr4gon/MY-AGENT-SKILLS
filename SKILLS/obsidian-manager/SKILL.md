@@ -2,8 +2,11 @@
 name: obsidian-manager
 description: >
   Gestión completa del vault Obsidian Personal-Vault (Babilonia).
-  Opera en 3 modos (REST API, MCP, Filesystem), usa templates con ID registry,
-  búsqueda semántica multi-estrategia, y respeta permisos estrictos por zona.
+  Opera en 4 modos (SQLite de solo lectura, Filesystem, REST API, MCP), usa
+  templates con ID registry, búsqueda semántica multi-estrategia, y respeta
+  permisos estrictos por zona. Para preguntas analíticas sobre el vault
+  (cuántas notas, qué temas, links rotos, huérfanas, backlinks) consultar
+  primero la base SQLite derivada en vez de leer notas.
   Único skill autorizado para leer/escribir en el vault desde agentes.
 ---
 
@@ -11,19 +14,25 @@ description: >
 
 ## ⚡ Resumen Ejecutivo
 
-Este skill es la **única puerta de entrada autorizada** para que cualquier agente de OpenCODE interactúe con el vault Babilonia. Opera en **3 modos**, en orden de preferencia:
+Este skill es la **única puerta de entrada autorizada** para que cualquier agente de OpenCODE interactúe con el vault Babilonia. Opera en **4 modos**, en orden de preferencia:
 
 | Modo | Canal | Ideal para |
 |------|-------|------------|
+| **0. SQLite** | `build-vault-db.py --query "SELECT ..."` | **Solo lectura.** Preguntas analíticas: cuántas, dónde, cuáles, qué se relaciona con qué |
 | **1. Filesystem** | `cat`, `rg`, lectura/escritura directa de archivos | Leer/escribir archivos completos, búsquedas masivas con `rg` |
 | **2. REST API** | `curl -k https://127.0.0.1:27124/vault/...` | CRUD + Abrir en UI + Search estructurado (1 request) |
 | **3. MCP** | `POST /mcp/` (con session ID, 2 requests) | Tags, patches quirúrgicos, nota activa, búsqueda JsonLogic |
 
 **Regla de decisión:**
+- Si la pregunta es **sobre el vault** (cuántas notas, qué dominios, links rotos, huérfanas, de qué temas hay) → **SQLite** (una consulta en vez de leer cientos de notas)
 - Si es **leer o escribir un archivo completo** → **Filesystem** (sin red, instantáneo)
 - Si es **CRUD + abrir en UI + search** → **REST API** (1 request, sin sesión)
 - Si es **tags + patches + nota activa + search estructurado** → **MCP** (requiere sesión)
 - Si no responde REST API ni MCP → **Filesystem** como fallback universal
+
+> ⚠️ **SQLite nunca escribe.** Es una proyección derivada del vault, de solo lectura. Toda
+> escritura sigue yendo por Filesystem / REST API / MCP. Si la base contradice a un archivo,
+> **gana el archivo** — la base quedó vieja y hay que regenerarla.
 
 ---
 
@@ -48,7 +57,13 @@ TEMPLATE_NOTA="${TEMPLATE_NOTA:-$BABILONIA/TEMPLATES/Notas generales.md}"
 TEMPLATE_MOC="${TEMPLATE_MOC:-$BABILONIA/TEMPLATES/MOCs.md}"
 ID_REGISTRY="${ID_REGISTRY:-$BABILONIA_OPENCODE/ID-REGISTRY.md}"
 NEXT_ID_SCRIPT="${NEXT_ID_SCRIPT:-$BABILONIA/BIBLIOTECA-DE-BABEL/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/next-id.py}"
+VAULT_DB_SCRIPT="${VAULT_DB_SCRIPT:-$BABILONIA/BIBLIOTECA-DE-BABEL/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/build-vault-db.py}"
+VAULT_DB="${VAULT_DB:-/files/vault-db/biblioteca.db}"
+VAULT_QUERIES="${VAULT_QUERIES:-$BABILONIA/BIBLIOTECA-DE-BABEL/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/QUERIES.md}"
 ```
+
+> La base vive **fuera** del vault a propósito: es un binario de ~19 MB, no tiene
+> por qué indexarlo Obsidian ni inflar el repo git.
 
 > Cualquier referencia a paths dentro del vault **siempre** usa `$BABILONIA/...`.  
 > Cualquier referencia a scripts **siempre** usa su env var correspondiente.
@@ -193,7 +208,66 @@ next-id MI_PROYECTO
 
 ## 🔍 Estrategias de Búsqueda Semántica
 
-El skill soporta **4 estrategias** para buscar información, ordenadas de la más a la menos eficiente según el caso:
+El skill soporta **5 estrategias** para buscar información, ordenadas de la más a la menos eficiente según el caso:
+
+### Estrategia 0: SQLite (recomendada para TODA pregunta analítica)
+
+**Usala primero cuando la pregunta es sobre el vault y no sobre una nota puntual.**
+Responder "qué sé de Safeguard" leyendo notas son 120 archivos y ~30.000 palabras;
+la misma respuesta por SQL son 13. Esa diferencia es la que evita llenar la ventana
+de contexto y perder el hilo de la conversación.
+
+```bash
+# Consultar (la base ya construida)
+"$VAULT_DB_SCRIPT" --query "SELECT dominio, count(*) FROM notes GROUP BY 1"
+
+# Regenerar de cero (0.8s) — hacerlo si se editaron notas en esta sesión
+"$VAULT_DB_SCRIPT" --stats --verify
+
+# Árbol de MOCs según jerarquía de carpetas
+"$VAULT_DB_SCRIPT" --tree
+```
+
+**Esquema:**
+
+```
+notes(id PK, path, nombre, entidad, dominio, subdominio, area,
+      fecha, palabras, n_headings, mtime)
+tags(note_id, tag, tag_norm)
+links(src_id, dst_id, target_raw, resuelto, seccion)
+headings(note_id, nivel, texto, orden, anchor)
+notes_fts(id, nombre, cuerpo)          -- FTS5
+```
+
+**Columnas derivadas** — no existen en el frontmatter, se calculan al construir:
+`entidad` sale del prefijo del ID (MAN/MOC/UFA/...), y `dominio`/`subdominio`/`area`
+de las carpetas. **Por eso no hace falta normalizar los tags:** el filtrado ocurre
+sobre columnas limpias, y los ~2.400 tags quedan como una tabla más.
+
+> 📖 **El recetario completo está en `$VAULT_QUERIES`** (`QUERIES.md`, mismo directorio
+> que el script). Leelo antes de inventar SQL: tiene inventario, búsqueda por tema,
+> recuperación por chunk, relaciones, higiene y árbol de MOCs, todas probadas.
+
+**Dos usos que solo existen acá:**
+
+```bash
+# Full-text con fragmento resaltado — responder "¿qué sé de X?" sin abrir nada
+"$VAULT_DB_SCRIPT" --query "
+  SELECT n.path, snippet(notes_fts,2,'>>','<<','…',12)
+  FROM notes_fts f JOIN notes n ON n.id=f.id
+  WHERE notes_fts MATCH 'kerberoasting' LIMIT 10"
+
+# Aristas tipadas: links.seccion guarda bajo qué heading aparece cada wikilink,
+# y el vault usa secciones consistentes, así que sirve como TIPO de relación
+# sin haber editado una sola nota
+"$VAULT_DB_SCRIPT" --query "
+  SELECT seccion, count(*) c FROM links WHERE resuelto=1 AND seccion IS NOT NULL
+  GROUP BY 1 ORDER BY c DESC LIMIT 10"
+```
+
+**Lo que NO puede:** no entiende significado. Encuentra `safeguard` porque el string
+está ahí; no conecta dos notas que hablan de lo mismo con palabras distintas. Para eso
+todavía hace falta `rg` con sinónimos, o leer las notas.
 
 ### Estrategia 1: `rg` (recomendada para búsquedas rápidas y precisas)
 
@@ -286,6 +360,9 @@ rg "tags:.*KNOWLEDGE" "$BABILONIA/" -g "*.md" --no-heading -l
 
 | Situación | Estrategia | Comando |
 |-----------|-----------|---------|
+| **"¿Qué sé de X?" / cuántas / dónde / cuáles** | **SQLite** | `$VAULT_DB_SCRIPT --query "SELECT ..."` |
+| **Full-text con fragmento, sin abrir notas** | **SQLite FTS5** | `... WHERE notes_fts MATCH 'término'` |
+| **Higiene: links rotos, huérfanas, stubs** | **SQLite** | ver `$VAULT_QUERIES` |
 | Offline, búsqueda rápida | `rg` (FS) | `rg "término" $BABILONIA -g "*.md"` |
 | Online, quiero JSON estructurado | REST API Search | `POST /search/simple/?query=...` |
 | Búsqueda compleja (path + content + tags) | MCP JsonLogic | `tools/call search_query` |
@@ -496,6 +573,11 @@ Este skill es el **único autorizado** para acceder al vault. Cualquier agente q
 
 | Operación | Canal preferente | Por qué | Fallback |
 |-----------|-----------------|---------|----------|
+| **Preguntar POR el vault** (cuántas, dónde, cuáles) | 🥇 SQLite | 1 consulta vs. leer cientos de notas | `rg` + contar |
+| **Full-text con contexto** | 🥇 SQLite FTS5 | devuelve el fragmento, no la nota entera | REST API search |
+| **Mapa temático / inventario** | 🥇 SQLite | `GROUP BY` sobre columnas derivadas | Tags |
+| **Grafo: backlinks, hubs, huérfanas** | 🥇 SQLite | joins y CTE recursivo sobre `links` | MCP document map |
+| **Higiene del vault** | 🥇 SQLite | links rotos, stubs, notas sin estructura | — |
 | **Leer nota** | 🥇 Filesystem | `cat` instantáneo, sin red | REST API |
 | **Listar directorio** | 🥇 Filesystem | `ls` directo, sin dep | REST API |
 | **Buscar keyword (rg)** | 🥇 Filesystem | `rg` masivo, offline | REST API search |
@@ -522,6 +604,10 @@ Este skill es el **único autorizado** para acceder al vault. Cualquier agente q
 - **Trash:** El vault usa `trashOption: none` — los borrados son permanentes. Confirmar siempre antes de borrar.
 - **Links:** El vault usa `useMarkdownLinks: true` — los links internos son rutas relativas `.md`.
 - **IOps:** Para operaciones batch (múltiples archivos), preferir **Filesystem**. Para operaciones interactivas, preferir **REST API**.
+- **La base SQLite queda vieja.** Es una foto del vault al momento de construirla. Regenerarla (`--stats --verify`, 0.8s) después de crear o editar notas, y siempre al empezar una sesión de análisis. Ante una contradicción entre la base y un archivo, **gana el archivo**.
+- **La base es descartable.** Borrarla no pierde nada: se reconstruye del vault, que es la única fuente de verdad. Nunca escribir en ella, nunca tratarla como origen de datos.
+- **Python sin dependencias:** el `python3` del sistema no tiene PyYAML ni `markdown`, así que `vault_db.py` es stdlib puro y parsea el frontmatter a mano. No agregarle imports de terceros. (Ojo: `plugzone_local.py` sí importa `markdown`, por eso hoy no corre en ese intérprete.)
+- **Scope:** por defecto indexa `BIBLIOTECA-DE-BABEL`. Para otra zona, `--scope TORRE-DE-BABEL --out /files/vault-db/torre.db`.
 
 ---
 
@@ -551,6 +637,16 @@ NEXTID=$(command -v next-id 2>/dev/null || echo "$NEXT_ID_SCRIPT")
 # 5. Templates
 [ -f "$TEMPLATE_NOTA" ] && echo "✅ Template nota: ok" || echo "⚠️ Template nota: no encontrado"
 [ -f "$TEMPLATE_MOC" ] && echo "✅ Template MOC: ok" || echo "⚠️ Template MOC: no encontrado"
+
+# 6. Base SQLite — existe y qué tan vieja está
+if [ -f "$VAULT_DB" ]; then
+  EDAD=$(( ($(date +%s) - $(stat -c %Y "$VAULT_DB")) / 3600 ))
+  FILAS=$("$VAULT_DB_SCRIPT" --query "SELECT count(*) FROM notes" 2>/dev/null | sed -n '3p')
+  echo "✅ SQLite: $VAULT_DB — ${FILAS} notas, ${EDAD}h de antigüedad"
+  [ "$EDAD" -gt 24 ] && echo "   ⚠️ Más de 24h: regenerar con '$VAULT_DB_SCRIPT --stats --verify'"
+else
+  echo "⚠️ SQLite: no construida — correr '$VAULT_DB_SCRIPT --stats --verify'"
+fi
 ```
 
 ---
@@ -559,9 +655,13 @@ NEXTID=$(command -v next-id 2>/dev/null || echo "$NEXT_ID_SCRIPT")
 
 - **ID Registry completo:** `$ID_REGISTRY`
 - **Script next-id:** `$NEXT_ID_SCRIPT`
+- **Base SQLite:** `$VAULT_DB` · builder `$VAULT_DB_SCRIPT` · recetario `$VAULT_QUERIES`
 - **Alias útil (agregar a zshrc):**
   ```zsh
   alias ov='obsidian vault=Personal-Vault'
+  alias vdb='"$VAULT_DB_SCRIPT" --query'
+  alias vdb-build='"$VAULT_DB_SCRIPT" --stats --verify'
+  alias vdb-tree='"$VAULT_DB_SCRIPT" --tree'
   alias ob='curl -sk -H "Authorization: Bearer ${OBSIDIAN_API_KEY}"'
   alias ob-open='ob -X POST "${OBSIDIAN_URL}/open"'
   alias ob-read='ob "${OBSIDIAN_URL}/vault"'

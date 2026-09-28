@@ -319,7 +319,7 @@ Schema **plano** (no anidado), leido con `jq`:
 {
   "name": "KANAGAWA DRAGON",
   "icon": "",
-  "wallpaper": "/home/lcampassi/dotfiles/recursos/wallpapers/JAPAN-MYTHOLOGY.png",
+  "wallpaper": "$DOTFILES/recursos/wallpapers/JAPAN-MYTHOLOGY.png",
   "primary": "#8ba4b0",
   "secondary": "#a292a3",
   "background": "#181616",

@@ -13,6 +13,8 @@ description: >
 MCP server que expone herramientas de Kali Linux corriendo en un contenedor
 Docker aislado. Este skill define el flujo de trabajo correcto para usarlo.
 
+**Ubicación**: `$KALI_MCP_HOME` (proyecto Docker del MCP server)
+
 ## 1. Verificación del entorno
 
 Antes de usar cualquier tool MCP, verificar que el contenedor esté corriendo:
@@ -23,12 +25,12 @@ docker ps --filter "name=hacker-mcp-commander"
 
 Si no está corriendo:
 ```bash
-cd /files/VMs/DOCKER/kali-mcp && make up
+cd "$KALI_MCP_HOME" && make up
 ```
 
 Si no existe (primera vez):
 ```bash
-cd /files/VMs/DOCKER/kali-mcp && make build && make up
+cd "$KALI_MCP_HOME" && make build && make up
 ```
 
 ## 2. Reglas de seguridad (obligatorias)
@@ -122,7 +124,7 @@ session_close(session_id)
 - **Timeouts**: scans largos (full, aggressive) pueden tardar minutos — usar
   timeouts generosos (300-900s) en esas tools.
 - **Workspace**: los archivos se comparten con el host en
-  `/files/VMs/DOCKER/kali-mcp/workspace/` — los resultados quedan accesibles
+  `$KALI_MCP_HOME/workspace/` — los resultados quedan accesibles
   para el usuario.
 - **Documentar**: al terminar, documentar hallazgos en el vault Babilonia
   (cargar `obsidian-manager`) con evidencia de los outputs.
@@ -131,7 +133,7 @@ session_close(session_id)
 
 | Problema | Solución |
 |---|---|
-| "Container not running" | `make up` en /files/VMs/DOCKER/kali-mcp |
+| "Container not running" | `make up` en `$KALI_MCP_HOME` |
 | Tool no responde | Verificar `docker ps`; `make logs` |
 | Binario no en allowlist | Usar tool específica o activar ALLOW_FREE_COMMAND |
 | Workspace no writable | `docker exec -u root <ctr> chown -R pentester:pentester /workspace` |
