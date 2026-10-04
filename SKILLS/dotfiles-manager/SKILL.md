@@ -76,7 +76,7 @@ entran, `esc` vuelve al menú, `q` sale. Tabla completa: `docs/configuration/set
 | System | Services · Startup apps · Logs · Snapshots · Backup (Proton Drive) · System · **Update** (`sections/update.py`) |
 | Tools | Notifications · Clipboard · Screenshots · Color picker · AI Agents |
 | Hardware | **Displays** (`sections/displays.py` + `nightlight.py`) · Audio · Input · **Power** (`sections/power.py`) · Battery · Storage |
-| Desktop | Modes · **Workspaces** (`sections/workspaces.py`) · Webapps · Default apps · **Shortcuts** |
+| Desktop | Modes · **Workspaces** (`sections/workspaces.py`) · **Desktop widgets** (`sections/deskwidgets.py`) · Webapps · Default apps · **Shortcuts** |
 | Look & feel | Themes · Theme editor · **Appearance** (forma del tema) · **Fonts & cursor** (`sections/fonts.py`) · Backgrounds |
 
 Lo más reciente:
@@ -94,6 +94,12 @@ Lo más reciente:
   `pacman -Rs --print`). Modos del script: `check all snapshot rollback pacman aur clean orphans audit firmware`.
 - **Power** — batería (upower), perfil, brillo pantalla/teclado, idle actions con línea de tiempo (hypridle),
   sesión (lock/suspend/logout/reboot/poweroff).
+- **Desktop widgets** — widgets en los workspaces vacíos (`desktop-widgets/`: daemon GTK3 + layer-shell,
+  `dwlib.py` sin GTK, `agenda.py` con parser ICS propio). Prender/apagar, zona de una grilla 3×3 por widget (`p`),
+  orden en la zona (`K`/`J`), presets, mapa, **Options** (clima, agenda Obsidian Full Calendar / `.ics`, pomodoro,
+  teléfono KDE Connect, red) y todo. Config `desktop-widgets/widgets.conf`; el daemon la relee sola (reiniciarlo
+  por PID si cambia un `.py`). En D4rkFiles: `config/desktop-widgets/`, config en
+  `~/.config/dotfiles/desktop-widgets.conf`, CSS desde `style.css.tpl`, sin backup en la tarjeta de estado.
 - **Workspaces** — cantidad 1–10 (`←/→`, `enter`): genera `hypr/workspaces.conf` y `hyprctl reload`; ofrece mover
   ventanas que quedan afuera. Lo leen waybar, `workspace-cycle.sh` y `rofi/scripts/workspace-switcher.sh`.
 - **Appearance / Fonts & cursor** — campos de forma del tema y vista previa real de fuentes/íconos/cursor (PIL).
