@@ -1,440 +1,229 @@
 ---
 name: dotfiles-manager
-description: Use when the user asks about managing, updating, documenting, or creating themes for their dotfiles at ~/dotfiles. Helps with documentation, theme creation, and provides full context of the dotfiles structure.
+description: Use when the user asks about managing, updating, documenting, testing or extending their real Arch Linux dotfiles at ~/dotfiles (Hyprland + Qtile) - themes and theme shape fields, the Settings TUI and its sections, the Textual TUIs built on dtui.py (keymaps, workers, set_rows), workspaces count, night light, firewall, VPN/Tailscale, updates/CVEs/firmware, waybar, keybindings, docs - and when porting those changes to the public D4rkFiles repo. Provides the repo layout, safety rules, conventions and the porting map.
 ---
 
 # dotfiles-manager
 
-## Contexto del Repositorio
+Contexto y reglas para trabajar en los dotfiles **reales** del usuario (`$DOTFILES` = `~/dotfiles`) y para
+portar lo genérico al repo público **D4rkFiles** (`/files/D4rkFiles`). El contrato detallado vive en
+`$DOTFILES/AGENTS.md` (lo carga `CLAUDE.md`): **leelo primero**; esta skill es el mapa y las recetas.
 
-**Ubicacion**: `$DOTFILES`
-**Remote**: `git@github.com:${DOTFILES_REPO}.git` (branch: `main`)
-**Autor**: D4rkDr4g0n — Ciberseguridad & Desarrollo
-**Distro**: Arch Linux
-**WM**: Qtile (Python, Wayland)
-**License**: MIT
+## Contexto
 
-### Stack Tecnologico
+| | |
+|---|---|
+| Repo | `$DOTFILES` · remote `git@github.com:${DOTFILES_REPO}.git` · branch `main` |
+| Sistema | Arch Linux · **Hyprland** (WM en uso) · Qtile/X11 como alternativa |
+| Enlaces | `~/.config/<app>` → `$DOTFILES/<app>` (hypr, waybar, kitty, rofi, dunst, qtile, walker, swayosd, gtklock, hyprshell, opencode, Thunar, zsh…) · `~/.zshrc` → `zsh/zshrc` · `~/.claude/statusline-command.sh` → `claude/` |
+| Idioma | Español rioplatense en código, comentarios, docs y commits; **textos visibles de las TUIs en inglés** |
+| Punto de entrada | **Settings** (`recursos/settings/settings_tui.py`, `Super+Shift+Space`, logo de waybar) |
 
-```
-WM:             Qtile (Python, Wayland)
-Barra:          Waybar (Wayland)
-Terminal:       Kitty (Wayland nativo)
-Shell:          Zsh + powerlevel10k
-Launcher:       Rofi (Wayland nativo)
-Notifications:  Dunst
-Compositor:     Qtile built-in (Wayland)
-Lock Screen:    gtklock (Wayland)
-Screenshots:    grim+slurp (Wayland)
-Monitores:      wlr-randr (Wayland)
-Editores:       Neovim (LazyVim) / Sublime Text
-File Mgr:       Thunar
-Info:           Fastfetch
-AI:             opencode (skills personalizadas)
-```
+Stack: Hyprland + waybar · kitty + zsh (p10k) · rofi/walker · dunst · swayosd · gtklock · hypridle ·
+hyprsunset · hyprshell · Thunar/HyprFM · Neovim (LazyVim) / Sublime · TUIs propias en Python + Textual.
 
-### Enlaces Simbolicos
+## Reglas que no se rompen (resumen de AGENTS.md)
 
-```
-~/.zshrc              -> $DOTFILES/zsh/zshrc
-~/.config/qtile       -> $DOTFILES/qtile/
-~/.config/waybar      -> $DOTFILES/waybar/
-~/.config/gtklock     -> $DOTFILES/gtklock/
-~/.config/dunst       -> $DOTFILES/dunst/
-~/.config/rofi        -> $DOTFILES/rofi/
-~/.config/kitty       -> $DOTFILES/kitty/
-~/.config/Thunar      -> $DOTFILES/Thunar/
-~/.config/zsh         -> $DOTFILES/zsh/
-~/.config/automat     -> $DOTFILES/automat/
-~/.config/opencode    -> $DOTFILES/opencode/
-~/.config/herdr/config.toml -> $DOTFILES/herdr/config.toml  # solo el archivo, el resto es runtime (sockets/logs/session.json)
-```
+1. **Todo cambia en vivo**: `~/.config/<app>` apunta al repo. Cambios no destructivos; ante algo estructural,
+   primero una vía que no toque el sistema y pedir OK.
+2. **Nunca editar en el lugar un script que puede estar corriendo** (bash lee a medida que ejecuta; waybar
+   llama a `vpn_tui.py --waybar-status` y a `hypr-workspaces.py` cada pocos segundos). Escribir a un temporal
+   **en el mismo filesystem** y `os.replace`/`mv` (inode nuevo). `/tmp` es otro filesystem: copiar al lado y
+   reemplazar desde ahí. Revisar con `ps -eo args | grep '[n]ombre'` (ojo: `pgrep -f` se encuentra a sí mismo).
+3. **`hyprland.conf` en vivo**: validar antes con `Hyprland --verify-config -c <copia>` y, después de
+   reemplazar, `hyprctl configerrors` (vacío = bien) y `hyprctl binds -j` si tocaste atajos.
+4. **Pruebas sin efectos**: nada que recargue componentes (`theme-switch.sh`, `launch.sh`, `pkill waybar`,
+   aplicar un modo, conectar una VPN, prender servicios). Ver "Probar sin tocar la sesión".
+5. **Nada outward-facing sin OK**: push, PRs, GitHub, subir a Proton Drive. `sudo` pide contraseña/huella: el
+   usuario lo corre con `! <comando>` (sin TTY no se puede contestar `[Y/n]`: usar `--noconfirm`).
+6. Hay cambios del usuario sin commitear a veces: no pisarlos; al commitear, revisar el diff y separar o avisar.
 
----
-
-## Estructura Completa del Repositorio
+## Estructura
 
 ```
-dotfiles/
-├── README.md
-├── docs/                              # Documentacion modular
-│   ├── overview.md, installation.md, keybindings.md, themes.md, automations.md
-│   └── configuration/
-│       ├── qtile.md, polybar.md, wayland.md, kitty.md, zsh.md, rofi.md
-│       ├── picom.md, dunst.md, editors.md, fastfetch.md, thunar.md, extras.md, lock-screen.md
-│
-├── qtile/                             # Window Manager (X11 + Wayland)
-│   ├── config.py                      # Entry point, wl_input_rules, cursor
-│   ├── current_theme.json             # Tema activo
-│   └── modules/
-│       ├── groups.py                  # 6 workspaces con íconos (name numérico + label)
-│       ├── keys.py                    # Keybindings (mod4 = Super), dual-backend scripts
-│       ├── layouts.py                 # Columns, MonadTall, Stack
-│       ├── mouse.py                   # Mouse bindings
-│       ├── screens.py                 # Dual screen + wallpapers
-│       └── hooks.py                   # Autostart dual-backend (Waybar vs Polybar+Picom)
-│
-├── polybar/                           # Status bar (X11 only)
-│   ├── config.ini                     # 98% width, 28px, rounded 10px
-│   ├── colors.ini                     # Dinamico por tema
-│   ├── launch.sh                      # Kill + launch por monitor
-    │   └── modules/ (battery, bluetooth, brillo, date, logo, pulseaudio, vpn, wlan, xworkspaces)
-│
-├── waybar/                            # Status bar (Wayland)
-│   ├── config.jsonc                   # Modulos: logo, workspaces, clock, brillo, etc.
-│   ├── style.css                      # CSS con @import theme.css para colores
-│   ├── theme.css                      # @define-color generado por theme-switch.sh
-│   ├── launch.sh                      # Kill + launch
-│   ├── modules/
-│   └── scripts/
-│
-├── gtklock/                           # Lock screen config (Wayland, GTK-based)
-│   ├── config.ini                     # time-format, modules, style/layout paths
-│   ├── style.css                      # GTK3 CSS: clock, auth form glass, etc.
-│   └── layout.ui                      # Layout custom: clock bottom-left, auth bottom-right
-│
-├── kitty/                             # Terminal (X11 + Wayland nativo)
-│   ├── kitty.conf                     # Hack Nerd Font 10pt, 80% opacity, linux_display_server wayland
-│   └── colors.conf                    # Dinamico por tema
-│
-├── zsh/                               # Shell modular
-│   ├── zshrc                          # Entry point
-│   └── modules/
-│       ├── aliases.zsh                # theme, vi, cat, ls, c, q, .., vpnup/down, barupdate, etc.
-│       ├── history.zsh                # 100k lines, shared, inc_append
-│       ├── paths.zsh                  # ~/.local/bin, ~/.opencode/bin
-│       ├── plugins.zsh                # zsh-autosuggestions, zsh-syntax-highlighting
-│       ├── startup.zsh                # ASCII banner rojo D4rkDr4g0n
-│       ├── theme.zsh                  # powerlevel10k + colores dinamicos
-│       └── tools.zsh                  # extractPorts, hex-encode/decode, rot13
-│
-├── rofi/                              # Launcher (X11 + Wayland nativo 2.0+)
-│   ├── config.rasi                    # drun/run/window, fzf sort
-│   ├── theme.rasi                     # Norte, 480px, 24px radius, semi-transparente
-│   ├── favoritos.txt                  # Sublime, Burp, Wireshark, Bitwarden
-│   ├── theme-drun.rasi                # Grid Android 5x4 para app launcher
-│   ├── theme-action.rasi              # Grid 4x1 para action menu
-│   └── scripts/
-│       ├── launcher.sh                # Apps + Google search via "g <query>"
-│       ├── emoji.sh                   # 800+ emojis, copia al clipboard
-│       ├── qtile-action-menu.sh       # Suspend/Reboot/Poweroff/Logout
-│       ├── qtile-workspace-switcher.sh
-│       ├── notification-center.sh     # Notificaciones en Rofi (Dunst history) + entrada No Molestar
-│       ├── dnd-menu.sh                # No Molestar: toggle global, timer (systemd-run --user), silenciar apps
-│       ├── settings-menu.sh           # Themes, Workspaces, Web search, Backgrounds, Notifications
-│       └── web-search.sh              # Google, abre Firefox en workspace 5 (dual-backend)
-│
-├── picom/                             # Compositor (X11 only)
-│   └── picom.conf                     # GLX, vsync, 12px radius, dual_kawase blur (6)
-│
-├── dunst/                             # Notification daemon (X11 + Wayland)
-│   ├── dunstrc                        # 16px radius, rofi-aligned colors; reglas de apps silenciadas autogeneradas al final
-│   └── blocked-apps.conf              # Estado de apps silenciadas (enabled<TAB>appname), tracked en git
-│
-├── lazy-nvim/                         # Neovim (LazyVim)
-│   ├── init.lua, lazy-lock.json
-│   └── lua/config/ (lazy, options, keymaps, autocmds, colors, highlights)
-│       └── lua/plugins/ (colorscheme, example)
-│
-├── sublime-text/Packages/User/
-│   ├── Preferences.sublime-settings   # Kali-Red-Hack, Hack 10pt, caret #d32f2f
-│   ├── Package Control.sublime-settings
-│   └── Kali-Red-Hack.sublime-color-scheme
-│
-├── Thunar/
-│   ├── accels.scm                     # Shortcuts por defecto
-│   └── uca.xml                        # "Open Terminal Here" via exo-open
-│
-├── fastfetch/
-│   ├── config.jsonc                   # OS/Kernel/DE/WM/Packages/Mem/CPU/GPU/etc
-│   ├── ascii/ (arch.txt, cat.txt, rose.txt)
-│   └── png/ (logos aleatorios)
-│
-├── onedrive/
-│   ├── config                         # sync_dir=~/OneDrive, atomic writes
-│   └── sync_list
-│
-├── opencode/                          # AI assistant (opencode)
-│   ├── opencode.jsonc                 # Config: skills.paths -> MY-AGENT-SKILLS
-│   ├── .gitignore                     # Ignora node_modules, lock files
-│   ├── package.json                   # Plugin dependencies
-│   └── node_modules/                  # Runtime (gitignored)
-│
-├── herdr/                             # Multiplexor de agentes IA (tmux-like)
-│   ├── config.toml                    # prefix ctrl+space, theme.custom dinamico
-│   └── launch.sh                      # kitty -e herdr (auto_detect_launch nativo)
-│
-├── themes/                            # 8 temas dinamicos
-│   ├── brown-at-at/   (theme.json + wallpaper)
-│   ├── purple-sky/
-│   ├── ciberpunk/
-│   ├── chill-lofi/
-│   ├── data-center/
-│   ├── green-geek/
-│   ├── gray-terminal/
-│   └── red-japan/
-│
-├── scripts/
-│   ├── theme-switch.sh                # Cambia polybar/waybar/kitty/zsh/qtile/fastfetch
-│   ├── barupdate.sh                   # Reinicia Polybar (X11) o Waybar (Wayland)
-│   ├── screenshot.sh                  # grim+slurp (Wayland) o Flameshot (X11)
-│   ├── lock-screen.sh                 # gtklock (Wayland) o lock-screen binary (X11)
-│   ├── lock-screen                    # Compiled ELF (X11 i3lock-based)
-│   ├── lock-screen.c                  # C source (X11)
-│   └── vpn-replace.sh                 # Reemplazar config de Wireguard VPN
-│
-├── automat/
-│   ├── display-monitors.sh            # xrandr (X11) / wlr-randr (Wayland) laptop + HDMI
-│   ├── launch-logo.sh                 # ASCII dragon banner
-│   ├── launchgemma.sh                 # Ollama + Gemma 3 en Kitty
-│   ├── vault-pull.sh                  # Git pull en ~/OneDrive/vault
-│   ├── vault-push.sh                  # Git commit "D4 - YYYY-MM-DD"
-│   └── install/                       # 13 scripts de instalacion
-│       ├── setup-yay.sh               # AUR helper
-│       ├── install-fonts.sh           # Hack, JetBrains Mono, Font Awesome, Noto
-│       ├── install-zsh.sh             # Zsh + p10k + symlinks
-│       ├── install-qtile.sh           # Qtile + Python deps
-│       ├── install-polybar.sh         # Polybar + stow
-│       ├── install-picom.sh           # Picom + stow
-│       ├── install-kitty.sh           # Kitty + stow
-│       ├── install-rofi.sh            # Rofi + stow
-│       ├── install-neovim.sh          # Neovim + LazyVim
-│       ├── install-tools.sh           # Obsidian, Flameshot, Firefox, CopyQ, etc.
-│       ├── install-ollama.sh          # Ollama + modelos
-│       ├── install-n8n.sh             # n8n automation
-│       ├── install-wayland.sh         # Paquetes Wayland (waybar, swaylock, grim, slurp, etc.)
-│       └── setup-blackarch.sh         # BlackArch repos (opcional)
-│
-└── recursos/
-    ├── wallpapers/                    # 18+ wallpapers cyberpunk/sci-fi/hacker
-    ├── finnancials/gastos.py          # TUI expense manager (textual, SQLite)
-    ├── logo-bloqueo.png               # Lock screen image
-    ├── logo.txt                       # Dragon ASCII art
-    ├── tux.txt                        # Tux ASCII
-    └── Theme-Manager/Palettes/Fiery-Red-Sunset.theme
+~/dotfiles/
+├── AGENTS.md / CLAUDE.md        contrato para agentes (CLAUDE.md = @AGENTS.md)
+├── <app>/                       una carpeta por app (hypr, waybar, kitty, rofi, dunst, qtile, walker…)
+│   └── hypr/
+│       ├── hyprland.conf        config principal (source de workspaces.conf)
+│       ├── workspaces.conf      GENERADO por Settings → Workspaces (atajos 1..N + "# count: N")
+│       ├── hypridle.conf        GENERADO por Settings → Power
+│       ├── hyprsunset.conf      GENERADO por Settings → Displays (luz nocturna)
+│       └── scripts/             move-and-focus-workspace.sh, move-window-to-workspace.sh,
+│                                workspace-cycle.sh (Ctrl+Tab/rueda en 1..N), hypr-workspaces.py (indicador waybar)
+├── scripts/                     theme-switch.sh (orquestador de temas), dotfiles-update.sh, proton-backup.sh,
+│                                mode-switch.sh, webapps.sh, wallpaper-set.sh, lock-screen.sh, wayland/…
+├── recursos/
+│   ├── tui/dtui.py              base común de TUIs (+ keymap.json: teclas reasignadas)
+│   ├── settings/settings_tui.py Settings (menú, CATEGORIES, section_views(), binding_catalog())
+│   │   └── sections/            una sección por archivo (common.py = helpers)
+│   ├── vpn/ shortcuts/ modes/ webapps/ clipboard/ agents/ proton-backup/   TUIs sueltas (vista + app)
+│   ├── PROTON/ OPENVPN/ WIREGUARD/ CITRIX/ FORTI/   perfiles VPN (fuera de git)
+│   └── wallpapers/
+├── themes/<nombre>/theme.json   17 temas (+ _design-tokens.json)
+└── docs/                        overview, installation, keybindings, themes, design-system, requirements,
+                                 automations, configuration/*.md (una por componente)
 ```
 
----
+## Settings y sus secciones
 
-## Workspaces (Qtile Groups)
+`Super+Shift+Space`. Menú por categorías a la izquierda (`CATEGORIES`), sección a la derecha. `tab`/`enter`
+entran, `esc` vuelve al menú, `q` sale. Tabla completa: `docs/configuration/settings.md`.
 
-| # | Icono | Nombre |
-|---|-------|--------|
-| 1 |  | Workspace 1 |
-| 2 |  | Workspace 2 |
-| 3 |  | Workspace 3 |
-| 4 |  | Workspace 4 |
-| 5 |  | Workspace 5 |
-| 6 |  | Workspace 6 |
+| Categoría | Secciones (archivo) |
+|---|---|
+| Connectivity | Wi-Fi, Bluetooth (en settings_tui.py) · VPN (`recursos/vpn/vpn_tui.py`: Forti, Proton, WireGuard, OpenVPN, **Tailscale**, Citrix) · **Firewall** (`sections/firewall.py`) · Phone · Network tools |
+| System | Services · Startup apps · Logs · Snapshots · Backup (Proton Drive) · System · **Update** (`sections/update.py`) |
+| Tools | Notifications · Clipboard · Screenshots · Color picker · AI Agents |
+| Hardware | **Displays** (`sections/displays.py` + `nightlight.py`) · Audio · Input · **Power** (`sections/power.py`) · Battery · Storage |
+| Desktop | Modes · **Workspaces** (`sections/workspaces.py`) · Webapps · Default apps · **Shortcuts** |
+| Look & feel | Themes · Theme editor · **Appearance** (forma del tema) · **Fonts & cursor** (`sections/fonts.py`) · Backgrounds |
 
----
+Lo más reciente:
 
-## Keybindings Principales
+- **Firewall** — firewalld: on/off, zona por defecto, servicios/puertos (`a`/`d`), zona por conexión de NM.
+  Estado por `systemctl` (con firewalld parado `firewall-cmd` espera ~10 s a D-Bus), zonas/servicios/puertos de
+  los XML de `/usr/lib/firewalld`; cambios con `sudo` en la terminal (`--permanent` + `--reload`). Prenderlo corta
+  KDE Connect / VNC si no se permiten (`kdeconnect`, `5900/tcp`).
+- **Displays** — mapa de monitores (`hyprctl monitors -j`), **luz nocturna** (hyprsunset: `←/→` temperatura,
+  `-/+` brillo en vivo por IPC `hyprctl hyprsunset …`, franja de 24 h, `s` horario, `l` al login;
+  `hyprsunset.service`), tablet por VNC.
+- **Update** — estado (pendientes cacheados 15 min en `~/.local/state/dotfiles-settings/update.json`, última
+  actualización de `pacman.log`, snapshot, kernel, CVEs, firmware), acciones agrupadas, **Pending** y
+  **Installed** estilo pacseek (`v`; `/` buscar, `e` a mano, `s` tamaño, `x` desinstalar con vista previa
+  `pacman -Rs --print`). Modos del script: `check all snapshot rollback pacman aur clean orphans audit firmware`.
+- **Power** — batería (upower), perfil, brillo pantalla/teclado, idle actions con línea de tiempo (hypridle),
+  sesión (lock/suspend/logout/reboot/poweroff).
+- **Workspaces** — cantidad 1–10 (`←/→`, `enter`): genera `hypr/workspaces.conf` y `hyprctl reload`; ofrece mover
+  ventanas que quedan afuera. Lo leen waybar, `workspace-cycle.sh` y `rofi/scripts/workspace-switcher.sh`.
+- **Appearance / Fonts & cursor** — campos de forma del tema y vista previa real de fuentes/íconos/cursor (PIL).
+- **Shortcuts** — atajos de Hyprland, kitty, herdr, Qtile, Obsidian, LazyVim y pestaña **Settings**: las 130+
+  teclas de las TUIs, reasignables.
 
-### Qtile (mod4 = Super)
+## TUIs: `recursos/tui/dtui.py`
 
-| Atajo | Accion |
-|-------|--------|
-| `Mod + Enter` | Terminal (Kitty) |
-| `Mod + Space` | App launcher (Rofi) |
-| `Mod + B` | Firefox |
-| `Mod + F` | Thunar |
-| `Mod + O` | Obsidian |
-| `Mod + P` | Bitwarden |
-| `Mod + S` | Sublime Text |
-| `Mod + V` | CopyQ |
-| `Mod + Shift + Return` | Herdr (multiplexor de agentes IA, prefix ctrl+space) |
-| `Mod + Q` | Cerrar ventana |
-| `Mod + Shift + F` | Fullscreen |
-| `Mod + T` | Float toggle |
-| `Mod + Shift + Arrows` | Mover ventana |
-| `Mod + Ctrl + Arrows` | Redimensionar |
-| `Mod + Ctrl + R` | Recargar Qtile + Waybar |
-| `Mod + L` | Action menu (Lock/Reboot/Poweroff/Logout) |
-| `Mod + Shift + Space` | Settings menu (incluye Notifications) |
-| `Mod + 1-6` | Ir a workspace |
-| `Mod + Shift + 1-6` | Mover ventana a workspace |
-| `Print` / `Mod + Shift + S` | Screenshot (grim+slurp) |
+Todas se ven como impala/bluetui y usan solo estas piezas (sin CSS ni colores propios):
 
-### Kitty
+| Pieza | Uso |
+|---|---|
+| `DApp` / `DView` / `ViewApp` | App base; contenido de una TUI (se monta suelta o como sección); `FOCUS`, `hints()`, `update_hints()`, `visible_now` |
+| `Panel` | Borde redondeado, título y `border_subtitle` de estado; el que tiene foco va en `primary` |
+| `Table` | Fila completa; `j/k`; filas `hdr:`/`gap:` que el cursor saltea; **`set_rows()`** redibuja solo si cambió y conserva la selección por clave |
+| `Card` | Contenido rich que recibe foco (paneles que no son tablas: mapa de monitores, luz nocturna) |
+| Popups | `FormModal` (`Field` con `choices`, `password`, `files`), `ConfirmModal`, `PickModal`, `TextModal` |
+| Barras / imágenes | `bar`, `meter10`, `charge10`, `ImagePreview` (kitty graphics), `swatches` |
+| Teclas | Cada `Binding` de una `DView`/`DApp` recibe id `Clase.acción`; `keymap.json` las reasigna (`App.set_keymap`); `remap_hints` traduce el pie; `bindings_of()` las lista |
 
-| Atajo | Accion |
-|-------|--------|
-| `Ctrl+Shift+Enter` | Nueva tab |
-| `Ctrl+Shift+W` | Cerrar tab |
-| `Ctrl+Shift+N` | Renombrar tab |
-| `Ctrl+Shift+Space` | Nueva ventana (split) |
-| `Ctrl+Shift+Arrows` | Resize ±5px |
+Reglas aprendidas:
+- **Todo lo que llama a procesos va en `@work(thread=True, exclusive=True)`** y la UI solo pinta
+  (`call_from_thread`). VPN trababa 0.5 s cada 5 s por hacerlo en el hilo de la UI.
+- **No usar `self.loading`** como bandera: es una propiedad de Textual y muestra un spinner. Usar `_busy`.
+- Un método `render` en un widget pisa el de Textual: no nombrar así métodos propios.
+- Dar `description` a los `Binding` con `show=False` (se ven en Shortcuts → Settings).
+- `hints()` con la tecla por defecto tal cual (`"a"`, `"/"`, `"←/→"`): se traducen solas si se reasignan.
+- `run()` de `settings_tui.py` ya fija `timeout`; no pasarle otro.
 
-### Zsh Aliases
+Sección nueva de Settings: archivo en `recursos/settings/sections/` con su `DView` (helpers de `common.py`:
+`run`, `detach`, `DOTFILES`, `STATE`, `HYPRLAND`, `hypr_block_get/set`), import en `settings_tui.py`, entrada en
+`CATEGORIES` y en `section_views()`. Una TUI suelta nueva: `recursos/<x>/`, lanzador en
+`waybar/scripts/<x>-launch.sh` → `float-tui-launch.sh` / `center-tui-launch.sh`, `windowrule` en
+`hyprland.conf` (y `FLOAT_GEOMETRY` en Qtile), doc.
 
-| Alias | Comando |
-|-------|---------|
-| `theme` | `$DOTFILES/scripts/theme-switch.sh` |
-| `vi` | `nvim` |
-| `cat` | `bat` |
-| `ls`/`l`/`ll`/`la`/`lla` | `lsd` variants |
-| `c` | `clear` |
-| `q` | `exit` |
-| `..`/`...`/`....`/`.....` | `cd` shortcuts |
-| `top` | `btop` |
-| `vpnup`/`vpndown` | Wireguard VPN |
-| `launchgemma` | Ollama + Gemma |
-| `n8nstart`/`n8nstop` | n8n service |
-| `zshconfig` | `nvim ~/.zshrc` |
-| `barupdate` | Relaunch Waybar |
-| `hosts` | `sudo nvim /etc/hosts` |
+## Temas
 
----
+`themes/<nombre>/theme.json` plano: 14 claves de color (`name`, `icon`, `wallpaper`, `primary`, `secondary`,
+`background`, `foreground`, `chip_battery`→`chip_bluetooth`→`chip_wlan`→`chip_audio` como rampa oscuro→claro,
+`status_ok/warn/error`). `theme <nombre>` → `scripts/theme-switch.sh` es el **único** orquestador: escribe
+`qtile/current_theme.json` (fuente del tema activo para runtime), genera cada config en su formato y recarga.
 
-## Temas Disponibles
+Campos de forma opcionales (defaults = como se veía todo antes; tabla en `docs/themes.md`; `shape_field` respeta
+`false` explícitos): `radius`, `opacity`, `inactive_opacity`, `dim_inactive`, `dim_strength`, `blur_enabled`,
+`blur_size`, `blur_passes`, `blur_noise`, `blur_contrast`, `blur_brightness`, `blur_vibrancy`, `blur_popups`,
+`shadow_enabled`, `shadow_style` (dark/glow), `shadow_range`, `shadow_power`, `border_size`, `border_style`
+(solid/gradient/rotating), `border_angle`, `gaps_in`, `gaps_out`, `animations` (smooth/snappy/bouncy/off),
+`font_mono`, `font_size`, `font_ui`, `icon_theme`, `opencode_theme`. Se editan en Settings → Appearance y Fonts &
+cursor. Un color nuevo sale de las 14 claves con `hex_blend()`, **nunca** un campo nuevo. Los 17 temas:
+atom-dark, brown-at-at, catppuccin-mocha, chill-lofi, ciberpunk, data-center, everforest, gray-terminal,
+green-geek, gruvbox, kanagawa-dragon, nord, oxocarbon-dark, purple-sky, red-dark, solarized-dark, tokyo-night.
 
-17 temas en `themes/<nombre>/theme.json`:
+## Probar sin tocar la sesión
 
-| Tema | Wallpaper | Paleta |
-|------|-----------|--------|
-| Brown AT-AT | STAR-WARS-AT-AT.png | Marron/gris calido |
-| Red Dark | RED-STONE.png | Rojo oscuro, minimalista |
-| Gray Terminal | HACKER.jpg | Grises |
-| Green Geek | HACKER-SETUP-DARK.jpg | Verde terminal |
-| Purple Sky | CITY.jpg | Violeta |
-| Ciberpunk | CITY-SCI-FI.jpg | Neon magenta/purple |
-| Chill Lofi | CREATIVITY-ROOM.jpg | Tierra calido |
-| Data Center | DATA-CENTER.jpg | Cian/verde |
-| Gruvbox | CITYSCAPE-CYBER.png | Retro, tonos tierra, amarillo/verde mate |
-| Everforest | CYBER-SPACE-CITY.png | Bosque neblinoso, verdes calidos |
-| Solarized Dark | CODE.png | Cientifico, contraste calibrado |
-| Atom Dark | INDUSTRIAL-CYBERPUNK-CITY.png | Grises oscuros, acento azul |
-| Nord | DARK-SERVER-ROOM.png | Azul-gris artico |
-| Catppuccin Mocha | DOG-ROOM.jpg | Pastel oscuro |
-| Tokyo Night | CITY-DARK.jpg | Azul-violeta nocturno |
-| Kanagawa Dragon | JAPAN-MYTHOLOGY.png | Neutros calidos tipo tinta sumi-e, acentos azul/malva |
-| Oxocarbon Dark | CYBERPUNK-DATACENTER.png | IBM Carbon, negro carbon con neon purpura/azul |
-
-### Estructura de theme.json
-
-Schema **plano** (no anidado), leido con `jq`:
-
-```json
-{
-  "name": "KANAGAWA DRAGON",
-  "icon": "",
-  "wallpaper": "$DOTFILES/recursos/wallpapers/JAPAN-MYTHOLOGY.png",
-  "primary": "#8ba4b0",
-  "secondary": "#a292a3",
-  "background": "#181616",
-  "foreground": "#c5c9c5",
-  "chip_battery": "#282727",
-  "chip_bluetooth": "#393836",
-  "chip_wlan": "#625e5a",
-  "chip_audio": "#7a8382",
-  "status_ok": "#8a9a7b",
-  "status_warn": "#c4b28a",
-  "status_error": "#c4746e"
-}
-```
-
-`chip_battery` → `chip_audio` es una rampa de 4 superficies oscuro→claro (reinterpretada como escala de elevacion para dunst, rofi, kitty, HyprFM, Obsidian, VPN TUI). `status_ok`/`status_warn`/`status_error` son colores semanticos (herdr, HyprFM, dunst, agents-tui, VPN TUI, y ahora tambien el statusline de Claude Code). Los tokens de forma (fuente, radios, opacidad, blur) viven como default en `themes/_design-tokens.json`, pero desde el piloto `atom-dark`/`tokyo-night`/`oxocarbon-dark` **sí pueden variar por tema** vía 8 campos opcionales (`radius`, `opacity`, `blur_enabled`, `blur_size`, `blur_passes`, `font_mono`, `icon_theme`, `opencode_theme`) — el resto de los temas todavía no los define y cae al default. Detalle completo en `docs/themes.md`.
-
-### Componentes que actualiza theme-switch.sh
-
-- `polybar/colors.ini` (X11, legacy)
-- `waybar/theme.css` + `waybar/style.css` (radio/fuente)
-- `kitty/colors.conf` + `kitty/kitty.conf` (fuente)
-- `~/.zsh_colors`, `~/.zsh_banner_color`
-- `qtile/current_theme.json`, `qtile/modules/screens.py` (wallpaper — legacy, el WM real en uso es Hyprland)
-- `hypr/hyprland.conf`: colores de borde, `rounding`, opacidad por-app (`windowrule`), `decoration.blur` — **este es el WM que corre de verdad**, no Qtile/picom
-- `rofi/theme*.rasi` (radio), `rofi/colors.rasi` (fuente), `dunst/dunstrc` (radio/transparencia/fuente/colores), `gtklock/style.css` (radio/fuente)
-- `~/.config/gtk-3.0/gtk.css` (colores Thunar/GTK), `~/.config/gtk-3.0/settings.ini` (icon theme)
-- `herdr/config.toml` ([theme.custom]), `opencode/opencode.jsonc` (colores de agente + campo `theme` built-in)
-- `~/.claude/statusline-command.sh` (colores ANSI 24-bit de status_ok/warn/error/primary)
-- Best-effort si existen: HyprFM, Obsidian (lc-red), Sublime Text, LazyVim, Walker
-- Recarga: hyprctl, waybar, kitty, dunst, herdr, thunar
-
----
-
-## Documentacion
-
-La documentacion vive en `docs/` y cubre:
-
-| Archivo | Contenido |
-|---------|-----------|
-| `docs/overview.md` | Arquitectura, file tree, enlaces, dual-backend |
-| `docs/installation.md` | Guia de instalacion, paquetes Wayland |
-| `docs/keybindings.md` | Todos los atajos, dual-backend |
-| `docs/themes.md` | Sistema de temas, Polybar + Waybar |
-| `docs/automations.md` | Scripts automat/install, dual-backend |
-| `docs/configuration/qtile.md` | Qtile detalle, Wayland backend |
-| `docs/configuration/polybar.md` | Polybar modulos (X11) |
-| `docs/configuration/wayland.md` | Wayland architecture, Waybar, swaylock, grim+slurp |
-| `docs/configuration/kitty.md` | Kitty config, Wayland flag |
-| `docs/configuration/zsh.md` | Zsh modulos |
-| `docs/configuration/rofi.md` | Rofi scripts |
-| `docs/configuration/picom.md` | Picom efectos (X11) |
-| `docs/configuration/dunst.md` | Dunst notification center |
-| `docs/configuration/editors.md` | Neovim + Sublime |
-| `docs/configuration/fastfetch.md` | Fastfetch display |
-| `docs/configuration/lock-screen.md` | swaylock + betterlockscreen (dual-backend) |
-| `docs/configuration/thunar.md` | Thunar accels/uca |
-| `docs/configuration/opencode.md` | opencode AI config |
-| `docs/configuration/extras.md` | OneDrive, wallpapers, gastos.py |
-| `docs/configuration/herdr.md` | Herdr: prefix custom, launch, integracion de temas, por que solo se symlinkea config.toml |
-
----
+- **TUIs headless**: `app.run_test(size=(170, 48))`, `pilot.press(...)`, `app.save_screenshot("x.svg")`. Para ver
+  el SVG: `sed 's/<svg /<svg xml:space="preserve" /'` y `rsvg-convert` (sin eso rsvg colapsa los espacios y la
+  captura parece rota aunque no lo esté). Las imágenes de kitty no salen en el SVG.
+- **Leer lo que dibuja un widget**: `"".join(s.text for s in w.render_line(y))`.
+- **Sandbox**: `bwrap --ro-bind / / --dev /dev --proc /proc --tmpfs /tmp --bind <scratch> <scratch>
+  --unshare-ipc` sin `WAYLAND_DISPLAY`/`DBUS_SESSION_BUS_ADDRESS`/`HYPRLAND_INSTANCE_SIGNATURE` (agregar
+  `--unshare-pid` salvo que la prueba necesite ver procesos reales).
+- **Binarios falsos** en un `PATH` antepuesto para simular estados (`firewall-cmd`, `tailscale`, `hyprctl`,
+  `arch-audit`, `fwupdmgr`, `nmcli`, `systemctl`); no pulsar teclas que ejecuten acciones reales.
+- **Copias de config**: `DTUI_KEYMAP`, `PROTON_BACKUP_CONF/STATE`, `MODES_CONF`, `WEBAPPS_CONF`, `GASTOS_DB`.
+  Con `HOME` falso, `PYTHONUSERBASE=$HOME_REAL/.local` para no perder `rich`/`textual`.
+- **Lag de la UI**: medir con una tarea asyncio que duerme 10 ms y registra el máximo atraso mientras se navega.
+- zsh no separa palabras en `set -- $var`: los scripts de prueba con bucles, en bash.
 
 ## Instrucciones
 
-### 0. AVISO: mantener D4rkFiles sincronizado
+### 0. Mantener D4rkFiles sincronizado
 
-Estos dotfiles reales (`$DOTFILES`) tienen un homonimo generico y publico: **D4rkFiles** (`/files/D4rkFiles`,
-github.com/D4rkDr4gon/D4rkFiles). **Si cambiamos algo en los dotfiles reales, actualizamos tambien D4rkFiles con
-su equivalente generico** (sin rutas, nombres, VPNs, trabajo ni credenciales; lo dependiente del tema va como
-plantilla `.tpl`). Equivalencias: `<app>/` -> `config/<app>/`, `lazy-nvim/` -> `config/nvim/`, `zsh/` -> `home/zsh/`,
-`sddm/` y `systemd/user/` -> `system/`, `recursos/shortcuts/` -> `tools/`. Verificar con
-`scripts/dotfiles-doctor.sh` y `scripts/check-docs.sh` de D4rkFiles, y confirmar con el usuario antes del push.
+D4rkFiles (`/files/D4rkFiles`, github.com/D4rkDr4gon/D4rkFiles) es la versión genérica y pública. **Lo genérico que
+se cambia acá se porta allá**, adaptado (nunca copiado): sin rutas, nombres, VPNs de trabajo, redes ni credenciales.
 
-### 1. Actualizar documentacion tras un cambio
+| `~/dotfiles` | D4rkFiles |
+|---|---|
+| `<app>/` | `config/<app>/` (lo que depende del tema, como plantilla `.tpl` con tokens `@nombre@`) |
+| `recursos/tui/dtui.py` | `tools/dtui.py` |
+| `recursos/settings/` | `tools/settings/` (rutas por `sections/common.py`: `CONF_DIR`, `STATE`, `HYPR_USER_DIR`…) |
+| `recursos/<tui>/<tui>_tui.py` | `tools/<tui>_tui.py` (`load_view(módulo, atributo)`, sin carpeta) |
+| `qtile/current_theme.json` | `~/.local/state/dotfiles/current_theme.json` |
+| `recursos/tui/keymap.json` | `~/.config/dotfiles/keymap.json` |
+| `hypr/workspaces.conf` (source, todos los atajos) | `~/.config/dotfiles/hypr/workspaces.conf` (el repo trae 1..9; el override hace `unbind` de los que sobran, el bind del 10 y `# count: N`) |
+| `hypr/hypridle.conf`, `hyprsunset.conf` (versionados) | `config/hypr/…` generados y en `.gitignore` |
+| `sed` sobre configs en `theme-switch.sh` | tokens en `scripts/lib/theme.sh` + plantillas (`config/hypr/theme.conf.tpl` lleva la forma; `config/hypr/animations/<preset>.conf`) |
+| `lazy-nvim/`, `zsh/`, `sddm/`, `systemd/user/` | `config/nvim/`, `home/zsh/`, `system/` |
 
-Cuando se modifique un archivo de configuracion, se agregue un nuevo componente, o se cambien atajos/alias:
+Método que funcionó: **merge a tres vías por archivo** (`git merge-file -p ours base theirs`, base = dotfiles en el
+commit en que D4rkFiles estaba al día), resolver conflictos con la convención de D4rkFiles, y archivos nuevos
+portados a mano. Después:
 
-1. Identificar que archivo/s de docs afecta el cambio
-2. Leer el/los archivos actuales
-3. Actualizar la informacion afectada (descripciones, atajos, rutas, etc.)
-4. Si el cambio introduce algo completamente nuevo, evaluar si amerita un nuevo documento en `docs/configuration/`
-5. Actualizar `docs/overview.md` si el file tree cambio
-6. Actualizar `docs/keybindings.md` si se agregaron/eliminaron atajos
-7. Actualizar este SKILL.md en la seccion correspondiente para mantener el contexto sincronizado
+- `Hyprland --verify-config -c` sobre una **copia** renderizada (`theme-switch.sh --render-only` escribe en
+  Firefox/HyprFM/estado del home: correrlo con `HOME`/`XDG_*` falsos) y probar varias combinaciones de forma.
+- Settings y TUIs headless con `XDG_CONFIG_HOME`/`XDG_STATE_HOME`/`DTUI_KEYMAP` en el scratchpad.
+- `scripts/check-docs.sh` (0 problemas) y `scripts/dotfiles-doctor.sh configs repo` (0 errores).
+- `git diff | grep -iE '<usuario>|/home/|<empresa>|citrix|forti|proton'` antes de commitear.
+- Paquetes nuevos en `install/packages/*.txt`; docs de D4rkFiles (`docs/settings.md`, `themes.md`, `scripts.md`,
+  `keybindings.md`, `customization.md`, `components.md`, `design-system.md`, `ai-skill.md`) y su skill
+  `skills/d4rkfiles/` (`SKILL.md` + `references/recetas.md`).
+- Confirmar con el usuario antes del push (salvo que lo haya pedido explícitamente).
 
-### 2. Crear un nuevo tema
+### 1. Actualizar documentación tras un cambio
 
-Seguir estos pasos exactos:
+Cada cambio de comportamiento actualiza su doc en el mismo commit: `docs/configuration/settings.md` (secciones),
+`docs/configuration/<componente>.md`, `docs/themes.md` (campos/tabla de apps), `docs/keybindings.md` y
+`docs/configuration/hyprland.md` (atajos), `docs/configuration/updates.md` (modos de dotfiles-update),
+`docs/configuration/shortcuts.md`, `docs/design-system.md` (piezas de TUI) y `AGENTS.md` (si cambia una
+convención o una pieza de `dtui.py`). Y esta skill, si cambia algo de lo que describe.
 
-1. Elegir nombre en kebab-case (ej: `matrix-rain`)
-2. Buscar o crear wallpaper en `recursos/wallpapers/`
-3. Crear directorio `themes/<nombre>/`
-4. Crear `themes/<nombre>/theme.json` siguiendo la estructura de arriba
-5. La ruta del wallpaper debe ser absoluta: `$HOME/dotfiles/recursos/wallpapers/<archivo>`
-6. Definir colores: primary, secondary, background, foreground, y chip (battery, bluetooth, wlan, audio)
-7. Verificar que el tema funcione: `theme <nombre>`
-8. Actualizar `docs/themes.md` con la nueva entrada en la tabla
-9. Actualizar la tabla de temas en este SKILL.md
+### 2. Crear un tema
 
-### 3. Agregar un nuevo componente
+1. `themes/<nombre>/theme.json` con las 14 claves (+ forma opcional) y `preview.png`.
+2. Wallpaper en `recursos/wallpapers/`.
+3. `theme <nombre>` (recarga componentes: solo con OK del usuario) o Settings → Themes.
+4. Fila en `docs/themes.md`.
 
-1. Crear la carpeta en `$DOTFILES/` con su configuracion
-2. Agregar el enlace simbolico en la seccion de estructura
-3. Crear el enlace real: `ln -sf $DOTFILES/<carpeta> ~/.config/<carpeta>`
-4. Crear `docs/configuration/<nombre>.md` con:
-   - Proposito del componente
-   - Archivos que contiene
-   - Tabla de configuracion principal
-   - Atajos si aplica
-5. Actualizar `docs/overview.md` con el nuevo componente en file tree y tabla
-6. Actualizar el README.md principal si el cambio es significativo
-7. Si el componente requiere registro en opencode (skills, plugins, MCP), actualizar `opencode/opencode.jsonc`
-8. Actualizar este SKILL.md manteniendo la estructura sincronizada
+### 3. Agregar una app tematizada o un componente
 
-### 4. Ubicacion de los skills
+Carpeta en `$DOTFILES/<app>`, symlink a `~/.config/<app>`, bloque en `apply_theme_config` de `theme-switch.sh`
+(y en `reload_components` si se recarga en vivo), fila en `docs/themes.md` y `docs/configuration/<app>.md`.
+Los archivos generados llevan cabecera "generado, no editar".
 
-Este skill vive en `$HOME/MY-AGENT-SKILLS/dotfiles-manager/SKILL.md`.
-Para que opencode lo cargue, debe estar registrado en `skills.paths` del `opencode.json`.
+### 4. Commits
+
+Conventional commits en español (`feat(scope): …`), cuerpo con viñetas del porqué, `Co-Authored-By` y
+`Claude-Session` si el entorno los da. Sin `git add -A` a ciegas cuando hay cambios ajenos; si el usuario pide
+"todo en un commit", nombrar en el cuerpo los cambios suyos que entran.
+
+### 5. Ubicación
+
+Esta skill: `$HOME/MY-AGENT-SKILLS/SKILLS/dotfiles-manager/SKILL.md` (enlazada en `~/.claude/skills/`; opencode
+la lee por `skills.paths`). La skill pública del repo genérico es `/files/D4rkFiles/skills/d4rkfiles/`.
