@@ -72,14 +72,21 @@ entran, `esc` vuelve al menú, `q` sale. Tabla completa: `docs/configuration/set
 
 | Categoría | Secciones (archivo) |
 |---|---|
-| Connectivity | Wi-Fi, Bluetooth (en settings_tui.py) · VPN (`recursos/vpn/vpn_tui.py`: Forti, Proton, WireGuard, OpenVPN, **Tailscale**, Citrix) · **Firewall** (`sections/firewall.py`) · Phone · Network tools |
-| System | Services · Startup apps · Logs · Snapshots · Backup (Proton Drive) · System · **Update** (`sections/update.py`) |
+| Connectivity | Wi-Fi, Bluetooth (en settings_tui.py) · VPN (`recursos/vpn/vpn_tui.py`: Forti, Proton, WireGuard, OpenVPN, **Tailscale**, Citrix) · **Firewall** (`sections/firewall.py`) · **USB guard** (`sections/usbguard.py`) · Phone (+ bloqueo por proximidad) · Network tools |
+| System | Services · Startup apps · Logs · Snapshots · Backup (Proton Drive) · System · **Update** (`sections/update.py`) · **Maintenance** (`sections/maintenance.py`: .pacnew, unidades caídas, paccache, earlyoom) |
 | Tools | Notifications · Clipboard · Screenshots · Color picker · AI Agents |
 | Hardware | **Displays** (`sections/displays.py` + `nightlight.py`) · Audio · Input · **Power** (`sections/power.py`) · Battery · Storage |
-| Desktop | Modes · **Workspaces** (`sections/workspaces.py`) · **Desktop widgets** (`sections/deskwidgets.py`) · Webapps · Default apps · **Shortcuts** |
+| Desktop | Modes · **Workspaces** (`sections/workspaces.py`, + Session: `hypr/scripts/hypr-session.py`) · **Desktop widgets** (`sections/deskwidgets.py`) · Webapps · Default apps · **Shortcuts** |
 | Look & feel | Themes · Theme editor · **Appearance** (forma del tema) · **Fonts & cursor** (`sections/fonts.py`) · Backgrounds |
 
 Lo más reciente:
+
+- **Salud del sistema** (`docs/configuration/system-health.md`): tope de carga en Battery (`l`, regla udev),
+  Maintenance, USB guard (+ `scripts/usbguard-notify.py`), bloqueo por proximidad del teléfono
+  (`scripts/phone-proximity.py`, `phone/phone.conf`). Lo que toca `/etc` va con `common.sudo_run`.
+- **Sesión** (`docs/configuration/session.md`): autosave/restore de ventanas por workspace. `restore` lanza apps:
+  probar solo con `hyprctl` falso.
+- **Theme editor → `w`**: tema desde un wallpaper (`sections/wallpalette.py`).
 
 - **Firewall** — firewalld: on/off, zona por defecto, servicios/puertos (`a`/`d`), zona por conexión de NM.
   Estado por `systemctl` (con firewalld parado `firewall-cmd` espera ~10 s a D-Bus), zonas/servicios/puertos de
