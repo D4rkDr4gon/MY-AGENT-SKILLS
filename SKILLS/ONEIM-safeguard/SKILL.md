@@ -39,7 +39,7 @@ Este skill se activa cuando el usuario necesita **administrar, operar o diagnost
 
 El curso está definido en el syllabus del vault, que es la fuente de verdad:
 
-`$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/02-SAFEGUARD-PAM/99-ENABLEMENTS/CURSO SAFEGUARD - SYLLABUS.md`
+`$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/02-SAFEGUARD-PAM/99-ENABLEMENTS/TECHNICAL ENABLEMENT/CURSO SAFEGUARD - SYLLABUS.md`
 
 1. Leer el syllabus **completo** con `obsidian-manager` y seguir al pie de la letra su sección **INSTRUCCIONES PARA LA IA TUTORA**: rol de tutor socrático, ciclo de cada paso, reglas, adaptación.
 2. Pedir los datos de **COMO ARRANCAR**: nombre del alumno, versión de Safeguard (o "última") y paso actual (o "retomar desde el seguimiento"). Si es "retomar", leer la sección **SEGUIMIENTO**.
@@ -163,7 +163,7 @@ Antes de resolver cualquier cosa, preguntar al usuario (si no está explicitado)
 
 ### 2. Buscar en Babilonia
 
-- Buscar en `$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/02-SAFEGUARD-PAM/` — manual completo de SPP, SPS y SPA, organizado por secciones (`00-ARQUITECTURA` a `11-SAFEGUARD-REMOTE-ACCESS` y `99-ENABLEMENTS`)
+- Buscar en `$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/02-SAFEGUARD-PAM/` — manual completo de SPP, SPS y SPA, organizado por secciones (`00-ARQUITECTURA` a `12-SAFEGUARD-ON-DEMAND` y `99-ENABLEMENTS`, con `PRESALES ENABLEMENT/`, `DEMOS/` y `TECHNICAL ENABLEMENT/`)
 - Si la info no existe o no alcanza → buscar en internet
 
 ### 3. Buscar en internet (web fallback)
