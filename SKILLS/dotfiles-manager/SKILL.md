@@ -6,7 +6,7 @@ description: Use when the user asks about managing, updating, documenting, testi
 # dotfiles-manager
 
 Contexto y reglas para trabajar en los dotfiles **reales** del usuario (`$DOTFILES` = `~/dotfiles`) y para
-portar lo genérico al repo público **D4rkFiles** (`/files/D4rkFiles`). El contrato detallado vive en
+portar lo genérico al repo público **D4rkFiles** (`/files/projects/D4rkFiles`). El contrato detallado vive en
 `$DOTFILES/AGENTS.md` (lo carga `CLAUDE.md`): **leelo primero**; esta skill es el mapa y las recetas.
 
 ## Contexto
@@ -30,7 +30,10 @@ hyprsunset · hyprshell · Thunar/HyprFM · Neovim (LazyVim) / Sublime · TUIs p
    llama a `vpn_tui.py --waybar-status` y a `hypr-workspaces.py` cada pocos segundos). Escribir a un temporal
    **en el mismo filesystem** y `os.replace`/`mv` (inode nuevo). `/tmp` es otro filesystem: copiar al lado y
    reemplazar desde ahí. Revisar con `ps -eo args | grep '[n]ombre'` (ojo: `pgrep -f` se encuentra a sí mismo).
-3. **`hyprland.conf` en vivo**: validar antes con `Hyprland --verify-config -c <copia>` y, después de
+3. **Hyprland 0.57 = config Lua** (`hypr/hyprland.lua`; `hyprctl dispatch`/`keyword` viejos no andan: desde
+   scripts, `hypr/scripts/hypr-dispatch` **por ruta absoluta**, y probar lanzando desde Hyprland con
+   `hyprctl dispatch 'hl.dsp.exec_cmd("…")'`, no desde una terminal). En vivo: validar antes con
+   `Hyprland --verify-config -c <copia>` (no valida argumentos de `hl.dsp.*`) y, después de
    reemplazar, `hyprctl configerrors` (vacío = bien) y `hyprctl binds -j` si tocaste atajos.
 4. **Pruebas sin efectos**: nada que recargue componentes (`theme-switch.sh`, `launch.sh`, `pkill waybar`,
    aplicar un modo, conectar una VPN, prender servicios). Ver "Probar sin tocar la sesión".
@@ -45,8 +48,9 @@ hyprsunset · hyprshell · Thunar/HyprFM · Neovim (LazyVim) / Sublime · TUIs p
 ├── AGENTS.md / CLAUDE.md        contrato para agentes (CLAUDE.md = @AGENTS.md)
 ├── <app>/                       una carpeta por app (hypr, waybar, kitty, rofi, dunst, qtile, walker…)
 │   └── hypr/
-│       ├── hyprland.conf        config principal (source de workspaces.conf)
-│       ├── workspaces.conf      GENERADO por Settings → Workspaces (atajos 1..N + "# count: N")
+│       ├── hyprland.lua         config principal (Hyprland >= 0.57; carga theme.lua y settings.lua)
+│       ├── theme.lua            GENERADO por theme-switch.sh · settings.lua GENERADO por Settings
+│       ├── workspaces.conf      GENERADO por Settings → Workspaces (solo "# count: N"; hyprland.lua arma los atajos)
 │       ├── hypridle.conf        GENERADO por Settings → Power
 │       ├── hyprsunset.conf      GENERADO por Settings → Displays (luz nocturna)
 │       └── scripts/             move-and-focus-workspace.sh, move-window-to-workspace.sh,
@@ -139,8 +143,8 @@ Reglas aprendidas:
 Sección nueva de Settings: archivo en `recursos/settings/sections/` con su `DView` (helpers de `common.py`:
 `run`, `detach`, `DOTFILES`, `STATE`, `HYPRLAND`, `hypr_block_get/set`), import en `settings_tui.py`, entrada en
 `CATEGORIES` y en `section_views()`. Una TUI suelta nueva: `recursos/<x>/`, lanzador en
-`waybar/scripts/<x>-launch.sh` → `float-tui-launch.sh` / `center-tui-launch.sh`, `windowrule` en
-`hyprland.conf` (y `FLOAT_GEOMETRY` en Qtile), doc.
+`waybar/scripts/<x>-launch.sh` → `float-tui-launch.sh` / `center-tui-launch.sh`, `hl.window_rule` en
+`hyprland.lua` (y `FLOAT_GEOMETRY` en Qtile), doc.
 
 ## Temas
 
@@ -179,7 +183,7 @@ green-geek, gruvbox, kanagawa-dragon, nord, oxocarbon-dark, purple-sky, red-dark
 
 ### 0. Mantener D4rkFiles sincronizado
 
-D4rkFiles (`/files/D4rkFiles`, github.com/D4rkDr4gon/D4rkFiles) es la versión genérica y pública. **Lo genérico que
+D4rkFiles (`/files/projects/D4rkFiles`, github.com/D4rkDr4gon/D4rkFiles) es la versión genérica y pública. **Lo genérico que
 se cambia acá se porta allá**, adaptado (nunca copiado): sin rutas, nombres, VPNs de trabajo, redes ni credenciales.
 
 | `~/dotfiles` | D4rkFiles |
@@ -190,9 +194,11 @@ se cambia acá se porta allá**, adaptado (nunca copiado): sin rutas, nombres, V
 | `recursos/<tui>/<tui>_tui.py` | `tools/<tui>_tui.py` (`load_view(módulo, atributo)`, sin carpeta) |
 | `qtile/current_theme.json` | `~/.local/state/dotfiles/current_theme.json` |
 | `recursos/tui/keymap.json` | `~/.config/dotfiles/keymap.json` |
-| `hypr/workspaces.conf` (source, todos los atajos) | `~/.config/dotfiles/hypr/workspaces.conf` (el repo trae 1..9; el override hace `unbind` de los que sobran, el bind del 10 y `# count: N`) |
+| `hypr/workspaces.conf` (`# count: N`) | `~/.config/dotfiles/hypr/workspaces.conf` (igual: solo `# count: N`, los atajos los arma `config/hypr/hyprland.lua`) |
+| `hypr/settings.json` → `settings.lua` (Settings) | `~/.config/dotfiles/hypr/settings.conf` en hyprlang plano, que traduce `config/hypr/lib/user_conf.lua` (también `autostart.conf`, `monitors.conf`, `*.lua`) |
+| `hypr/scripts/hypr-dispatch` (`$HOME/dotfiles/hypr/scripts/…`) | `config/hypr/scripts/hypr-dispatch` (`$HOME/.config/hypr/scripts/…`; en Settings `common.HYPR_DISPATCH`) |
 | `hypr/hypridle.conf`, `hyprsunset.conf` (versionados) | `config/hypr/…` generados y en `.gitignore` |
-| `sed` sobre configs en `theme-switch.sh` | tokens en `scripts/lib/theme.sh` + plantillas (`config/hypr/theme.conf.tpl` lleva la forma; `config/hypr/animations/<preset>.conf`) |
+| `sed` sobre configs en `theme-switch.sh` | tokens en `scripts/lib/theme.sh` + plantillas (`config/hypr/theme.lua.tpl` lleva la forma; `config/hypr/animations/<preset>.lua`) |
 | `lazy-nvim/`, `zsh/`, `sddm/`, `systemd/user/` | `config/nvim/`, `home/zsh/`, `system/` |
 
 Método que funcionó: **merge a tres vías por archivo** (`git merge-file -p ours base theirs`, base = dotfiles en el
@@ -239,4 +245,4 @@ Conventional commits en español (`feat(scope): …`), cuerpo con viñetas del p
 ### 5. Ubicación
 
 Esta skill: `$HOME/MY-AGENT-SKILLS/SKILLS/dotfiles-manager/SKILL.md` (enlazada en `~/.claude/skills/`; opencode
-la lee por `skills.paths`). La skill pública del repo genérico es `/files/D4rkFiles/skills/d4rkfiles/`.
+la lee por `skills.paths`). La skill pública del repo genérico es `/files/projects/D4rkFiles/skills/d4rkfiles/`.
