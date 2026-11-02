@@ -1,6 +1,6 @@
 ---
 name: dotfiles-manager
-description: Use when the user asks about managing, updating, documenting, testing or extending their real Arch Linux dotfiles at ~/dotfiles (Hyprland + Qtile) - themes and theme shape fields, the Settings TUI and its sections, the Textual TUIs built on dtui.py (keymaps, workers, set_rows), workspaces count, night light, firewall, VPN/Tailscale, updates/CVEs/firmware, waybar, keybindings, docs - and when porting those changes to the public D4rkFiles repo. Provides the repo layout, safety rules, conventions and the porting map.
+description: Use when the user asks about managing, updating, documenting, testing or extending their real Arch Linux dotfiles at ~/dotfiles (Hyprland, Wayland only) - themes and theme shape fields, the Settings TUI and its sections, the Textual TUIs built on dtui.py (keymaps, workers, set_rows), workspaces count, night light, firewall, VPN/Tailscale, updates/CVEs/firmware, waybar, keybindings, docs - and when porting those changes to the public D4rkFiles repo. Provides the repo layout, safety rules, conventions and the porting map.
 ---
 
 # dotfiles-manager
@@ -14,12 +14,12 @@ portar lo genérico al repo público **D4rkFiles** (`/files/projects/D4rkFiles`)
 | | |
 |---|---|
 | Repo | `$DOTFILES` · remote `git@github.com:${DOTFILES_REPO}.git` · branch `main` |
-| Sistema | Arch Linux · **Hyprland** (WM en uso) · Qtile/X11 como alternativa |
-| Enlaces | `~/.config/<app>` → `$DOTFILES/<app>` (hypr, waybar, kitty, rofi, dunst, qtile, walker, swayosd, gtklock, hyprshell, opencode, Thunar, zsh…) · `~/.zshrc` → `zsh/zshrc` · `~/.claude/statusline-command.sh` → `claude/` |
+| Sistema | Arch Linux · **Hyprland** (única sesión; Qtile/Polybar/Picom se sacaron, apps X11 por XWayland) |
+| Enlaces | `~/.config/<app>` → `$DOTFILES/<app>` (hypr, waybar, kitty, rofi, dunst, walker, swayosd, gtklock, hyprshell, opencode, Thunar, zsh…) · `~/.zshrc` → `zsh/zshrc` · `~/.claude/statusline-command.sh` → `claude/` |
 | Idioma | Español rioplatense en código, comentarios, docs y commits; **textos visibles de las TUIs en inglés** |
 | Punto de entrada | **Settings** (`recursos/settings/settings_tui.py`, `Super+Shift+Space`, logo de waybar) |
 
-Stack: Hyprland + waybar · kitty + zsh (p10k) · rofi/walker · dunst · swayosd · gtklock · hypridle ·
+Stack: Hyprland + waybar · kitty + zsh (p10k) · lanzador propio (TUI, reemplazó a rofi) · dunst · swayosd · gtklock · hypridle ·
 hyprsunset · hyprshell · Thunar/HyprFM · Neovim (LazyVim) / Sublime · TUIs propias en Python + Textual.
 
 ## Reglas que no se rompen (resumen de AGENTS.md)
@@ -46,7 +46,7 @@ hyprsunset · hyprshell · Thunar/HyprFM · Neovim (LazyVim) / Sublime · TUIs p
 ```
 ~/dotfiles/
 ├── AGENTS.md / CLAUDE.md        contrato para agentes (CLAUDE.md = @AGENTS.md)
-├── <app>/                       una carpeta por app (hypr, waybar, kitty, rofi, dunst, qtile, walker…)
+├── <app>/                       una carpeta por app (hypr, waybar, kitty, rofi, dunst, walker…)
 │   └── hypr/
 │       ├── hyprland.lua         config principal (Hyprland >= 0.57; carga theme.lua y settings.lua)
 │       ├── theme.lua            GENERADO por theme-switch.sh · settings.lua GENERADO por Settings
@@ -111,10 +111,14 @@ Lo más reciente:
   teléfono KDE Connect, red) y todo. Config `desktop-widgets/widgets.conf`; el daemon la relee sola (reiniciarlo
   por PID si cambia un `.py`). En D4rkFiles: `config/desktop-widgets/`, config en
   `~/.config/dotfiles/desktop-widgets.conf`, CSS desde `style.css.tpl`, sin backup en la tarjeta de estado.
+- **Lanzador** (`recursos/launcher/launcher_tui.py`, doc `docs/configuration/launcher.md`) — reemplazo de rofi:
+  modos `apps` (`Mod+Space`: apps + cuenta en vivo + comando + web), `emoji` (`Mod+E`), `power` (`Mod+L`),
+  `workspaces` (clic en waybar) y `dmenu`. Menús desde bash: `scripts/dmenu.sh` (stdin → stdout), nunca
+  `rofi -dmenu`. Backend de No Molestar: `scripts/dnd.sh`. `rofi/` queda como respaldo sin uso.
 - **Workspaces** — cantidad 1–10 (`←/→`, `enter`): genera `hypr/workspaces.conf` y `hyprctl reload`; ofrece mover
-  ventanas que quedan afuera. Lo leen waybar, `workspace-cycle.sh` y `rofi/scripts/workspace-switcher.sh`.
+  ventanas que quedan afuera. Lo leen waybar, `workspace-cycle.sh` y el lanzador (modo `workspaces`).
 - **Appearance / Fonts & cursor** — campos de forma del tema y vista previa real de fuentes/íconos/cursor (PIL).
-- **Shortcuts** — atajos de Hyprland, kitty, herdr, Qtile, Obsidian, LazyVim y pestaña **Settings**: las 130+
+- **Shortcuts** — atajos de Hyprland, kitty, herdr, Obsidian, LazyVim y pestaña **Settings**: las 130+
   teclas de las TUIs, reasignables.
 
 ## TUIs: `recursos/tui/dtui.py`
@@ -128,7 +132,7 @@ Todas se ven como impala/bluetui y usan solo estas piezas (sin CSS ni colores pr
 | `Table` | Fila completa; `j/k`; filas `hdr:`/`gap:` que el cursor saltea; **`set_rows()`** redibuja solo si cambió y conserva la selección por clave |
 | `Card` | Contenido rich que recibe foco (paneles que no son tablas: mapa de monitores, luz nocturna) |
 | Popups | `FormModal` (`Field` con `choices`, `password`, `files`), `ConfirmModal`, `PickModal`, `TextModal` |
-| Barras / imágenes | `bar`, `meter10`, `charge10`, `ImagePreview` (kitty graphics), `swatches` |
+| Barras / imágenes | `bar`, `meter10`, `charge10`, `ImagePreview` (kitty graphics; la TUI llama a `enable_images()` al cargarse, antes de `run()`), `swatches` |
 | Teclas | Cada `Binding` de una `DView`/`DApp` recibe id `Clase.acción`; `keymap.json` las reasigna (`App.set_keymap`); `remap_hints` traduce el pie; `bindings_of()` las lista |
 
 Reglas aprendidas:
@@ -144,14 +148,14 @@ Sección nueva de Settings: archivo en `recursos/settings/sections/` con su `DVi
 `run`, `detach`, `DOTFILES`, `STATE`, `HYPRLAND`, `hypr_block_get/set`), import en `settings_tui.py`, entrada en
 `CATEGORIES` y en `section_views()`. Una TUI suelta nueva: `recursos/<x>/`, lanzador en
 `waybar/scripts/<x>-launch.sh` → `float-tui-launch.sh` / `center-tui-launch.sh`, `hl.window_rule` en
-`hyprland.lua` (y `FLOAT_GEOMETRY` en Qtile), doc.
+`hyprland.lua`, doc.
 
 ## Temas
 
 `themes/<nombre>/theme.json` plano: 14 claves de color (`name`, `icon`, `wallpaper`, `primary`, `secondary`,
 `background`, `foreground`, `chip_battery`→`chip_bluetooth`→`chip_wlan`→`chip_audio` como rampa oscuro→claro,
 `status_ok/warn/error`). `theme <nombre>` → `scripts/theme-switch.sh` es el **único** orquestador: escribe
-`qtile/current_theme.json` (fuente del tema activo para runtime), genera cada config en su formato y recarga.
+`themes/current_theme.json` (fuente del tema activo para runtime), genera cada config en su formato y recarga.
 
 Campos de forma opcionales (defaults = como se veía todo antes; tabla en `docs/themes.md`; `shape_field` respeta
 `false` explícitos): `radius`, `opacity`, `inactive_opacity`, `dim_inactive`, `dim_strength`, `blur_enabled`,
@@ -192,7 +196,7 @@ se cambia acá se porta allá**, adaptado (nunca copiado): sin rutas, nombres, V
 | `recursos/tui/dtui.py` | `tools/dtui.py` |
 | `recursos/settings/` | `tools/settings/` (rutas por `sections/common.py`: `CONF_DIR`, `STATE`, `HYPR_USER_DIR`…) |
 | `recursos/<tui>/<tui>_tui.py` | `tools/<tui>_tui.py` (`load_view(módulo, atributo)`, sin carpeta) |
-| `qtile/current_theme.json` | `~/.local/state/dotfiles/current_theme.json` |
+| `themes/current_theme.json` | `~/.local/state/dotfiles/current_theme.json` |
 | `recursos/tui/keymap.json` | `~/.config/dotfiles/keymap.json` |
 | `hypr/workspaces.conf` (`# count: N`) | `~/.config/dotfiles/hypr/workspaces.conf` (igual: solo `# count: N`, los atajos los arma `config/hypr/hyprland.lua`) |
 | `hypr/settings.json` → `settings.lua` (Settings) | `~/.config/dotfiles/hypr/settings.conf` en hyprlang plano, que traduce `config/hypr/lib/user_conf.lua` (también `autostart.conf`, `monitors.conf`, `*.lua`) |
