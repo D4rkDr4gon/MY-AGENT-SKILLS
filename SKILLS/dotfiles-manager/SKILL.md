@@ -15,11 +15,11 @@ portar lo genérico al repo público **D4rkFiles** (`/files/projects/D4rkFiles`)
 |---|---|
 | Repo | `$DOTFILES` · remote `git@github.com:${DOTFILES_REPO}.git` · branch `main` |
 | Sistema | Arch Linux · **Hyprland** (única sesión; Qtile/Polybar/Picom se sacaron, apps X11 por XWayland) |
-| Enlaces | `~/.config/<app>` → `$DOTFILES/<app>` (hypr, waybar, kitty, rofi, dunst, walker, swayosd, gtklock, hyprshell, opencode, Thunar, zsh…) · `~/.zshrc` → `zsh/zshrc` · `~/.claude/statusline-command.sh` → `claude/` |
+| Enlaces | `~/.config/<app>` → `$DOTFILES/<app>` (hypr, waybar, kitty, dunst, swayosd, gtklock, hyprshell, opencode, Thunar, zsh…) · `~/.zshrc` → `zsh/zshrc` · `~/.claude/statusline-command.sh` → `claude/` |
 | Idioma | Español rioplatense en código, comentarios, docs y commits; **textos visibles de las TUIs en inglés** |
 | Punto de entrada | **Settings** (`recursos/settings/settings_tui.py`, `Super+Shift+Space`, logo de waybar) |
 
-Stack: Hyprland + waybar · kitty + zsh (p10k) · lanzador propio (TUI, reemplazó a rofi) · dunst · swayosd · gtklock · hypridle ·
+Stack: Hyprland + waybar · kitty + zsh (p10k) · lanzador propio (TUI) · dunst · swayosd · gtklock · hypridle ·
 hyprsunset · hyprshell · Thunar/HyprFM · Neovim (LazyVim) / Sublime · TUIs propias en Python + Textual.
 
 ## Reglas que no se rompen (resumen de AGENTS.md)
@@ -46,7 +46,7 @@ hyprsunset · hyprshell · Thunar/HyprFM · Neovim (LazyVim) / Sublime · TUIs p
 ```
 ~/dotfiles/
 ├── AGENTS.md / CLAUDE.md        contrato para agentes (CLAUDE.md = @AGENTS.md)
-├── <app>/                       una carpeta por app (hypr, waybar, kitty, rofi, dunst, walker…)
+├── <app>/                       una carpeta por app (hypr, waybar, kitty, dunst, swayosd…)
 │   └── hypr/
 │       ├── hyprland.lua         config principal (Hyprland >= 0.57; carga theme.lua y settings.lua)
 │       ├── theme.lua            GENERADO por theme-switch.sh · settings.lua GENERADO por Settings
@@ -111,10 +111,10 @@ Lo más reciente:
   teléfono KDE Connect, red) y todo. Config `desktop-widgets/widgets.conf`; el daemon la relee sola (reiniciarlo
   por PID si cambia un `.py`). En D4rkFiles: `config/desktop-widgets/`, config en
   `~/.config/dotfiles/desktop-widgets.conf`, CSS desde `style.css.tpl`, sin backup en la tarjeta de estado.
-- **Lanzador** (`recursos/launcher/launcher_tui.py`, doc `docs/configuration/launcher.md`) — reemplazo de rofi:
+- **Lanzador** (`recursos/launcher/launcher_tui.py`, doc `docs/configuration/launcher.md`) — rofi y walker se sacaron:
   modos `apps` (`Mod+Space`: apps + cuenta en vivo + comando + web), `emoji` (`Mod+E`), `power` (`Mod+L`),
   `workspaces` (clic en waybar) y `dmenu`. Menús desde bash: `scripts/dmenu.sh` (stdin → stdout), nunca
-  `rofi -dmenu`. Backend de No Molestar: `scripts/dnd.sh`. `rofi/` queda como respaldo sin uso.
+  `rofi -dmenu`. Backend de No Molestar: `scripts/dnd.sh`.
 - **Workspaces** — cantidad 1–10 (`←/→`, `enter`): genera `hypr/workspaces.conf` y `hyprctl reload`; ofrece mover
   ventanas que quedan afuera. Lo leen waybar, `workspace-cycle.sh` y el lanzador (modo `workspaces`).
 - **Appearance / Fonts & cursor** — campos de forma del tema y vista previa real de fuentes/íconos/cursor (PIL).
@@ -156,6 +156,9 @@ Sección nueva de Settings: archivo en `recursos/settings/sections/` con su `DVi
 `background`, `foreground`, `chip_battery`→`chip_bluetooth`→`chip_wlan`→`chip_audio` como rampa oscuro→claro,
 `status_ok/warn/error`). `theme <nombre>` → `scripts/theme-switch.sh` es el **único** orquestador: escribe
 `themes/current_theme.json` (fuente del tema activo para runtime), genera cada config en su formato y recarga.
+Es **transaccional**: escribe en un staging y `stage_commit` reemplaza (temporal + `mv`) solo si todo salió
+bien; una ruta nueva va en `STAGED_VARS` o con `"$(st "$ruta")"`, un efecto externo con `defer` (D4rkFiles:
+`render_template` / `_st` en `scripts/lib/theme.sh`).
 
 Campos de forma opcionales (defaults = como se veía todo antes; tabla en `docs/themes.md`; `shape_field` respeta
 `false` explícitos): `radius`, `opacity`, `inactive_opacity`, `dim_inactive`, `dim_strength`, `blur_enabled`,

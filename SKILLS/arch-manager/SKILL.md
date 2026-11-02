@@ -20,8 +20,8 @@ description: Use when the user asks about managing their Arch Linux system — p
 - **Bluetooth:** Bluez
 - **Fingerprint:** Goodix — `libfprint-2-tod1-goodix`
 - **Shell:** Zsh + Powerlevel10k
-- **WM:** Qtile (Wayland)
-- **Display Manager:** LightDM
+- **WM:** Hyprland 0.57 (Wayland, config Lua; apps X11 por XWayland)
+- **Display Manager:** SDDM (tema `dotfiles-ascii`)
 - **Dotfiles:** `$DOTFILES` (Git repo at `github.com/$DOTFILES_REPO`)
 
 ---
@@ -87,7 +87,7 @@ yay -Qm               # list installed AUR packages
 
 | Service | Controls |
 |---|---|
-| `lightdm.service` | Display manager |
+| `sddm.service` | Display manager |
 | `NetworkManager.service` | Network |
 | `bluetooth.service` | Bluetooth stack |
 | `systemd-resolved.service` | DNS resolver |
@@ -171,20 +171,19 @@ sudo systemctl restart NetworkManager
 
 | Component | Config |
 |---|---|
-| Display Manager | LightDM (`/etc/lightdm/lightdm.conf`) |
-| WM | Qtile (Wayland, `~/.config/qtile/config.py`) |
+| Display Manager | SDDM (`/etc/sddm.conf.d/`, tema en `/usr/share/sddm/themes/dotfiles-ascii`) |
+| WM | Hyprland (`~/.config/hypr/hyprland.lua` → `$DOTFILES/hypr/`) |
 | Bar | Waybar (`~/.config/waybar/`) |
-| Wallpaper | Qtile built-in / swww |
+| Wallpaper | hyprpaper (`$DOTFILES/hypr/scripts/start-hyprpaper.sh`) |
+| Lock | gtklock (`$DOTFILES/scripts/lock-screen.sh`; hypridle opcional desde Settings → Power) |
 | Dual monitors | Managed by `$DOTFILES/automat/display-monitors.sh` |
 
-### LightDM
+### SDDM
 
 ```bash
-# Status
-systemctl status lightdm
-
-# Greeter config
-/etc/lightdm/lightdm-gtk-greeter.conf
+systemctl status sddm
+# Tema: $DOTFILES/scripts/setup-sddm-theme.sh (sudo); PAM con huella en /etc/pam.d/sddm
+sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/dotfiles-ascii   # previsualizar
 ```
 
 ---
@@ -347,18 +346,9 @@ cd "$DOTFILES"
 # Install stow
 sudo pacman -S stow
 
-# Create symlinks component by component:
-stow -t ~/.config qtile waybar kitty rofi dunst fastfetch
-stow -t ~/.config onedrive opencode
-stow -t ~/.config/sublime-text sublime-text
-stow -t ~/ zsh  # creates ~/.zshrc
-
-# For Neovim (LazyVim):
-stow -t ~/.config lazy-nvim
-nvim  # auto-installs plugins
-
-# Autostart directory
-ln -sf "$DOTFILES/automat/" ~/.config/automat
+# Los symlinks los crea install.sh (create_symlinks): ~/.config/<app> -> $DOTFILES/<app>
+# (symlink de directorio completo; stow aplana los paquetes y no sirve acá).
+bash "$DOTFILES/install.sh"
 ```
 
 Or use the install scripts in `$DOTFILES/automat/install/` in order.
@@ -367,10 +357,10 @@ Or use the install scripts in `$DOTFILES/automat/install/` in order.
 
 ```bash
 # Check all symlinks
-ls -la "$DOTFILES/qtile" "$DOTFILES/waybar" ~/.config/qtile ~/.config/waybar
+bash "$DOTFILES/scripts/dotfiles-doctor.sh"      # links, paquetes, servicios, configs, repo
 
-# Verify Qtile config
-qtile check
+# Verify Hyprland config
+hyprctl configerrors                              # vacío = bien
 
 # Launch components
 bash ~/.config/waybar/launch.sh
@@ -384,7 +374,7 @@ fc-list | grep "Hack.*Nerd"
 
 ## 15. Theme Management
 
-8 themes in `$DOTFILES/themes/<name>/theme.json`.
+17 themes in `$DOTFILES/themes/<name>/theme.json` (also Settings → Themes).
 
 ```bash
 # List themes
@@ -392,12 +382,11 @@ theme --list
 ls "$DOTFILES/themes/"
 
 # Apply theme
-theme at-at
-theme city-sci-fi
-theme hacker
+theme red-dark
+theme tokyo-night
 
 # Verify current theme
-cat ~/.config/qtile/current_theme.json
+cat "$DOTFILES/themes/current_theme.json"
 ```
 
 ### Creating a new theme
@@ -410,12 +399,9 @@ cat ~/.config/qtile/current_theme.json
 
 ### Theme components updated
 
-- `waybar/theme.css`
-- `kitty/colors.conf`
-- `~/.zsh_colors`
-- `qtile/current_theme.json`
-- `qtile/modules/screens.py` (wallpaper path)
-- Waybar + Qtile are reloaded automatically
+- `themes/current_theme.json` (tema activo; lo leen las TUIs y los scripts)
+- `hypr/theme.lua`, `waybar/theme.css`, `kitty/colors.conf`, `~/.zsh_colors`, GTK, dunst… (tabla completa en `$DOTFILES/docs/themes.md`)
+- Hyprland, waybar, kitty y dunst se recargan solos
 
 ---
 
@@ -501,7 +487,7 @@ nmcli connection show | grep vpn
 nmcli connection up <vpn-name>
 nmcli connection down <vpn-name>
 
-# Polybar has a vpn_status.sh + vpn_toggle.sh module
+# Waybar: chip VPN (recursos/vpn/vpn_tui.py --waybar-status); click abre la TUI
 # Proton VPN has CLI + GTK interfaces
 ```
 
@@ -567,13 +553,13 @@ sudo fstrim -v /files
 
 ## 22. Troubleshooting
 
-### Display / Qtile issues
+### Display / Hyprland issues
 
 ```bash
-# Check Qtile config
-qtile check
+# Check Hyprland config
+hyprctl configerrors
 
-# Restart Qtile without logout
+# Reload Hyprland + waybar
 Mod+Ctrl+R
 
 # Waybar issues
@@ -625,16 +611,13 @@ bluetoothctl
 - [ ] Install yay
 - [ ] Install all fonts (`install-fonts.sh`)
 - [ ] Install Zsh + change shell (`install-zsh.sh`)
-- [ ] Install Qtile (`install-qtile.sh`)
-- [ ] Install Polybar (`install-polybar.sh`)
-- [ ] Install Picom (`install-picom.sh`)
+- [ ] Install Wayland + Hyprland (`install-wayland.sh`, `install-hyprland.sh`)
 - [ ] Install Kitty (`install-kitty.sh`)
-- [ ] Install Rofi (`install-rofi.sh`)
 - [ ] Install Neovim + LazyVim (`install-neovim.sh`)
 - [ ] Install productivity tools (`install-tools.sh`)
 - [ ] Install Ollama (`install-ollama.sh`)
 - [ ] Install n8n (`install-n8n.sh`)
-- [ ] Apply theme (`theme city-sci-fi`)
+- [ ] Apply theme (`theme red-dark`)
 - [ ] Set up online accounts
 - [ ] Configure dual monitors
 - [ ] Configure VPN
