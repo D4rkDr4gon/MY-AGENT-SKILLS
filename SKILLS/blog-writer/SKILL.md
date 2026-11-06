@@ -23,8 +23,9 @@ Skill para escribir posts del blog de [${BLOG_DOMAIN}/docs](https://${BLOG_DOMAI
 | **Build tool** | **Vite 6** — dev server con HMR, production builds con hashing |
 | **Framework** | None — HTML plano + Vite, sin CMS, sin backend |
 | **CSS** | `src/styles/blog.css` (compartido por listing + todos los posts) |
-| **JS** | `src/scripts/blog.js` + `src/scripts/blog-search.js` (solo listing) |
-| **Fuentes** | JetBrains Mono via Google Fonts |
+| **JS** | `src/scripts/blog.js` (toggle de tema en todas las páginas; búsqueda solo en el listing vía `blog-search.js`) |
+| **Fuentes** | Inter (texto) + JetBrains Mono (acentos) via Google Fonts |
+| **Tema** | Claro por defecto, oscuro con toggle (mismos tokens que la landing) |
 | **Iconos** | Font Awesome 6.5 (CDN) |
 
 ## Stack Técnico
@@ -32,7 +33,8 @@ Skill para escribir posts del blog de [${BLOG_DOMAIN}/docs](https://${BLOG_DOMAI
 - **Vite 6**: build tool multi-page. Escanea `docs/` recursivamente via `findHtmlFiles()` en `vite.config.js`. Cada `.html` en `docs/` es una entry de Vite. **No hay que tocar `vite.config.js` al agregar posts.**
 - **CSS compartido**: todos los HTML del blog (listing + posts) importan `/src/styles/blog.css`. En producción, Vite transforma la ruta a un hash (`/assets/blog-xxx.css`).
 - **Sin CSS inline**: ninguna página del blog debe tener `<style>` inline. Todo via `blog.css`.
-- **Sin JS en posts individuales**: solo el listing (`docs/index.html`) importa `blog.js`. Los posts no necesitan JavaScript.
+- **JS**: listing y posts importan `<script type="module" src="/src/scripts/blog.js">` al final del body (toggle de tema). La búsqueda se activa sola solo si existe `#searchInput`.
+- **Script inline de tema** en el `<head>` (lee `localStorage.theme` antes del pintado). Copiarlo tal cual de un post existente.
 - **Post template**: la clase del nav es `blog-nav` (no `post-nav`), con wrapper `nav-links`.
 
 ## Fuentes de Verdad
@@ -100,12 +102,21 @@ Body:
 - NO empezar con frases hechas.
 - **Idioma**: escribir en español argentino correcto — usar ñ, tildes, diéresis, puntuación adecuada. No omitir acentos ni reemplazar ñ por n por "simplicidad".
 
-## Metadata del post
+## Metadata del post (SEO)
 
-Cada post debe tener:
+Cada post debe tener, todo en el `<head>` (copiar el bloque de un post existente y ajustar):
 
 - `<title>` con formato: `Título del post — lcampassi`
-- `<meta name="description">` con resumen de 1-2 líneas para SEO
+- `<meta name="description">` con resumen de 1-2 líneas (idealmente ≤160 caracteres, con las palabras que alguien buscaría)
+- `<link rel="canonical" href="https://${BLOG_DOMAIN}/docs/posts/<archivo>.html" />`
+- `<meta name="author" content="Lucciano Campassi" />`
+- Open Graph: `og:type=article`, `og:site_name`, `og:locale=es_AR`, `og:url` (= canonical), `og:title` (= h1), `og:description`, `og:image=https://${BLOG_DOMAIN}/og-image.png` (+ width 1200 / height 630), `article:published_time` (fecha del archivo), `article:author`
+- Twitter: `twitter:card=summary_large_image`, `twitter:title`, `twitter:description`, `twitter:image`
+- JSON-LD `BlogPosting` con: `headline`, `description`, `datePublished`/`dateModified`, `inLanguage: "es"`, `image`, `url`, `mainEntityOfPage`, `author` y `publisher` = `{"@type":"Person","@id":"https://${BLOG_DOMAIN}/#person","name":"Lucciano Campassi"}`, `isPartOf` = `{"@type":"Blog","@id":"https://${BLOG_DOMAIN}/docs/#blog"}`, `keywords` (= tag)
+
+El sitemap se genera solo en el build (la fecha sale del nombre del archivo); no hay que tocarlo.
+
+Además del público técnico, se escriben **artículos orientados a quien busca ayuda** (responsables de seguridad, IT, compliance): títulos con la pregunta que alguien buscaría en Google ("Cómo preparar…", "Qué es…", "X vs Y"), igual en primera persona y sin tono de venta. No cerrar con un pitch comercial.
 
 ## Proceso de escritura completo
 
@@ -143,14 +154,17 @@ Cada post debe tener:
 Cada post tiene una card con esta estructura (copiar el patrón de las existentes):
 
 ```html
-<article class="post-card">
+<a href="posts/YYYY-MM-DD-slug.html" class="post-card">
   <div class="post-meta">
-    <time datetime="YYYY-MM-DD">YYYY-MM-DD</time>
+    <span>YYYY-MM-DD</span>
     <span class="tag">tag</span>
   </div>
-  <h2><a href="posts/YYYY-MM-DD-slug.html">Título del post</a></h2>
-  <p class="post-excerpt">Resumen de 1-2 líneas que enganche.</p>
-</article>
+  <h2>Título del post</h2>
+  <p class="post-excerpt">
+    Resumen de 1-2 líneas que enganche.
+  </p>
+  <span class="read-more">leer <i class="fas fa-arrow-right"></i></span>
+</a>
 ```
 
 ### Regla de ordenamiento del index
@@ -174,7 +188,7 @@ Post 9  → Obsidian
 Post 10 → Trabajo IAM NetIQ
 ```
 
-Al agregar un post nuevo, insertarlo en la posición #2 (después de Bienvenidos), y renumerar los siguientes.
+Al agregar un post nuevo, insertarlo en la posición #2 (después de Bienvenidos). Los comentarios `<!-- Post N -->` son solo orientativos.
 
 ### 6. Pre-deploy checklist
 
@@ -190,9 +204,10 @@ Al agregar un post nuevo, insertarlo en la posición #2 (después de Bienvenidos
 - [ ] Todos los links funcionan
 - [ ] El HTML valida sin errores (sin tags sin cerrar, sin atributos rotos)
 - [ ] La card en el blog index está en la posición correcta (Post 1 = Bienvenidos pinneado, Post 2 = post nuevo)
-- [ ] El nav del post usa clase `blog-nav` (no `post-nav`) y wrapper `nav-links`
+- [ ] El nav del post es `header.blog-nav` con `nav-links` y `nav-actions` (copiado de un post existente)
+- [ ] Bloque SEO completo: canonical, OG, Twitter y JSON-LD `BlogPosting` (el JSON parsea)
 - [ ] No hay CSS inline (`<style>` blocks) — todo via `blog.css`
-- [ ] No hay `<script>` tag en posts individuales (solo el listing necesita JS)
+- [ ] El post incluye el script inline de tema en el `<head>` y `blog.js` al final del body
 - [ ] El link a CSS es `/src/styles/blog.css` (Vite lo transforma en build)
 - [ ] Preview local funciona (`npm run dev` y abrir http://localhost:8080/docs/)
 
@@ -202,7 +217,7 @@ Al agregar un post nuevo, insertarlo en la posición #2 (después de Bienvenidos
 cd "$BLOG_ROOT"
 npm run build           # Build producción a dist/
 npm run preview         # Preview local (opcional, puede colgarse)
-git add -A && git commit -m "blog: add post TITULO" && git push
+git add -A && git commit -m "blog: add post TITULO" && git push   # solo cuando el usuario lo pide
 ```
 
 **Importante**: el deploy usa GitHub Actions. No depende de "auto-deploy desde master branch". El Action buildéa con Vite y deploya `dist/`. Esperar ~1-2 min para que se refleje en https://${BLOG_DOMAIN}/docs/.
@@ -215,30 +230,31 @@ No es necesario correr `npm run build` manualmente antes del push (el Action lo 
 
 Usar siempre la misma estructura que los posts existentes. Copiar de `${BLOG_ROOT}/docs/posts/` un post existente como base. La estructura incluye:
 
-- Nav fijo con clase `blog-nav` (no `post-nav`), brand `lc.`, wrapper `nav-links` con links a home, blog
-- Header con fecha, tag, título, reading time
-- Contenido con `.post-content` (párrafos, h2, h3, listas, código, blockquotes)
-- Footer minimal con clase `post-footer`
+- `<head>`: metadata SEO (ver arriba), fuentes Inter + JetBrains Mono, Font Awesome, favicons, `/src/styles/blog.css` y el script inline de tema
+- Nav `header.blog-nav` (brand `lc.` + nombre → `/es/`, links Inicio / Proyectos / Blog, toggle de tema, botón Contacto)
+- `article.post-article` > `.container` > link `.post-back` ("Volver al blog"), `header.post-header` (fecha, tag, h1, `.reading-time`), `.post-content`
+- `footer.post-footer` con links Inicio, Blog, Contacto, English
+- `<script type="module" src="/src/scripts/blog.js"></script>` antes de `</body>`
 
-El `<head>` debe importar:
+El nav usa esta estructura:
 ```html
-<link rel="stylesheet" href="/src/styles/blog.css" />
-```
-
-No necesita `<script>` ni CSS inline. El nav usa la estructura:
-```html
-<nav class="blog-nav">
-  <div class="container">
-    <div class="nav-inner">
-      <div class="brand"><a href="/">lc<span>.</span></a></div>
-      <div class="nav-links">
-        <a href="/"><i class="fas fa-arrow-left"></i> home</a>
-        <a href="/docs/">blog</a>
-        <a href="/" class="btn-blog">contact</a>
-      </div>
+<header class="blog-nav">
+  <div class="container nav-inner">
+    <a href="/es/" class="brand" aria-label="Lucciano Campassi — inicio">
+      <span class="brand-mark">lc<span>.</span></span>
+      <span class="brand-name">Lucciano Campassi</span>
+    </a>
+    <nav class="nav-links" aria-label="Blog">
+      <a href="/es/">Inicio</a>
+      <a href="/es/#proyectos" class="hide-sm">Proyectos</a>
+      <a href="/docs/" class="active-link">Blog</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle" type="button" aria-label="Cambiar tema"><i class="fas fa-moon"></i><i class="fas fa-sun"></i></button>
+      <a href="/es/#contacto" class="btn-blog">Contacto</a>
     </div>
   </div>
-</nav>
+</header>
 ```
 
 No cambiar el sistema de diseño (colores, tipografía, espaciado) a menos que el usuario lo pida explícitamente.
@@ -248,3 +264,5 @@ No cambiar el sistema de diseño (colores, tipografía, espaciado) a menos que e
 - No mencionar nombres de clientes en posts laborales
 - No publicar información confidencial de empresas donde el usuario trabaja o trabajó
 - No hacer afirmaciones técnicas sin verificar contra fuentes de verdad
+- No inventar métricas, cifras ni anécdotas: si no lo dio el usuario o una fuente, no va
+- No mencionar su localidad
