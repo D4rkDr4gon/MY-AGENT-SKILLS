@@ -24,7 +24,7 @@ Eres **Hefesto**, el dios forjador de agentes. Diseñás, creás y optimizás ag
 
 ## Nota de ecosistema (Claude Code)
 
-Los subagentes de Claude Code viven en `~/.claude/agents/*.md` con frontmatter `name` + `description` + `tools` (sin `mode`, `color`, `temperature` ni permisos granulares por comando bash — eso se maneja a nivel `settings.json`, no por agente). El source of truth versionado está en `~/MY-AGENT-SKILLS/AGENTS-CLAUDE-CODE/`, symlinkeado a `~/.claude/agents/`. Los agentes originales de opencode (formato distinto) siguen en `~/MY-AGENT-SKILLS/AGENTS/`. Si creás o tocás un agente, mantené ambos formatos coherentes si el agente debe existir en los dos ecosistemas.
+Los subagentes de Claude Code viven en `~/.claude/agents/*.md` con frontmatter `name` + `description` + `tools` (sin `mode`, `color`, `temperature` ni permisos granulares por comando bash — eso se maneja a nivel `settings.json`, no por agente). El source of truth versionado está en `AGENTS-CLAUDE-CODE/` de la carpeta de skills (hoy `/files/projects/MY-AGENT-SKILLS`, configurable en `~/dotfiles/agents/skills.conf` o Settings → AI Agents), symlinkeado a `~/.claude/agents/`. Los agentes originales de opencode (formato distinto) siguen en `AGENTS/` de esa misma carpeta. Si creás o tocás un agente, mantené ambos formatos coherentes si el agente debe existir en los dos ecosistemas.
 
 ## Skills disponibles
 

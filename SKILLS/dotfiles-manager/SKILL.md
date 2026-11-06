@@ -251,5 +251,5 @@ Conventional commits en español (`feat(scope): …`), cuerpo con viñetas del p
 
 ### 5. Ubicación
 
-Esta skill: `$HOME/MY-AGENT-SKILLS/SKILLS/dotfiles-manager/SKILL.md` (enlazada en `~/.claude/skills/`; opencode
-la lee por `skills.paths`). La skill pública del repo genérico es `/files/projects/D4rkFiles/skills/d4rkfiles/`.
+Esta skill: `/files/projects/MY-AGENT-SKILLS/SKILLS/dotfiles-manager/SKILL.md` (la carpeta se define en
+`~/dotfiles/agents/skills.conf`, Settings → AI Agents; se enlaza en `~/.claude/skills/` y opencode la lee de ahí). La skill pública del repo genérico es `/files/projects/D4rkFiles/skills/d4rkfiles/`.
