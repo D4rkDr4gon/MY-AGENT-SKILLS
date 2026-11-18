@@ -73,7 +73,7 @@ $BLOG_ROOT/
 │   │   ├── _reset.css         # Reset, tamaño de fuente fluido, .container, .theme-toggle
 │   │   ├── _base.css          # .section, .section--alt, .eyebrow, .section-title, .reveal
 │   │   ├── _components.css    # Todos los componentes de la landing
-│   │   └── _media.css         # Breakpoints (960px, 680px)
+│   │   └── _media.css         # Breakpoints: nav hamburguesa ≤1279px (compacto 1280–1599), 960px, 680px
 │   └── scripts/
 │       ├── index.js           # Landing: initTheme + initNavigation + initReveal
 │       ├── _navigation.js     # Nav scrolled, menú móvil, link activo, reveal on scroll
@@ -133,7 +133,11 @@ Los IDs están en inglés en `src/sections/en/` y en español en `src/sections/e
 Ver skill `blog-writer` para escribir posts. Resumen de integración:
 - `docs/` se escanea solo: **no tocar `vite.config.js` para agregar posts**.
 - Listing y posts usan `/src/styles/blog.css` y `/src/scripts/blog.js` (tema + búsqueda solo en el listing). Sin `<style>` inline.
-- Nav del blog: `header.blog-nav` con brand → `/es/`, links Inicio / Proyectos / Blog, toggle de tema y botón Contacto (`/es/#contacto`). Footer con Inicio, Blog, Contacto e English (`/`).
+- Nav del blog: `header.blog-nav` con brand → `/es/`, links Inicio / Proyectos / Blog / Herramientas (`/identity-tools/`), toggle de tema y botón Contacto (`/es/#contacto`). Un post nuevo debe copiar ese nav completo. Footer con Inicio, Blog, Contacto e English (`/`).
+
+## Identity Tools (`/identity-tools/`)
+
+Repo aparte (`D4rkDr4gon/identity-tools`, local `/files/projects/identity-tools`) servido como project site bajo el mismo dominio. Desde el portfolio se enlaza en: nav (Tools / Herramientas), tarjeta en Proyectos (EN/ES), footer, nav del blog y `robots.txt` (segundo `Sitemap:`). El nav de la landing tiene 9 links: si se agrega otro, volver a medir que no desborde entre 1280 y 1599px.
 
 ## Reglas para Modificaciones
 
