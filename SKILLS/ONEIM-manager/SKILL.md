@@ -38,7 +38,7 @@ Este skill se activa cuando el usuario necesita **administrar, operar o diagnost
 
 El curso está definido en el syllabus del vault, que es la fuente de verdad:
 
-`$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/00-IDENTITY GOVERNANCE & ADMINISTRATION/99-ENABLEMENTS/CURSO ONEIM - SYLLABUS.md`
+`$BABILONIA/BIBLIOTECA-DE-BABEL/04-IDENTIDAD/03-ONEIDENTITY/00-IDENTITY GOVERNANCE & ADMINISTRATION/99-ENABLEMENTS/CURSO ONEIM - SYLLABUS.md`
 
 1. Leer el syllabus **completo** con `obsidian-manager` y seguir al pie de la letra su sección **INSTRUCCIONES PARA LA IA TUTORA**: rol de tutor socrático, ciclo de cada paso, reglas, adaptación.
 2. Pedir los datos de **COMO ARRANCAR**: nombre del alumno, versión de One Identity Manager (o "última") y paso actual (o "retomar desde el seguimiento"). Si es "retomar", leer la sección **SEGUIMIENTO**.
@@ -123,7 +123,7 @@ Seguir el **Protocolo de actuación** de esta skill: pedir contexto de la instal
 > La rama `03-ONEIDENTITY/00-IDENTITY GOVERNANCE & ADMINISTRATION` del vault Babilonia tiene el manual completo de ONEIM en español: **19 secciones, ~150 notas**, contrastadas contra la documentación oficial 10.0 LTS.
 >
 > **Punto de entrada único:**
-> `$BABILONIA/BIBLIOTECA-DE-BABEL/04-SPECIALIZED-DOMAINS/01-IAM-IDENTITY/03-ONEIDENTITY/00-IDENTITY GOVERNANCE & ADMINISTRATION/ONEIM - MAPA DE CONOCIMIENTO.md`
+> `$BABILONIA/BIBLIOTECA-DE-BABEL/04-IDENTIDAD/03-ONEIDENTITY/00-IDENTITY GOVERNANCE & ADMINISTRATION/ONEIM - MAPA DE CONOCIMIENTO.md`
 >
 > Ese mapa es un índice plano de **todas** las notas con *qué pregunta responde cada una* y sus *términos clave en español e inglés*. Se lee primero y después se abre únicamente la nota que corresponda — no hace falta recorrer los MOC.
 >

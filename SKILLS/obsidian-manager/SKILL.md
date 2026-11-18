@@ -56,10 +56,10 @@ OBSIDIAN_URL="${OBSIDIAN_URL:-https://127.0.0.1:27124}"
 TEMPLATE_NOTA="${TEMPLATE_NOTA:-$BABILONIA/TEMPLATES/Notas generales.md}"
 TEMPLATE_MOC="${TEMPLATE_MOC:-$BABILONIA/TEMPLATES/MOCs.md}"
 ID_REGISTRY="${ID_REGISTRY:-$BABILONIA_OPENCODE/ID-REGISTRY.md}"
-NEXT_ID_SCRIPT="${NEXT_ID_SCRIPT:-$BABILONIA/BIBLIOTECA-DE-BABEL/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/next-id.py}"
-VAULT_DB_SCRIPT="${VAULT_DB_SCRIPT:-$BABILONIA/BIBLIOTECA-DE-BABEL/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/build-vault-db.py}"
+NEXT_ID_SCRIPT="${NEXT_ID_SCRIPT:-$BABILONIA/BIBLIOTECA-DE-BABEL/03-DESARROLLO-Y-DATOS/04-SCRIPTS/PYTHON/next-id.py}"
+VAULT_DB_SCRIPT="${VAULT_DB_SCRIPT:-$BABILONIA/BIBLIOTECA-DE-BABEL/03-DESARROLLO-Y-DATOS/04-SCRIPTS/PYTHON/build-vault-db.py}"
 VAULT_DB="${VAULT_DB:-/files/vault-db/biblioteca.db}"
-VAULT_QUERIES="${VAULT_QUERIES:-$BABILONIA/BIBLIOTECA-DE-BABEL/05-PRACTICAL-RESOURCES/01-SCRIPTS/PYTHON/QUERIES.md}"
+VAULT_QUERIES="${VAULT_QUERIES:-$BABILONIA/BIBLIOTECA-DE-BABEL/03-DESARROLLO-Y-DATOS/04-SCRIPTS/PYTHON/QUERIES.md}"
 ```
 
 > La base vive **fuera** del vault a propósito: es un binario de ~19 MB, no tiene
@@ -409,25 +409,45 @@ Links a notas relacionadas.')
 
 # 4. Guardar la nota (elegir método)
 # Opción A: Filesystem
-echo "$CONTENT" > "$BABILONIA/BIBLIOTECA-DE-BABEL/00-FUNDAMENTALS/mi-nota.md"
+echo "$CONTENT" > "$BABILONIA/BIBLIOTECA-DE-BABEL/02-REDES/01-FUNDAMENTOS-DE-REDES/mi-nota.md"
 
 # Opción B: REST API
 curl -sk -X PUT \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
   -H "Content-Type: text/markdown" \
   --data-raw "$CONTENT" \
-  "${OBSIDIAN_URL}/vault/BIBLIOTECA-DE-BABEL/00-FUNDAMENTALS/mi-nota.md"
+  "${OBSIDIAN_URL}/vault/BIBLIOTECA-DE-BABEL/02-REDES/01-FUNDAMENTOS-DE-REDES/mi-nota.md"
 
 # 5. Abrir en UI (para verificar)
 curl -sk -X POST \
   -H "Authorization: Bearer ${OBSIDIAN_API_KEY}" \
-  "${OBSIDIAN_URL}/open/BIBLIOTECA-DE-BABEL/00-FUNDAMENTALS/mi-nota.md"
+  "${OBSIDIAN_URL}/open/BIBLIOTECA-DE-BABEL/02-REDES/01-FUNDAMENTOS-DE-REDES/mi-nota.md"
 
 # 6. Ofrecer resumen al usuario
 echo "✅ Nota creada: $NOTE_ID — Mi título descriptivo"
-echo "📂 $BABILONIA/BIBLIOTECA-DE-BABEL/00-FUNDAMENTALS/mi-nota.md"
+echo "📂 $BABILONIA/BIBLIOTECA-DE-BABEL/02-REDES/01-FUNDAMENTOS-DE-REDES/mi-nota.md"
 echo "🔗 Abierta en Obsidian UI"
 ```
+
+---
+
+## 🧭 Dónde va cada nota (estructura por dominio, 2026-11-18)
+
+La biblioteca se ordena por **tema**, no por nivel: una nota va en el dominio de su tema y los fundamentos viven dentro de cada dominio. La tabla completa está en la sección "DÓNDE VA CADA COSA" de `BIBLIOTECA-DE-BABEL/BIBLIOTECA-DE-BABEL.md`.
+
+| Si la nota trata de… | Carpeta |
+|---|---|
+| Hardware, assembly, Linux, Windows, hipervisores, Docker, cloud, Tomcat, monitoreo | `01-INFRAESTRUCTURA` |
+| Modelo OSI, protocolos, segmentación, Wireshark | `02-REDES` |
+| Lenguajes, Bash, PowerShell, Ansible, SQL/NoSQL, scripts | `03-DESARROLLO-Y-DATOS` |
+| IAM: AD (administración), Entra ID, One Identity, NetIQ IDM y NAM | `04-IDENTIDAD` |
+| Ataque, defensa, CSIRT/SOC, malware, criptografía, productos de seguridad | `05-CIBERSEGURIDAD` |
+| IA, LLM, agentes, prompts, seguridad de IA | `06-INTELIGENCIA-ARTIFICIAL` |
+| Auditoría, legislación, cumplimiento | `07-GRC` |
+| Administración, liderazgo, finanzas | `08-GESTION-Y-NEGOCIOS` |
+| Matemática, física | `09-CIENCIAS` |
+
+Temas transversales (AD, cloud, redes): cada perspectiva va en su dominio y los MOCs se enlazan en `RELACIONADO`. Un producto va donde está su función principal.
 
 ---
 

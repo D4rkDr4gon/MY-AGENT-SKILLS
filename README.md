@@ -150,7 +150,7 @@ Las variables se definen en `~/.zshenv` (Linux) o `$PROFILE` (Windows). Ver [`do
 ## 📖 Documentación en el Vault
 
 La documentación detallada del ecosistema está en el vault Obsidian:
-`$BABILONIA/Manuales/04-SPECIALIZED-DOMAINS/03-AI/03-OPENCODE-AGENTS-SKILLS/`
+`$BABILONIA/BIBLIOTECA-DE-BABEL/06-INTELIGENCIA-ARTIFICIAL/03-OPENCODE-AGENTS-SKILLS/`
 
 - `AGENTS.md` — Detalle de cada agente
 - `SKILLS.md` — Detalle de cada skill
