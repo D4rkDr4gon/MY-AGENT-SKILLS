@@ -443,7 +443,7 @@ La biblioteca se ordena por **tema**, no por nivel: una nota va en el dominio de
 | IAM: AD (administración), Entra ID, One Identity, NetIQ IDM y NAM | `04-IDENTIDAD` |
 | Ataque, defensa, CSIRT/SOC, malware, criptografía, productos de seguridad, arquitectura de seguridad y zero trust, AppSec, DLP, OT/ICS | `05-CIBERSEGURIDAD` |
 | IA, LLM, agentes, prompts, seguridad de IA | `06-INTELIGENCIA-ARTIFICIAL` |
-| Gobierno del programa de seguridad (CISO: estrategia, riesgo, directorio, presupuesto, políticas, continuidad, terceros, concientización, ciberseguro), auditoría, legislación, cumplimiento | `07-GRC` |
+| Gobierno del programa de seguridad (CISO: estrategia, riesgo, directorio, presupuesto, políticas, continuidad, terceros, concientización, ciberseguro, gobierno de IA, riesgo interno), auditoría, legislación, cumplimiento | `07-GRC` |
 | Administración, liderazgo, finanzas | `08-GESTION-Y-NEGOCIOS` |
 | Matemática, física | `09-CIENCIAS` |
 
