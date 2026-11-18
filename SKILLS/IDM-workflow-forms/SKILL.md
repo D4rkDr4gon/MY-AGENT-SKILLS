@@ -3,7 +3,11 @@ name: IDM-workflow-forms
 description: >
   Use when working with Workflow JSON forms for IDM — Form Builder, fields,
   components, buttons (submit/approve/reject), eventos custom, JavaScript logic,
-  data mapping, precarga de datos. Cross-platform (Linux + Windows).
+  data mapping, precarga de datos. Also when the user asks to "listar tipos de
+  campos" / qué campos podemos manejar, or names a field type to build ("campo
+  multi selección lista estática", "estilo Perfil", "picklist de grupos") —
+  resolves it against the field catalog in the vault and real reference forms.
+  Cross-platform (Linux + Windows).
 ---
 
 # IDM-workflow-forms
@@ -160,12 +164,75 @@ Si el usuario dice "documentalo" o "guardalo en el vault", usar `obsidian-manage
 
 ---
 
+## Catálogo de tipos de campo (fuente única)
+
+El catálogo vive en el vault, **no en este skill**: este repo es público y el catálogo tiene nombres de workflows, keys, entidades y rutas de clientes.
+
+| Recurso | Ruta |
+|---|---|
+| Catálogo (tipos, alias, ASCII art, workflows de referencia) | `$BABILONIA_IDM/04-WF JSON/campos/Catalogo de tipos de campo WF JSON.md` |
+| Recetas genéricas por tipo (placeholders, JSON, JS, troubleshooting) | `$BABILONIA_IDM/04-WF JSON/campos/*.md` (cada entrada del catálogo linkea la suya) |
+| Forms de referencia (exports con el JSON en base64) | La raíz `<FORMS_ROOT>` y las rutas relativas están en el catálogo |
+
+Antes de responder sobre un tipo de campo, **leer el catálogo**. Si el tipo no está, decirlo y proponer el más cercano. No hay que inventar uno.
+
+### Modo: listar tipos de campos
+
+**Disparadores:** "listar tipos de campos", "qué campos podemos manejar", "mostrame los campos", "catálogo de campos".
+
+1. Leer el catálogo completo.
+2. Responder con **un bloque por tipo**, en el orden del catálogo, con este formato exacto:
+
+````
+### <N>. <Nombre del tipo>
+Alias: <alias para pedirlo>
+```
+<ASCII art del catálogo, tal cual>
+```
+Workflows donde se usa:
+- <Workflow 1> — <key o detalle corto>
+- <Workflow 2> — <key o detalle corto>
+Receta: <nombre de la nota>
+````
+
+3. Mostrar **dos** workflows de referencia por tipo. Si el catálogo tiene uno solo, mostrar uno y aclararlo. No inventar referencias.
+4. Si el usuario pide un subconjunto ("solo las picklists", "solo selects"), filtrar por tipo.
+5. Cerrar con una línea: "Para pedir uno: nombrá el tipo + los datos que cambian (lista/entidad/query, label, obligatoriedad)."
+
+### Modo: armar campos a partir del tipo
+
+**Disparador:** el usuario nombra un tipo o un alias, o compara con un campo existente ("como el perfil del alta de X", "como la picklist del workflow Y").
+
+1. **Resolver el tipo** con la tabla de alias del catálogo. Si es ambiguo (simple o múltiple, lista o entidad), preguntar una sola vez.
+2. **Pedir solo los datos variables** que lista la receta, en la sección "Información requerida": lista global, entidad o query, label, key, si es obligatorio y si es simple o múltiple.
+3. **Leer la receta** y el **form de referencia**. El JSON está en base64 dentro de `srvprvJSONData`:
+   ```bash
+   python3 -I -c "import re,base64,sys,json;t=open(sys.argv[1]).read();print(json.dumps(json.loads(base64.b64decode(re.search(r'srvprvJSONData\">\s*<ds-value><!\[CDATA\[(.*?)\]\]>',t,re.S).group(1))),indent=1,ensure_ascii=False))" "<form.xml>"
+   ```
+4. **Generar con un script en el scratchpad** que:
+   - decodifica el form base;
+   - copia los componentes del form de referencia;
+   - renombra keys, ids HTML y eventos (deben ser únicos);
+   - ajusta `inlinescripts`, `poblarCampos`, `localization` y `bulkRequiere.refreshOn`;
+   - vuelve a codificar y cambia `ds-object-name` y `cn`.
+   **Nunca** editar los forms de referencia.
+5. **Validar antes de entregar:**
+   - el XML parsea y el base64 decodifica a JSON;
+   - árbol de componentes;
+   - keys únicas (salvo `column` y los paneles heredados);
+   - no quedan restos del form origen (nombres, entidades ni eventos viejos);
+   - `event` de cada botón = `trigger.event` del logic.
+6. **Decir qué falta confirmar** contra el entorno: que la entidad, lista o query exista con esa key exacta, y qué atributo se muestra.
+7. Si se implementa un tipo nuevo o un workflow nuevo, **ofrecer** sumarlo al catálogo, como tipo o como referencia (vía `obsidian-manager`).
+
+---
+
 ## Vault — Ubicación de documentación
 
 | Área | Ruta (via env var) |
 |------|-------------------|
 | IDM — WF JSON (teoría) | `$BABILONIA_IDM/04-WF JSON/` |
-| IDM — WF JSON (campos) | `$BABILONIA_IDM/04-WF JSON/campos/` |
+| IDM — WF JSON (campos) | `$BABILONIA_IDM/04-WF JSON/campos/` — empezar por `Catalogo de tipos de campo WF JSON.md` |
 | IDM — WF JSON (Form.IO) | `$BABILONIA_IDM/04-WF JSON/FORM.IO/` |
 
 > **Nota:** La documentación en Babilonia cubre casos puntuales de campos y configuraciones comunes, pero NO es exhaustiva. El Form Builder es una herramienta amplia y muchas configuraciones avanzadas (componentes custom, APIs complejas, integraciones) no están documentadas allí.
@@ -244,9 +311,9 @@ En el vault existen librerías JavaScript utilitarias usadas en los workflows JS
 
 | Librería | Ruta (via env var) | Propósito |
 |----------|-------------------|-----------|
-| Utilidades generales | `$BABILONIA/Manuales/05-PRACTICAL-RESOURCES/01-SCRIPTS/JAVASCRIPT/WorkFlowUtils-General.js` | Validaciones, checks de ambiente, funciones transversales |
-| Manejo de listas | `$BABILONIA/Manuales/05-PRACTICAL-RESOURCES/01-SCRIPTS/JAVASCRIPT/WorkFlowUtils-Lists.js` | Manipulación de componentes Select (listas desplegables) en formularios JSON |
-| Alertas visuales | `$BABILONIA/Manuales/05-PRACTICAL-RESOURCES/01-SCRIPTS/JAVASCRIPT/WorkFlowUtils-sweetalert2.js` | Librería SweetAlert2 para modales y notificaciones en formularios |
+| Utilidades generales | `$BABILONIA/BIBLIOTECA-DE-BABEL/03-DESARROLLO-Y-DATOS/04-SCRIPTS/JAVASCRIPT/WorkFlowUtils-General.js` | Validaciones, checks de ambiente, funciones transversales |
+| Manejo de listas | `$BABILONIA/BIBLIOTECA-DE-BABEL/03-DESARROLLO-Y-DATOS/04-SCRIPTS/JAVASCRIPT/WorkFlowUtils-Lists.js` | Manipulación de componentes Select (listas desplegables) en formularios JSON |
+| Alertas visuales | `$BABILONIA/BIBLIOTECA-DE-BABEL/03-DESARROLLO-Y-DATOS/04-SCRIPTS/JAVASCRIPT/WorkFlowUtils-sweetalert2.js` | Librería SweetAlert2 para modales y notificaciones en formularios |
 
 ### Cuándo usarlas
 
